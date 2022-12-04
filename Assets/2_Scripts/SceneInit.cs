@@ -4,24 +4,37 @@ using UnityEngine;
 
 public class SceneInit : MonoBehaviour
 {
-
     public GameObject playerSpawnPoint;
     public string triggerSpawnName;
 
     public bool isFalling = false;
 
+    public int sceneTrackNum;
+    
+    public bool backedUp = false;
+
     void Awake(){
         triggerSpawnName = GameController.current.triggerSpawnName;
         MenuManager.current.Invoke("FadeFromBlack",0.1f);
+
+        MusicManager.current.currentTrackNum = sceneTrackNum;
+        MusicManager.current.Invoke("PlayMusic",0.1f);
     }
+
     // Start is called before the first frame update
     void Start()
     {
+        //Decide where to put the player when the scene loads
         if(!GameController.current.playerSpawned){            
             playerSpawnPoint = GameObject.Find("SpawnStartPos");
 
             PlayerManager.current.spawnPosition = playerSpawnPoint.transform.position;
             PlayerManager.current.Invoke("InitPlayer", 0.01f);
+        }
+        else if(GameController.current.playerRespawning){
+            PlayerManager.current.spawnPosition = PlayerManager.current.backupSpawnPos;
+            PlayerManager.current.Invoke("RebootPlayer", 0.01f);
+            GameController.current.playerRespawning = false;
         }
         else{
             playerSpawnPoint = GameObject.Find(triggerSpawnName);

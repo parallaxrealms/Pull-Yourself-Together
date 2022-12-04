@@ -14,6 +14,7 @@ public class GameController : MonoBehaviour
 
     public bool gameStarted = false;
     public bool playerSpawned = false;
+    public bool playerRespawning = false;
 
     public GameObject UI_Object;
 
@@ -70,7 +71,7 @@ public class GameController : MonoBehaviour
 
 
     public void GetUI(){
-        Invoke("EnableUI", 1.0f);
+        Invoke("EnableUI", 0.01f);
     }
 
     public void NewGame(){
@@ -99,7 +100,8 @@ public class GameController : MonoBehaviour
     }
 
     public void BossFightStarted(){
-        MenuManager.current.Invoke("BossMusic", 0.1f);
+        MusicManager.current.currentTrackNum = 6;
+        MusicManager.current.Invoke("PlayMusic", 0.1f);
     }
 
     public void EnableUI(){
@@ -163,12 +165,15 @@ public class GameController : MonoBehaviour
     }
 
     public void HighlightPickups(){
+        Debug.Log("Highlight Pickups!");
         foreach (GameObject pickup in ListPickups)
         {
             PickUpScript pickupScript = pickup.GetComponent<PickUpScript>();
 
             if(pickupScript.pickupType == 9){ //Head Reset
-                pickupScript.Invoke("EnablePickupParticles", 0.01f);
+                if(!pickupScript.isUsed){
+                    pickupScript.Invoke("EnablePickupParticles", 0.01f);
+                }
             }
             if(pickupScript.pickupType == 1){ //Body
                 if(hasBody == false){
@@ -176,15 +181,17 @@ public class GameController : MonoBehaviour
                 }
                 else{
                     pickupScript.Invoke("DisablePickupParticles", 0.01f);
+                    pickupScript.Invoke("DrawOutline", 0.01f);
                 }
             }
             if(pickupScript.pickupType == 2){ //Drill
-                if(hasBody == false){
+                if(hasBody == true){
                     if(hasDrill == false){
                         pickupScript.Invoke("EnablePickupParticles", 0.01f);
                     }
                     else{
                         pickupScript.Invoke("DisablePickupParticles", 0.01f);
+                        pickupScript.Invoke("DrawOutline", 0.01f);
                     }
                 }
                 else{
@@ -192,12 +199,13 @@ public class GameController : MonoBehaviour
                 }
             }
             if(pickupScript.pickupType == 3){ //Gun
-                if(hasBody == false){
+                if(hasBody == true){
                     if(hasGun == false){
                         pickupScript.Invoke("EnablePickupParticles", 0.01f);
                     }
                     else{
                         pickupScript.Invoke("DisablePickupParticles", 0.01f);
+                        pickupScript.Invoke("DrawOutline", 0.01f);
                     }
                 }
                 else{
@@ -205,13 +213,14 @@ public class GameController : MonoBehaviour
                 }
             }
             if(pickupScript.pickupType == 4){ //Legs
-                if(hasBody == false){
+                if(hasBody == true){
                     if(hasLegs == false){
                         pickupScript.Invoke("EnablePickupParticles", 0.01f);
                     }
                     else{
                         pickupScript.Invoke("DisablePickupParticles", 0.01f);
-                }
+                        pickupScript.Invoke("DrawOutline", 0.01f);
+                    }
                 }
                 else{
                     pickupScript.Invoke("DisablePickupParticles", 0.01f);

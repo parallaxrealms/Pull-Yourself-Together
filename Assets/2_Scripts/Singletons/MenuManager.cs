@@ -8,10 +8,11 @@ public class MenuManager : MonoBehaviour
 {
     public static MenuManager current;
 
-    public int menuState = 1; //1 = Main Menu, 2 = Playing, 3 = Game Over
+    public int menuState = 0; //0 = foreword, 1 = Main Menu, 2 = Playing, 3 = Game Over
     public GameObject mainMenuScreen;
     public GameObject gameOverScreen;
     public GameObject blackScreen;
+    public GameObject forewordScreen;
     public SpriteRenderer blackScreenSprite;
     public Color originalColorValue;
     public Color aColorValue;
@@ -20,13 +21,6 @@ public class MenuManager : MonoBehaviour
     public bool fadeFromBlackStarted = false;
     public bool fadeToBlackStarted = false;
     public float speedFade = 0.25f;
-
-    public bool musicPlaying;
-    public AudioSource audio;
-    public AudioClip menuMusic;
-    public AudioClip gameOverMusic;
-    public AudioClip abyssMusic;
-    public AudioClip bossMusic;
 
     public GameObject PartsUI;
     public UI_Parts UIPartsScript;
@@ -38,14 +32,13 @@ public class MenuManager : MonoBehaviour
         PartsUI = GameObject.Find("UI_Player_Parts");
         UIPartsScript = PartsUI.GetComponent<UI_Parts>();
         UIPartsScript.Invoke("DisablePartsUI", 0.1f);
+
+        GameController.current.Invoke("DisableUI", 0.2f);
     }
     
     // Start is called before the first frame update
     void Start()
-    {
-        audio = GetComponent<AudioSource>();
-        musicPlaying = DebugManager.current.musicPlaying;
-
+    {        
         DontDestroyOnLoad(gameObject);
 
         blackScreenSprite = blackScreen.GetComponent<SpriteRenderer>();
@@ -53,7 +46,7 @@ public class MenuManager : MonoBehaviour
         originalColorValue = aColorValue;
         TempC = aColorValue;
 
-        MainMenu();
+        Foreword();
     }
     // Update is called once per frame
     void Update()
@@ -61,11 +54,20 @@ public class MenuManager : MonoBehaviour
         if(!fadeToBlackStarted){
             if(menuState == 1 || menuState == 3){
                 if (Input.anyKey){
-                    if(DebugManager.current.testingMode){
-                        GameController.current.Invoke("TestGame", 0.01f);
+                    if(!fadeFromBlackStarted){
+                        if(DebugManager.current.testingMode){
+                            GameController.current.Invoke("TestGame", 0.01f);
+                        }
+                        else{
+                            GameController.current.Invoke("NewGame", 0.01f);
+                        }
                     }
-                    else{
-                        GameController.current.Invoke("NewGame", 0.01f);
+                }
+            }
+            if(menuState == 0){
+                if (Input.anyKey){
+                    if(!fadeFromBlackStarted){
+                        Invoke("MainMenu", 0.01f);
                     }
                 }
             }
@@ -111,22 +113,20 @@ public class MenuManager : MonoBehaviour
         fadeFromBlackStarted = true;
     }
 
-
-    public void MainMenu(){
-        if(musicPlaying){
-            audio.clip = menuMusic;
-            audio.Play();
-        }
+    public void Foreword(){
         FadeFromBlack();
+        forewordScreen.SetActive(true);
+        mainMenuScreen.SetActive(false);
+        gameOverScreen.SetActive(false);
+    }
+    public void MainMenu(){
+        FadeFromBlack();
+        forewordScreen.SetActive(false);
         mainMenuScreen.SetActive(true);
         gameOverScreen.SetActive(false);
         menuState = 1;
     }
     public void GameOver(){
-        if(musicPlaying){
-            audio.clip = gameOverMusic;
-            audio.Play();
-        }
         FadeFromBlack();
         mainMenuScreen.SetActive(false);
         gameOverScreen.SetActive(true);
@@ -134,21 +134,10 @@ public class MenuManager : MonoBehaviour
     }
     public void NewGame(){
         FadeFromBlack();
-        if(musicPlaying){
-            audio.clip = abyssMusic;
-            audio.Play();
-        }
         mainMenuScreen.SetActive(false);
         gameOverScreen.SetActive(false);
         menuState = 2;
     }
-    public void BossMusic(){
-        if(musicPlaying){
-            audio.clip = bossMusic;
-            audio.Play();
-        }
-    }
-
     public void ChangeSceneTo(){
         sceneChanging = true;
         FadeFromBlack();

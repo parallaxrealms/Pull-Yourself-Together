@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class PlayerManager : MonoBehaviour
 {
@@ -69,6 +70,7 @@ public class PlayerManager : MonoBehaviour
     public GameObject backupObject;
     public Vector3 backupSpawnPos;
     public bool backedUp = false;
+    public string backupSceneName;
     
     public bool isHit = false;
     public float hitCooldown = 0.5f;
@@ -77,6 +79,9 @@ public class PlayerManager : MonoBehaviour
     public int numOfNymrite;
     public int numOfVelrite;
     public int numOfZyrite;
+
+    public float mLength;
+    public float colliderHeight;
 
 
     private void Awake(){
@@ -89,12 +94,7 @@ public class PlayerManager : MonoBehaviour
     {
         if(canMove){
             if(hasLegs){
-                if(Input.GetButtonDown("Crouch")){
-                    EnableCrouchState();
-                }
-                if(Input.GetButtonUp("Crouch")){
-                    DisableCrouchState();
-                }
+                
             }
         }
     }
@@ -118,8 +118,15 @@ public class PlayerManager : MonoBehaviour
         playerHealthManager = healthManagerUI.GetComponent<UI_HealthManager>();
 
         audio = GetComponent<AudioSource>();
-
         Reboot();
+    }
+
+    private void GetColliderHeights(){
+        capsuleCollider = currentPlayerObject.GetComponent<CapsuleCollider>();
+        colliderHeight = capsuleCollider.height;
+
+        playerCollider = currentPlayerObject.GetComponent<ControlledCapsuleCollider>();
+        mLength = playerCollider.m_Length;
     }
 
     public void Reboot(){
@@ -135,14 +142,26 @@ public class PlayerManager : MonoBehaviour
         audio.Play();
         hasHead = true;
 
+        GetColliderHeights();
+
         GameController.current.Invoke("ResetEnemyPlayerObjects", 0.01f);
         GameController.current.Invoke("EnableUI", 0.01f);
     }
 
     public void RebootBackup(){
+        Scene scene = SceneManager.GetActiveScene();
+        if(scene.name == backupSceneName){
+            RebootPlayer();
+        }
+        else{
+            GameController.current.playerRespawning = true;
+            SceneManager.LoadScene(backupSceneName);
+        }
+    }
+
+    public void RebootPlayer(){
         isDead = false;
         backedUp = false;
-        spawnPosition = currentPlayerObject.transform.position;
         Destroy(currentPlayerObject);
         Destroy(backupObject);
         currentPlayerObject = Instantiate(player0_Prefab, backupSpawnPos, Quaternion.identity) as GameObject;
@@ -247,8 +266,7 @@ public class PlayerManager : MonoBehaviour
         audio.clip = clip_pickup;
         audio.Play();
 
-        playerCollider = currentPlayerObject.GetComponent<ControlledCapsuleCollider>();
-        capsuleCollider = currentPlayerObject.GetComponent<CapsuleCollider>();
+        GetColliderHeights();
 
         GameController.current.Invoke("ResetEnemyPlayerObjects", 0.01f);
 
@@ -275,8 +293,7 @@ public class PlayerManager : MonoBehaviour
         audio.clip = clip_pickup;
         audio.Play();
 
-        playerCollider = currentPlayerObject.GetComponent<ControlledCapsuleCollider>();
-        capsuleCollider = currentPlayerObject.GetComponent<CapsuleCollider>();
+        GetColliderHeights();
 
         GameController.current.Invoke("ResetEnemyPlayerObjects", 0.01f);
 
@@ -418,8 +435,7 @@ public class PlayerManager : MonoBehaviour
         audio.clip = clip_dropPart;
         audio.Play();
 
-        playerCollider = currentPlayerObject.GetComponent<ControlledCapsuleCollider>();
-        capsuleCollider = currentPlayerObject.GetComponent<CapsuleCollider>();
+        GetColliderHeights();
 
         playerHealthManager.Invoke("LoseBody", 0.1f);
 
@@ -470,8 +486,7 @@ public class PlayerManager : MonoBehaviour
         audio.clip = clip_dropPart;
         audio.Play();
 
-        playerCollider = currentPlayerObject.GetComponent<ControlledCapsuleCollider>();
-        capsuleCollider = currentPlayerObject.GetComponent<CapsuleCollider>();
+        GetColliderHeights();
 
         playerHealthManager.Invoke("LoseWorkerBoots", 0.1f);
 
@@ -504,8 +519,7 @@ public class PlayerManager : MonoBehaviour
         audio.clip = clip_dropPart;
         audio.Play();
 
-        playerCollider = currentPlayerObject.GetComponent<ControlledCapsuleCollider>();
-        capsuleCollider = currentPlayerObject.GetComponent<CapsuleCollider>();
+        GetColliderHeights();
 
         playerHealthManager.Invoke("LoseJumpBoots", 0.1f);
 
@@ -667,6 +681,12 @@ public class PlayerManager : MonoBehaviour
     
     public void SetBackupPoint(){
         backedUp = true;
+
+        Scene scene = SceneManager.GetActiveScene();
+        backupSceneName = scene.name;
+        GameObject sceneInit = GameObject.Find("SceneInit");
+        SceneInit sceneInitScript = sceneInit.GetComponent<SceneInit>();
+        Debug.Log("Backed up on: " + backupSceneName);
     }
 
     public void TransferPlayerProperties(){
@@ -692,11 +712,12 @@ public class PlayerManager : MonoBehaviour
     }
 
     public void EnableCrouchState(){
-        playerCollider.m_Length = 0f;
+        capsuleCollider.height = colliderHeight / 4;
+        playerCollider.m_Length = mLength / 4;
     }
     public void DisableCrouchState(){
-        playerCollider.m_Length = 0.4f;
-
+        capsuleCollider.height = colliderHeight;
+        playerCollider.m_Length = mLength;
     }
 
     public void PauseMovement(){

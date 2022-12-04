@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class MessageConsole : MonoBehaviour
 {
-
+    private Animator anim;
     public GameObject messagePanel;
     public GameObject messagePanelObject;
     public SpriteRenderer message_spriteRend;
@@ -15,7 +15,8 @@ public class MessageConsole : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        messagePos = new Vector3(transform.position.x, transform.position.y + 2f, 0);
+        anim = GetComponent<Animator>();
+        messagePos = new Vector3(transform.position.x, transform.position.y + 2.2f, 0);
 
         messagePanelObject = Instantiate(messagePanel, messagePos, Quaternion.identity) as GameObject;
 
@@ -32,10 +33,12 @@ public class MessageConsole : MonoBehaviour
 
     void TurnConsoleOn(){
         message_spriteRend.enabled = true;
+        anim.SetBool("activated", true);
     }
 
     void TurnConsoleOff(){
         message_spriteRend.enabled = false;
+        anim.SetBool("activated", false);
     }
 
     private void OnTriggerEnter(Collider other) {

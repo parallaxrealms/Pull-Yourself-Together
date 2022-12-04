@@ -607,9 +607,14 @@ public class LostBotScript : MonoBehaviour
     }
 
     public void LoseHead(){
+        GameObject newHeadPart = Instantiate(drop_headObject, new Vector3(transform.position.x, transform.position.y, transform.position.z), Quaternion.identity) as GameObject;            
+        PickUpScript pickUpScript = newHeadPart.GetComponent<PickUpScript>();
+        pickUpScript.pickupType = 9;
+        pickUpScript.Invoke("DropNewPickup", 0.01f);
+
+        DestroySelf();
         isDead = true;
         activated = false;
-        anim.SetBool("isDead", true);
     }
 
     public void DestroySelf(){

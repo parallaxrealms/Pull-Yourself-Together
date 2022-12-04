@@ -7,6 +7,7 @@ public class CrystalScript : MonoBehaviour
     public CrystalScriptableObject crystalData;
 
     public int size = 0;//0 = small, 1 = large
+    public int numOfChunks = 0;
 
     public PlayerControl controlScript;
 
@@ -15,6 +16,9 @@ public class CrystalScript : MonoBehaviour
     
     private float cooldownTimer = 1.0f;
     private bool drillCooldown = false;
+
+    public SpriteRenderer spriteRend;
+    public CapsuleCollider collider;
 
     public GameObject crystalHitParticle;
     public GameObject crystalChunkObject;
@@ -26,6 +30,9 @@ public class CrystalScript : MonoBehaviour
 
     public Vector3 drillPos;
 
+    public float chunkSpawnTimer = 0.05f;
+    public bool chunkSpawned = false;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -33,7 +40,17 @@ public class CrystalScript : MonoBehaviour
         _type = crystalData.type;
         _health = crystalData.health;
 
+        spriteRend = GetComponent<SpriteRenderer>();
+        collider = GetComponent<CapsuleCollider>();
+
         chunkSpawnPos = new Vector3(chunkSpawnOrigin.transform.position.x,chunkSpawnOrigin.transform.position.y,chunkSpawnOrigin.transform.position.z);
+
+        if(size == 0){
+            numOfChunks = 4;
+        }
+        else if(size == 1){
+            numOfChunks = 8;
+        }
     }
 
     // Update is called once per frame
@@ -47,6 +64,22 @@ public class CrystalScript : MonoBehaviour
                 drillCooldown = false;
                 cooldownTimer = 1.0f;
                 anim.SetBool("Hit", false);
+            }
+        }
+
+        if(chunkSpawned){
+            if(numOfChunks >= 1){
+                if(chunkSpawnTimer > 0){
+                    chunkSpawnTimer -= Time.deltaTime;
+                }
+                else{
+                    SpawnChunks();
+                    chunkSpawnTimer = .05f;
+                }
+            }
+            else{
+                chunkSpawned = false;
+                DestroySelf();
             }
         }
     }
@@ -71,7 +104,7 @@ public class CrystalScript : MonoBehaviour
                     anim.SetBool("Hit", true);
                 }
                 else if(_health == 1){
-                    DestroySelf();
+                    CrystalDestroyed();
                     GameObject hitParticles = Instantiate(crystalHitParticle, new Vector3(drillPos.x, drillPos.y, drillPos.z), Quaternion.identity) as GameObject;
                     drillCooldown = true;
                 }
@@ -80,25 +113,17 @@ public class CrystalScript : MonoBehaviour
     }
 
     private void SpawnChunks(){
-        if(size == 0){
-            GameObject crystalChunk = Instantiate(crystalChunkObject, new Vector3(chunkSpawnPos.x,chunkSpawnPos.y,chunkSpawnPos.z), Quaternion.identity) as GameObject;
-            GameObject crystalChunk2 = Instantiate(crystalChunkObject, new Vector3(chunkSpawnPos.x + 0.5f,chunkSpawnPos.y,chunkSpawnPos.z), Quaternion.identity) as GameObject;
-            GameObject crystalChunk3 = Instantiate(crystalChunkObject, new Vector3(chunkSpawnPos.x - 0.5f,chunkSpawnPos.y,chunkSpawnPos.z), Quaternion.identity) as GameObject;
-            GameObject crystalChunk4 = Instantiate(crystalChunkObject,new Vector3(chunkSpawnPos.x, chunkSpawnPos.y + 0.5f,chunkSpawnPos.z), Quaternion.identity) as GameObject;
-        }
-        else if(size == 1){
-            GameObject crystalChunk = Instantiate(crystalChunkObject, new Vector3(chunkSpawnPos.x,chunkSpawnPos.y,chunkSpawnPos.z), Quaternion.identity) as GameObject;
-            GameObject crystalChunk2 = Instantiate(crystalChunkObject, new Vector3(chunkSpawnPos.x + 0.5f,chunkSpawnPos.y,chunkSpawnPos.z), Quaternion.identity) as GameObject;
-            GameObject crystalChunk3 = Instantiate(crystalChunkObject, new Vector3(chunkSpawnPos.x - 0.5f,chunkSpawnPos.y,chunkSpawnPos.z), Quaternion.identity) as GameObject;
-            GameObject crystalChunk4 = Instantiate(crystalChunkObject,new Vector3(chunkSpawnPos.x + 0.25f, chunkSpawnPos.y + 0.5f,chunkSpawnPos.z), Quaternion.identity) as GameObject;
-            GameObject crystalChunk5 = Instantiate(crystalChunkObject, new Vector3(chunkSpawnPos.x - 0.25f,chunkSpawnPos.y,chunkSpawnPos.z), Quaternion.identity) as GameObject;
-            GameObject crystalChunk6 = Instantiate(crystalChunkObject, new Vector3(chunkSpawnPos.x,chunkSpawnPos.y - 0.25f,chunkSpawnPos.z), Quaternion.identity) as GameObject;
-            GameObject crystalChunk7 = Instantiate(crystalChunkObject, new Vector3(chunkSpawnPos.x,chunkSpawnPos.y + 0.25f,chunkSpawnPos.z), Quaternion.identity) as GameObject;
-            GameObject crystalChunk8 = Instantiate(crystalChunkObject, new Vector3(chunkSpawnPos.x - 0.25f,chunkSpawnPos.y -0.25f,chunkSpawnPos.z), Quaternion.identity) as GameObject;
-        }
+        numOfChunks -= 1;
+        GameObject crystalChunk = Instantiate(crystalChunkObject, new Vector3(chunkSpawnPos.x,chunkSpawnPos.y,chunkSpawnPos.z), Quaternion.identity) as GameObject;
     }
+
+    private void CrystalDestroyed(){
+        chunkSpawned = true;
+        spriteRend.enabled = false;
+        collider.enabled = false;
+    }
+
     private void DestroySelf(){
-        SpawnChunks();
         Destroy(gameObject);
     }
 }

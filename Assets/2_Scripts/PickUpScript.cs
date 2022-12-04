@@ -45,7 +45,6 @@ public class PickUpScript : MonoBehaviour
 
     public bool isUsed = false;
 
-
     // Start is called before the first frame update
     void Start()
     {
@@ -91,6 +90,7 @@ public class PickUpScript : MonoBehaviour
         GameController.current.ListPickups.Add(gameObject);
 
         EraseOutline();
+        EraseText();
     }
 
     // Update is called once per frame
@@ -226,11 +226,17 @@ public class PickUpScript : MonoBehaviour
 
     public void DrawOutline(){
         spriteRend.material = outlineSpriteMat;
-        UI_PickUp.SetActive(true);
     }
 
     public void EraseOutline(){
         spriteRend.material = defaultSpriteMat;
+    }
+
+    public void DrawText(){
+        UI_PickUp.SetActive(true);
+    }
+
+    public void EraseText(){
         UI_PickUp.SetActive(false);
     }
 
@@ -248,6 +254,8 @@ public class PickUpScript : MonoBehaviour
         rb.AddForce(force * speed);
         transform.eulerAngles = new Vector3(transform.eulerAngles.x, 0, transform.eulerAngles.z);
         UI_PickUp.SetActive(false);
+
+        GameController.current.Invoke("HighlightPickups", 0.1f);
     }
 
     public void EnablePickupParticles(){
@@ -261,11 +269,11 @@ public class PickUpScript : MonoBehaviour
 
     public void SwitchText(){
         UISpriteRend.sprite = sprite_switch;
-        UI_PickUp.SetActive(true);
+        DrawText();
     }
     public void DefaultText(){
         UISpriteRend.sprite = sprite_default;
-        UI_PickUp.SetActive(true);
+        DrawText();
     }
 
     public void DestroySelf(){

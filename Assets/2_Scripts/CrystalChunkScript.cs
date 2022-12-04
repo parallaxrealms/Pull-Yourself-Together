@@ -31,7 +31,7 @@ public class CrystalChunkScript : MonoBehaviour
 
         transform.eulerAngles = new Vector3(transform.eulerAngles.x, Random.Range(0, 360), transform.eulerAngles.z);
 
-        float speed = 50.0f;
+        float speed = 20.0f;
         rb.isKinematic = false;
         Vector3 force = transform.forward;
         force = new Vector3(force.x, 1, 0);

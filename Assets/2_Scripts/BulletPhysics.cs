@@ -9,10 +9,12 @@ public class BulletPhysics : MonoBehaviour
 
     public AudioClip clip_hitImpactSound;
 
-
     public PlayerWeaponScriptableObject defaultGunValues;
 
     public Animator anim;
+    public SpriteRenderer spriteRend;
+
+    public SphereCollider collider;
 
     public int bulletType;
 
@@ -31,10 +33,12 @@ public class BulletPhysics : MonoBehaviour
     public GameObject missileImpactParticles;
     public GameObject laserHit;
 
-
     private Rigidbody rb;
 
     public float _lifespanTimer;
+
+    private float destroyTimer = 0.1f;
+    private bool destroyed = false;
 
     // Start is called before the first frame update
     void Start()
@@ -48,7 +52,10 @@ public class BulletPhysics : MonoBehaviour
         rb.AddForce(bulletDirection * _speed);
 
         damage = defaultGunValues.damageAmount;
-
+        if(bulletType == 0){
+            collider = GetComponent<SphereCollider>();
+            spriteRend = GetComponent<SpriteRenderer>();
+        }
         if(bulletType == 1){
             anim = GetComponent<Animator>();
             
@@ -66,7 +73,16 @@ public class BulletPhysics : MonoBehaviour
             _lifespanTimer -= Time.deltaTime;
         }
         else{
-            DestroySelf();
+            Destroy(gameObject);
+        }
+
+        if(destroyed){
+            if(destroyTimer > 0f){
+                destroyTimer -= Time.deltaTime;
+            }
+            else{
+                Destroy(gameObject);
+            }
         }
     }
 
@@ -74,11 +90,14 @@ public class BulletPhysics : MonoBehaviour
         Vector3 hitPos = other.gameObject.transform.position;
         if(other.gameObject.tag == "Ground"){
             if(bulletType == 0){
+                spriteRend.enabled = false;
+                collider.enabled = false; 
                 GameObject impactParticles = Instantiate(bulletImpactParticles, hitPos, Quaternion.identity) as GameObject;
-                DestroySelf();
 
                 audio.clip = clip_hitImpactSound;
                 audio.Play();
+
+                DestroySelf();      
             }
             else if(bulletType == 1){
                 rb.velocity = Vector3.zero;
@@ -97,6 +116,8 @@ public class BulletPhysics : MonoBehaviour
         }
         if(other.gameObject.tag == "BulletCollision"){
             if(bulletType == 0){
+                spriteRend.enabled = false;
+                collider.enabled = false; 
                 GameObject impactParticles_white = Instantiate(bulletImpactParticles_white, hitPos, Quaternion.identity) as GameObject;
                 DestroySelf();
 
@@ -120,6 +141,8 @@ public class BulletPhysics : MonoBehaviour
         }
         if(other.gameObject.tag == "Enemy"){
             if(bulletType == 0){
+                spriteRend.enabled = false;
+                collider.enabled = false; 
                 GameObject impactParticles_white = Instantiate(bulletImpactParticles_white, hitPos, Quaternion.identity) as GameObject;
                 DestroySelf();
 
@@ -143,6 +166,8 @@ public class BulletPhysics : MonoBehaviour
         }
         if(other.gameObject.tag == "Spawner"){
              if(bulletType == 0){
+                spriteRend.enabled = false;
+                collider.enabled = false; 
                 GameObject impactParticles_white = Instantiate(bulletImpactParticles_white, hitPos, Quaternion.identity) as GameObject;
                 DestroySelf();
 
@@ -167,7 +192,8 @@ public class BulletPhysics : MonoBehaviour
     }
 
     public void OnTriggerExit(Collider other){
-
+        spriteRend.enabled = false;
+        collider.enabled = false; 
     }
 
     public void DisableAOECollider(){
@@ -175,6 +201,6 @@ public class BulletPhysics : MonoBehaviour
     }
     
     public void DestroySelf(){
-        Destroy(gameObject);
+        destroyed = true;
     }
 }

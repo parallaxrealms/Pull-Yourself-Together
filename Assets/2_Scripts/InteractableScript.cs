@@ -106,7 +106,6 @@ public class InteractableScript : MonoBehaviour
                             pickUpScript.activated = true;
                             pickUpScript.Invoke("DefaultText", 0.01f);
                             pickUpScript.Invoke("DrawOutline", 0.1f);
-                            pickUpScript.Invoke("DisablePickupParticles", 0.1f);
                         }
                     }
                 }
@@ -116,7 +115,7 @@ public class InteractableScript : MonoBehaviour
     private void OnTriggerExit(Collider other) {
         if(other.gameObject.tag == "Player"){
             pickUpScript.activated = false;
-            pickUpScript.Invoke("EraseOutline", 0.1f);
+            pickUpScript.Invoke("EraseText", 0.1f);
         }
     }
 }

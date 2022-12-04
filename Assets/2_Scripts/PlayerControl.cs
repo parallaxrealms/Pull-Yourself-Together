@@ -16,7 +16,6 @@ public class PlayerControl : MonoBehaviour
     private Rigidbody rb;
 
     private AudioSource audio;
-    public AudioClip clip_jump;
     public AudioClip clip_shoot;
     public AudioClip clip_shootMissile;
     public AudioClip clip_shootLaser;
