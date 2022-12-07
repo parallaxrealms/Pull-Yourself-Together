@@ -54,6 +54,7 @@ public class CrystalChunkScript : MonoBehaviour
     }
 
     public void PlayerPickup(string typeOfCrystal){
+        crystalManagerScript.Invoke("ShowCrystalUITemp",0.01f);
         anim.SetBool("Pickup", true);
         pickedUp = true;
         audio.clip = clip_pickup;

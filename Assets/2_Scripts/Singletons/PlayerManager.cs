@@ -21,6 +21,9 @@ public class PlayerManager : MonoBehaviour
     public GameObject healthManagerUI;
     public UI_HealthManager playerHealthManager;
 
+    public GameObject partsUI;
+    public UI_Parts partsUIScript;
+
     public bool hasHead = false;
     public bool hasBody = false;
     public bool hasDrill = false;
@@ -29,7 +32,6 @@ public class PlayerManager : MonoBehaviour
 
     public int gunType = 0;
     public int legType = 0;
-
 
     public bool gunFacing;
 
@@ -83,6 +85,9 @@ public class PlayerManager : MonoBehaviour
     public float mLength;
     public float colliderHeight;
 
+    public GameObject respawnCircle;
+    public GameObject respawnCircleObject;
+    public OnRespawnDestroyNearby respawnCircleScript;
 
     private void Awake(){
         DontDestroyOnLoad(this);
@@ -116,6 +121,7 @@ public class PlayerManager : MonoBehaviour
         mainCamera = GameObject.Find("Camera");
         cameraScript = mainCamera.GetComponent<BasicCameraTracker>();
         playerHealthManager = healthManagerUI.GetComponent<UI_HealthManager>();
+        partsUIScript = partsUI.GetComponent<UI_Parts>();
 
         audio = GetComponent<AudioSource>();
         Reboot();
@@ -154,6 +160,7 @@ public class PlayerManager : MonoBehaviour
             RebootPlayer();
         }
         else{
+            GameController.current.Invoke("DestroyAllEnemyObjects", 0.01f);
             GameController.current.playerRespawning = true;
             SceneManager.LoadScene(backupSceneName);
         }
@@ -162,19 +169,20 @@ public class PlayerManager : MonoBehaviour
     public void RebootPlayer(){
         isDead = false;
         backedUp = false;
-        Destroy(currentPlayerObject);
-        Destroy(backupObject);
+        Destroy(currentPlayerObject); 
+        respawnCircle = Instantiate(respawnCircleObject, backupSpawnPos, Quaternion.identity) as GameObject;
         currentPlayerObject = Instantiate(player0_Prefab, backupSpawnPos, Quaternion.identity) as GameObject;
         currentPlayerObject.transform.parent = transform;
         cameraScript.m_Target = currentPlayerObject;
         controlScript = currentPlayerObject.GetComponent<PlayerControl>();
-        playerHealthManager.Invoke("GainHead", 0.2f);
+        playerHealthManager.Invoke("GainHead", 0.1f);
+        partsUIScript.Invoke("GainWorkerHead", 0.1f);
+
         audio.clip = clip_reboot;
         audio.Play();
         hasHead = true;
 
-        GameController.current.Invoke("ResetEnemyPlayerObjects", 0.01f);
-        GameController.current.Invoke("EnableUI", 0.01f);
+        GameController.current.Invoke("RebootFromCheckpoint", 0.01f);
     }
 
     public void RebootNewMap(){
@@ -190,6 +198,7 @@ public class PlayerManager : MonoBehaviour
         audio.clip = clip_pickup;
         audio.Play();
         playerHealthManager.Invoke("GainBody", 0.1f);
+        partsUIScript.Invoke("GainWorkerBody", 0.1f);
 
         currentPlayerObject = Instantiate(player1_Prefab, spawnPosition, Quaternion.identity) as GameObject;
         TransferPlayerProperties();
@@ -207,6 +216,7 @@ public class PlayerManager : MonoBehaviour
         controlScript.Invoke("EnableDrillArm", 0.1f);
         cameraScript.m_Target = currentPlayerObject;
         playerHealthManager.Invoke("GainDrillArm", 0.1f);
+        partsUIScript.Invoke("GainWorkerDrill", 0.1f);
         audio.clip = clip_pickup;
         audio.Play();
     }
@@ -219,6 +229,7 @@ public class PlayerManager : MonoBehaviour
         controlScript.Invoke("EnableGunArm", 0.1f);
         cameraScript.m_Target = currentPlayerObject;
         playerHealthManager.Invoke("GainBlasterGun", 0.1f);
+        partsUIScript.Invoke("GainBlaster", 0.1f);
         audio.clip = clip_pickup;
         audio.Play();
     }
@@ -229,6 +240,7 @@ public class PlayerManager : MonoBehaviour
         controlScript.Invoke("EnableGunArm", 0.1f);
         cameraScript.m_Target = currentPlayerObject;
         playerHealthManager.Invoke("GainMissileLauncher", 0.1f);
+        partsUIScript.Invoke("GainMissileLauncher", 0.1f);
         audio.clip = clip_pickup;
         audio.Play();
     }
@@ -239,6 +251,7 @@ public class PlayerManager : MonoBehaviour
         controlScript.Invoke("EnableGunArm", 0.1f);
         cameraScript.m_Target = currentPlayerObject;
         playerHealthManager.Invoke("GainLaserBeam", 0.1f);
+        partsUIScript.Invoke("GainLaserBeam", 0.1f);
         audio.clip = clip_pickup;
         audio.Play();
     }
@@ -263,6 +276,8 @@ public class PlayerManager : MonoBehaviour
         currentPlayerObject.transform.position = spawnPosition;
         cameraScript.m_Target = currentPlayerObject;
         playerHealthManager.Invoke("GainWorkerBoots", 0.01f);
+        partsUIScript.Invoke("GainWorkerBoots", 0.1f);
+
         audio.clip = clip_pickup;
         audio.Play();
 
@@ -270,7 +285,6 @@ public class PlayerManager : MonoBehaviour
 
         GameController.current.Invoke("ResetEnemyPlayerObjects", 0.01f);
 
-        playerHealthManager.Invoke("GainWorkerBoots", 0.1f);
         legType = 0;
 
         if(hasDrill){
@@ -290,6 +304,8 @@ public class PlayerManager : MonoBehaviour
         currentPlayerObject.transform.position = spawnPosition;
         cameraScript.m_Target = currentPlayerObject;
         playerHealthManager.Invoke("GainJumpBoots", 0.01f);
+        partsUIScript.Invoke("GainJumpBoots", 0.1f);
+
         audio.clip = clip_pickup;
         audio.Play();
 
@@ -297,7 +313,6 @@ public class PlayerManager : MonoBehaviour
 
         GameController.current.Invoke("ResetEnemyPlayerObjects", 0.01f);
 
-        playerHealthManager.Invoke("GainJumpBoots", 0.1f);
         legType = 1;
 
         if(hasDrill){

@@ -75,17 +75,17 @@ public class LostBotMeta : MonoBehaviour
     }
 
     public void LoseBody(){
-        Destroy(currentBotObject);
-        currentBotObject = Instantiate(lostBot0, new Vector3(currentBotObject.transform.position.x, currentBotObject.transform.position.y,currentBotObject.transform.position.z), Quaternion.identity) as GameObject;
-        currentBotObject.transform.parent = transform;
-        ResetBot();
+            Destroy(currentBotObject);
+            currentBotObject = Instantiate(lostBot0, new Vector3(currentBotObject.transform.position.x, currentBotObject.transform.position.y,currentBotObject.transform.position.z), Quaternion.identity) as GameObject;
+            currentBotObject.transform.parent = transform;
+            ResetBot();
     }
     
     public void LoseLegs(){
-        Destroy(currentBotObject);
-        currentBotObject = Instantiate(lostBot1, new Vector3(currentBotObject.transform.position.x, currentBotObject.transform.position.y,currentBotObject.transform.position.z), Quaternion.identity) as GameObject;
-        currentBotObject.transform.parent = transform;
-        ResetBot();
+            Destroy(currentBotObject);
+            currentBotObject = Instantiate(lostBot1, new Vector3(currentBotObject.transform.position.x, currentBotObject.transform.position.y,currentBotObject.transform.position.z), Quaternion.identity) as GameObject;
+            currentBotObject.transform.parent = transform;
+            ResetBot();
     }
 
     public void DestroySelf(){

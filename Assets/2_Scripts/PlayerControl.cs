@@ -124,7 +124,7 @@ public class PlayerControl : MonoBehaviour
         spriteRend = spriteAnimatorObject.GetComponent<SpriteRenderer>();
         spriteMaterial = spriteRend.material;
 
-        UI_CrystalManager = GameObject.Find("CrystalManager");
+        UI_CrystalManager = MenuManager.current.CrystalManager;
         crystalManagerScript = UI_CrystalManager.GetComponent<UI_CrystalManager>();
     }
 

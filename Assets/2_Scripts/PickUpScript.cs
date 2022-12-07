@@ -45,6 +45,8 @@ public class PickUpScript : MonoBehaviour
 
     public bool isUsed = false;
 
+    public GameObject prevBotOwner;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -56,7 +58,7 @@ public class PickUpScript : MonoBehaviour
         UISpriteRend = UI_PickUp.GetComponent<SpriteRenderer>();
         sprite_default = UISpriteRend.sprite;
 
-        if(pickupType == 9){ //Head Backup Point
+        if(pickupType == 0 || pickupType == 9){ //Head Backup Point
             pingAnim = pingObject.GetComponent<Animator>();
             pingObject.SetActive(false);
         }
@@ -99,13 +101,16 @@ public class PickUpScript : MonoBehaviour
         if(activated){
             if(Input.GetButtonDown("Interact")){
                 if(pickupType == 0){
-                    if(!PlayerManager.current.hasHead){
+                    if(!isUsed){
+                        PlayerManager.current.backupSpawnPos = new Vector3(transform.position.x, transform.position.y,transform.position.z);
+                        PlayerManager.current.backupObject = gameObject;
+                        PlayerManager.current.Invoke("SetBackupPoint",0.1f);
+                        pingObject.SetActive(true);
+                        pingAnim.SetBool("hidden", false);
+                        isUsed = true;
                         
+                        GameController.current.prevBotOwner = null;
                     }
-                    else{
-                        PlayerManager.current.Invoke("SwitchHead",0.1f);
-                    }
-                    DestroySelf();
                 }
                 if(pickupType == 1){
                     if(!PlayerManager.current.hasBody){
@@ -205,6 +210,8 @@ public class PickUpScript : MonoBehaviour
                         pingObject.SetActive(true);
                         pingAnim.SetBool("hidden", false);
                         isUsed = true;
+                        
+                        GameController.current.prevBotOwner = prevBotOwner;
                     }
                 }
             }    

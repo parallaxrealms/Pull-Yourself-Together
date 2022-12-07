@@ -35,6 +35,8 @@ public class GameController : MonoBehaviour
     public int gunType;
     public int legType;
 
+    public GameObject prevBotOwner;
+
     private void Awake(){
         DontDestroyOnLoad(this);
         current = this;
@@ -79,7 +81,7 @@ public class GameController : MonoBehaviour
             MenuManager.current.Invoke("NewGame", 0.01f);
             SceneManager.LoadScene("TheAbyss_0");
             gameStarted = true;
-            Invoke("HighlightPickups",3f);
+            Invoke("HighlightPickups",2f);
         }
     }
 
@@ -139,6 +141,18 @@ public class GameController : MonoBehaviour
         }
     }
 
+    public void DestroyClosestBotAfterSpawn(){
+        GameObject prevBot = prevBotOwner;
+        Debug.Log("prevbot: " + prevBotOwner);
+        LostBotMeta prevBotScript = prevBot.GetComponent<LostBotMeta>();
+        prevBotScript.Invoke("LoseLegs", 0.01f);
+        prevBotScript.Invoke("LoseDrill", 0.01f);
+        prevBotScript.Invoke("LoseGun", 0.01f);
+        prevBotScript.Invoke("LoseBody", 0.01f);
+        GameController.current.ListBots.Remove(prevBotOwner);
+        Destroy(prevBotOwner);
+    }
+
     public void InactivateEnemies(){
         foreach (GameObject worm in ListWorms)
         {
@@ -165,12 +179,11 @@ public class GameController : MonoBehaviour
     }
 
     public void HighlightPickups(){
-        Debug.Log("Highlight Pickups!");
         foreach (GameObject pickup in ListPickups)
         {
             PickUpScript pickupScript = pickup.GetComponent<PickUpScript>();
 
-            if(pickupScript.pickupType == 9){ //Head Reset
+            if(pickupScript.pickupType == 0 || pickupScript.pickupType == 9){ //Head Reset
                 if(!pickupScript.isUsed){
                     pickupScript.Invoke("EnablePickupParticles", 0.01f);
                 }
@@ -226,6 +239,16 @@ public class GameController : MonoBehaviour
                     pickupScript.Invoke("DisablePickupParticles", 0.01f);
                 }
             }
+        }
+    }
+
+    public void RebootFromCheckpoint(){
+        DestroyAllEnemyObjects();
+        ResetEnemyPlayerObjects();
+        EnableUI();
+        HighlightPickups();
+        if(prevBotOwner != null){
+            DestroyClosestBotAfterSpawn();
         }
     }
 

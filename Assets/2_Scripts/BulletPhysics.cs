@@ -86,6 +86,35 @@ public class BulletPhysics : MonoBehaviour
         }
     }
 
+    private void OnCollisionEnter(Collision other) {
+        Vector3 hitPos = other.gameObject.transform.position;
+        if(other.gameObject.tag == "Enemy"){
+            if(bulletType == 0){
+                spriteRend.enabled = false;
+                collider.enabled = false; 
+                GameObject impactParticles_white = Instantiate(bulletImpactParticles_white, hitPos, Quaternion.identity) as GameObject;
+                DestroySelf();
+
+                audio.clip = clip_hitImpactSound;
+                audio.Play();
+            }
+            else if(bulletType == 1){
+                rb.velocity = Vector3.zero;
+                anim.SetBool("isHit", true);
+                GameObject impactParticles = Instantiate(missileImpactParticles, hitPos, Quaternion.identity) as GameObject;
+                missileAOE = Instantiate(missileHitAOE, hitPos, Quaternion.identity) as GameObject;
+                missileHitCollider = missileAOE.GetComponent<SphereCollider>();
+                missileHitCollider.enabled = false;
+
+                audio.clip = clip_missileExplode;
+                audio.Play();
+            }
+            else if(bulletType == 2){
+                GameObject impactParticles = Instantiate(laserHit, hitPos, Quaternion.identity) as GameObject;
+            }
+        }
+    }
+
     public void OnTriggerEnter(Collider other){
         Vector3 hitPos = other.gameObject.transform.position;
         if(other.gameObject.tag == "Ground"){

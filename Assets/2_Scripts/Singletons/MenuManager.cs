@@ -24,6 +24,9 @@ public class MenuManager : MonoBehaviour
 
     public GameObject PartsUI;
     public UI_Parts UIPartsScript;
+
+    public GameObject CrystalManager;
+    public UI_CrystalManager crystalManagerScript;
     
     private void Awake(){
         DontDestroyOnLoad(this);
@@ -32,6 +35,9 @@ public class MenuManager : MonoBehaviour
         PartsUI = GameObject.Find("UI_Player_Parts");
         UIPartsScript = PartsUI.GetComponent<UI_Parts>();
         UIPartsScript.Invoke("DisablePartsUI", 0.1f);
+
+        CrystalManager = GameObject.Find("CrystalManager");
+        crystalManagerScript = CrystalManager.GetComponent<UI_CrystalManager>();
 
         GameController.current.Invoke("DisableUI", 0.2f);
     }
@@ -143,13 +149,14 @@ public class MenuManager : MonoBehaviour
         FadeFromBlack();
     }
 
-
     public void OpenPartsUI(){
         UIPartsScript.isEnabled = true;
         UIPartsScript.Invoke("EnablePartsUI", 0.1f);
+        crystalManagerScript.Invoke("ShowCrystalUI", 0.1f);
     }
     public void ClosePartsUI(){
         UIPartsScript.isEnabled = false;
         UIPartsScript.Invoke("DisablePartsUI", 0.1f);
+        crystalManagerScript.Invoke("HideCrystalUI", 0.1f);
     }
 }

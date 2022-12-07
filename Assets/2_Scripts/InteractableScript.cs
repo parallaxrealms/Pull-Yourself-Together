@@ -39,12 +39,7 @@ public class InteractableScript : MonoBehaviour
     private void OnTriggerEnter(Collider other) {
         if(!isSpawning){
             if(other.gameObject.tag == "Player"){
-                if(pickUpScript.pickupType == 0){ //If this pickup is a Head
-                    pickUpScript.activated = true;
-                    pickUpScript.Invoke("SwitchText", 0.01f);
-                    pickUpScript.Invoke("DrawOutline", 0.1f);
-                }
-                else if(pickUpScript.pickupType == 1){ //If this pickup is Body
+                if(pickUpScript.pickupType == 1){ //If this pickup is Body
                     if(PlayerManager.current.hasHead){
                         if(!PlayerManager.current.hasBody){
                             pickUpScript.activated = true;
@@ -100,7 +95,7 @@ public class InteractableScript : MonoBehaviour
                         }
                     }
                 }
-                else if(pickUpScript.pickupType == 9){ //If this pickup is Backup
+                else if(pickUpScript.pickupType == 0 || pickUpScript.pickupType == 9){ //If this pickup is Backup
                     if(PlayerManager.current.hasHead){
                         if(!pickUpScript.isUsed){
                             pickUpScript.activated = true;

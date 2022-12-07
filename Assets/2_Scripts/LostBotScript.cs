@@ -539,67 +539,83 @@ public class LostBotScript : MonoBehaviour
 
 
     public void LoseDrill(){
-        GameObject newDrillPart = Instantiate(drop_drillObject, new Vector3(transform.position.x, transform.position.y, transform.position.z), Quaternion.identity) as GameObject;            
-        PickUpScript pickUpScript = newDrillPart.GetComponent<PickUpScript>();
-        pickUpScript.pickupType = 2;
-        pickUpScript.Invoke("DropNewPickup", 0.01f);
+        if(hasDrill){
+            GameObject newDrillPart = Instantiate(drop_drillObject, new Vector3(transform.position.x, transform.position.y, transform.position.z), Quaternion.identity) as GameObject;            
+            PickUpScript pickUpScript = newDrillPart.GetComponent<PickUpScript>();
+            pickUpScript.pickupType = 2;
+            pickUpScript.Invoke("DropNewPickup", 0.01f);
 
-        hasDrill = false;
-        parentScript.hasDrill = false;
-        drillObject.SetActive(false);
-        parentScript.Invoke("LoseDrill", 0.01f);
+            hasDrill = false;
+            parentScript.hasDrill = false;
+            drillObject.SetActive(false);
+            parentScript.Invoke("LoseDrill", 0.01f);
+        }
     }
     public void LoseGun(){
-        if(gunType == 0){
-            GameObject newGunPart = Instantiate(drop_blasterObject, new Vector3(transform.position.x, transform.position.y, transform.position.z), Quaternion.identity) as GameObject;   
-            PickUpScript pickUpScript = newGunPart.GetComponent<PickUpScript>();
-            pickUpScript.pickupType = 3;
-            pickUpScript.Invoke("DropNewPickup", 0.01f);
+        if(hasGun){
+            if(gunType == 0){
+                GameObject newGunPart = Instantiate(drop_blasterObject, new Vector3(transform.position.x, transform.position.y, transform.position.z), Quaternion.identity) as GameObject;   
+                PickUpScript pickUpScript = newGunPart.GetComponent<PickUpScript>();
+                pickUpScript.pickupType = 3;
+                pickUpScript.Invoke("DropNewPickup", 0.01f);
+            }
+            if(gunType == 1){
+                GameObject newGunPart = Instantiate(drop_missileObject, new Vector3(transform.position.x, transform.position.y, transform.position.z), Quaternion.identity) as GameObject; 
+                PickUpScript pickUpScript = newGunPart.GetComponent<PickUpScript>();
+                pickUpScript.pickupType = 3;
+                pickUpScript.Invoke("DropNewPickup", 0.01f);  
+            }
+            if(gunType == 2){
+                GameObject newGunPart = Instantiate(drop_laserObject, new Vector3(transform.position.x, transform.position.y, transform.position.z), Quaternion.identity) as GameObject;   
+                PickUpScript pickUpScript = newGunPart.GetComponent<PickUpScript>();
+                pickUpScript.pickupType = 3;
+                pickUpScript.Invoke("DropNewPickup", 0.01f);
+            }
+            if(gunType == 3){
+                GameObject newGunPart = Instantiate(drop_autogunObject, new Vector3(transform.position.x, transform.position.y, transform.position.z), Quaternion.identity) as GameObject;   
+                PickUpScript pickUpScript = newGunPart.GetComponent<PickUpScript>();
+                pickUpScript.pickupType = 3;
+                pickUpScript.Invoke("DropNewPickup", 0.01f);
+            }
+            hasGun = false;
+            parentScript.hasGun = false;
+            gunObject.SetActive(false);
+            parentScript.Invoke("LoseGun", 0.01f);
         }
-        if(gunType == 1){
-            GameObject newGunPart = Instantiate(drop_missileObject, new Vector3(transform.position.x, transform.position.y, transform.position.z), Quaternion.identity) as GameObject; 
-            PickUpScript pickUpScript = newGunPart.GetComponent<PickUpScript>();
-            pickUpScript.pickupType = 3;
-            pickUpScript.Invoke("DropNewPickup", 0.01f);  
-        }
-        if(gunType == 2){
-            GameObject newGunPart = Instantiate(drop_laserObject, new Vector3(transform.position.x, transform.position.y, transform.position.z), Quaternion.identity) as GameObject;   
-            PickUpScript pickUpScript = newGunPart.GetComponent<PickUpScript>();
-            pickUpScript.pickupType = 3;
-            pickUpScript.Invoke("DropNewPickup", 0.01f);
-        }
-        if(gunType == 3){
-            GameObject newGunPart = Instantiate(drop_autogunObject, new Vector3(transform.position.x, transform.position.y, transform.position.z), Quaternion.identity) as GameObject;   
-            PickUpScript pickUpScript = newGunPart.GetComponent<PickUpScript>();
-            pickUpScript.pickupType = 3;
-            pickUpScript.Invoke("DropNewPickup", 0.01f);
-        }
-        hasGun = false;
-        parentScript.hasGun = false;
-        gunObject.SetActive(false);
-        parentScript.Invoke("LoseGun", 0.01f);
     }
     public void LoseBody(){
-        GameObject newBodyPart = Instantiate(drop_bodyObject, new Vector3(transform.position.x, transform.position.y, transform.position.z), Quaternion.identity) as GameObject;            
-        PickUpScript pickUpScript = newBodyPart.GetComponent<PickUpScript>();
-        pickUpScript.pickupType = 1;
-        pickUpScript.Invoke("DropNewPickup", 0.01f);
+        if(hasBody){
+            GameObject newBodyPart = Instantiate(drop_bodyObject, new Vector3(transform.position.x, transform.position.y, transform.position.z), Quaternion.identity) as GameObject;            
+            PickUpScript pickUpScript = newBodyPart.GetComponent<PickUpScript>();
+            pickUpScript.pickupType = 1;
+            pickUpScript.Invoke("DropNewPickup", 0.01f);
 
-        hasBody = false;
-        parentScript.hasBody = false;
-        parentScript.Invoke("LoseBody", 0.01f);
-        activated = true;
+            hasBody = false;
+            parentScript.hasBody = false;
+            parentScript.Invoke("LoseBody", 0.01f);
+            activated = true;
+        }
     }
     public void LoseLegs(){
-        GameObject newLegsPart = Instantiate(drop_legsObject, new Vector3(transform.position.x, transform.position.y, transform.position.z), Quaternion.identity) as GameObject;            
-        PickUpScript pickUpScript = newLegsPart.GetComponent<PickUpScript>();
-        pickUpScript.pickupType = 4;
-        pickUpScript.Invoke("DropNewPickup", 0.01f);
+        if(hasLegs){
+            GameObject newLegsPart = Instantiate(drop_legsObject, new Vector3(transform.position.x, transform.position.y, transform.position.z), Quaternion.identity) as GameObject;            
+            PickUpScript pickUpScript = newLegsPart.GetComponent<PickUpScript>();
+            pickUpScript.pickupType = 4;
+            pickUpScript.Invoke("DropNewPickup", 0.01f);
 
-        hasLegs = false;
-        parentScript.hasLegs = false;
-        parentScript.Invoke("LoseLegs", 0.01f);
-        activated = true;
+            hasLegs = false;
+            parentScript.hasLegs = false;
+            parentScript.Invoke("LoseLegs", 0.01f);
+            activated = true;
+        }
+    }
+
+    public void DeathOnRespawn(){
+        LoseDrill();
+        LoseGun();
+        LoseBody();
+        LoseLegs();
+        DestroySelf();
     }
 
     public void Dead(){
@@ -611,6 +627,7 @@ public class LostBotScript : MonoBehaviour
         PickUpScript pickUpScript = newHeadPart.GetComponent<PickUpScript>();
         pickUpScript.pickupType = 9;
         pickUpScript.Invoke("DropNewPickup", 0.01f);
+        pickUpScript.prevBotOwner = gameObject;
 
         DestroySelf();
         isDead = true;

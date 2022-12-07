@@ -45,6 +45,9 @@ public class SceneInit : MonoBehaviour
             if(PlayerManager.current.sceneDirection == "Right"){
                 PlayerManager.current.spawnPosition = new Vector3(playerSpawnPoint.transform.position.x + 10.0f,playerSpawnPoint.transform.position.y,playerSpawnPoint.transform.position.z);
             }
+            if(PlayerManager.current.sceneDirection == "Down"){
+                PlayerManager.current.spawnPosition = new Vector3(playerSpawnPoint.transform.position.x,playerSpawnPoint.transform.position.y + 5.0f,playerSpawnPoint.transform.position.z);
+            }
             PlayerManager.current.Invoke("RebootNewMap", 0.1f);
         }
     }

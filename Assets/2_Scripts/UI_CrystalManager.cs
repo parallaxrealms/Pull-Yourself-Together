@@ -34,6 +34,9 @@ public class UI_CrystalManager : MonoBehaviour
     public GameObject Num_Zyrite;
     public Text text_num_Zyrite;
 
+    public bool timerEnabled = false;
+    public float timer = 4.0f; 
+
     // Start is called before the first frame update
     void Start()
     {
@@ -54,12 +57,53 @@ public class UI_CrystalManager : MonoBehaviour
         text_num_Zyrite = Num_Zyrite.GetComponent<Text>();
 
         SyncCrystals();
+
+        HideCrystalUI();
     }
 
     // Update is called once per frame
     void Update()
     {
-        
+        if(timerEnabled){
+            if(timer > 0){
+                timer -= Time.deltaTime;
+            }
+            else{
+                timerEnabled = false;   
+                HideCrystalUI();
+                timer = 4f;
+            }
+        }
+        else{
+
+        }
+    }
+
+    public void ShowCrystalUITemp(){
+        timerEnabled = true;
+        SyncCrystals();
+        ShowCrystalUI();
+    }
+
+    public void ShowCrystalUI(){
+        rend_Corite.enabled = true;
+        rend_Velrite.enabled = true;
+        rend_Nymrite.enabled = true;
+        rend_Zyrite.enabled = true;
+        Num_Corite.SetActive(true);
+        Num_Velrite.SetActive(true);
+        Num_Nymrite.SetActive(true);
+        Num_Zyrite.SetActive(true);
+    }
+    public void HideCrystalUI(){
+        rend_Corite.enabled = false;
+        rend_Velrite.enabled = false;
+        rend_Nymrite.enabled = false;
+        rend_Zyrite.enabled = false;
+        Num_Corite.SetActive(false);
+        Num_Velrite.SetActive(false);
+        Num_Nymrite.SetActive(false);
+        Num_Zyrite.SetActive(false);
     }
 
     public void SyncCrystals(){
@@ -118,5 +162,4 @@ public class UI_CrystalManager : MonoBehaviour
         }
         text_num_Zyrite.text = PlayerManager.current.numOfZyrite.ToString();
     }
-
 }

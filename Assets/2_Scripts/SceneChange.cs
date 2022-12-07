@@ -27,7 +27,6 @@ public class SceneChange : MonoBehaviour
             GameController.current.sceneChangeName = sceneToName;
             GameController.current.triggerSpawnName = triggerConnectionName;
             GameController.current.Invoke("TransitionToSceneChange", 0.01f);
-            Debug.Log("playerEnteredSceneChange");
         }
     }
 
