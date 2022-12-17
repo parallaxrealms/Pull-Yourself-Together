@@ -4,9 +4,15 @@ using UnityEngine;
 
 public class PickUpScript : MonoBehaviour
 {
-
     public Rigidbody rb;
     public bool activated = false;
+
+    public GameObject sceneInitObject;
+    public SceneInit sceneInitScript;
+
+    private GameObject respawnCircle;
+    public GameObject respawnCircleObject;
+    public Vector3 scenePos;
 
     public SpriteRenderer spriteRend;
 
@@ -18,8 +24,13 @@ public class PickUpScript : MonoBehaviour
     public Sprite sprite_workerBoots;
     public Sprite sprite_jumpBoots;
 
-    public Sprite sprite_default;
-    public Sprite sprite_switch;
+    public Sprite sprite_pickup_0;
+    public Sprite sprite_pickup_1;
+    public Sprite sprite_pickup_2;
+    public Sprite sprite_pickup_3;
+    public Sprite sprite_pickup_4;
+    public Sprite sprite_pickup_5;
+    public Sprite sprite_pickup_6;
 
     public Material defaultSpriteMat;
     public Material outlineSpriteMat;
@@ -40,6 +51,10 @@ public class PickUpScript : MonoBehaviour
     public int bodyType;//0=worker body, 1=soldier body
     public int legType;//0=worker boots, 1=jump boots
 
+    public int progress1;
+    public int progress2;
+    public int progressNum;
+
     public GameObject pingObject;
     public Animator pingAnim;
 
@@ -50,17 +65,21 @@ public class PickUpScript : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        rb = GetComponent<Rigidbody>();
+        sceneInitObject = GameObject.Find("SceneInit");
+        sceneInitScript = sceneInitObject.GetComponent<SceneInit>();
 
+        rb = GetComponent<Rigidbody>();
         spriteRend = GetComponent<SpriteRenderer>();
         defaultSpriteMat = spriteRend.material;
 
         UISpriteRend = UI_PickUp.GetComponent<SpriteRenderer>();
-        sprite_default = UISpriteRend.sprite;
 
         if(pickupType == 0 || pickupType == 9){ //Head Backup Point
             pingAnim = pingObject.GetComponent<Animator>();
             pingObject.SetActive(false);
+            respawnCircle = Instantiate(respawnCircleObject, new Vector3(0,0,0), Quaternion.identity) as GameObject;
+            respawnCircle.transform.parent = transform;
+            respawnCircle.transform.localPosition = new Vector3(0,0,0);
         }
         if(pickupType == 3){ //If pickup is a gun
             if(gunType == 0){
@@ -88,11 +107,11 @@ public class PickUpScript : MonoBehaviour
 
         particlePickup.SetActive(false);
 
-        //Add to gameControllers List
         GameController.current.ListPickups.Add(gameObject);
 
         EraseOutline();
         EraseText();
+        TransferUpgradeProperties();
     }
 
     // Update is called once per frame
@@ -100,6 +119,7 @@ public class PickUpScript : MonoBehaviour
     {
         if(activated){
             if(Input.GetButtonDown("Interact")){
+                TransferUpgradeProperties();
                 if(pickupType == 0){
                     if(!isUsed){
                         PlayerManager.current.backupSpawnPos = new Vector3(transform.position.x, transform.position.y,transform.position.z);
@@ -114,21 +134,27 @@ public class PickUpScript : MonoBehaviour
                 }
                 if(pickupType == 1){
                     if(!PlayerManager.current.hasBody){
+                        PlayerManager.current.temp_body_progress1 = progress1;
+                        PlayerManager.current.temp_body_progress2 = progress2;
+                        PlayerManager.current.temp_body_progressNum = progressNum;
                         PlayerManager.current.Invoke("PickupBody",0.1f);
+                        DestroySelf();
                     }
                     else{
-
+                        
                     }
-                    DestroySelf();
                 }
                 else if(pickupType == 2){
                     if(!PlayerManager.current.hasDrill){
+                        PlayerManager.current.temp_drill_progress1 = progress1;
+                        PlayerManager.current.temp_drill_progress2 = progress2;
+                        PlayerManager.current.temp_drill_progressNum = progressNum;
                         PlayerManager.current.Invoke("PickupDrill",0.1f);
+                        DestroySelf();
                     }
                     else{
 
                     }
-                    DestroySelf();
                 }
                 else if(pickupType == 3){ //Guns
                     if(PlayerManager.current.hasGun){
@@ -138,6 +164,9 @@ public class PickUpScript : MonoBehaviour
                                 //Repair Gun
                             }
                             else{
+                                PlayerManager.current.temp_gun_progress1 = progress1;
+                                PlayerManager.current.temp_gun_progress2 = progress2;
+                                PlayerManager.current.temp_gun_progressNum = progressNum;
                                 PlayerManager.current.Invoke("SwitchToBlaster",0.1f);
                             }
                         }
@@ -146,6 +175,9 @@ public class PickUpScript : MonoBehaviour
                                 //Repair Gun
                             }
                             else{
+                                PlayerManager.current.temp_gun_progress1 = progress1;
+                                PlayerManager.current.temp_gun_progress2 = progress2;
+                                PlayerManager.current.temp_gun_progressNum = progressNum;
                                 PlayerManager.current.Invoke("SwitchToMissile",0.1f);
                             }
                         }
@@ -154,6 +186,9 @@ public class PickUpScript : MonoBehaviour
                                 //Repair Gun
                             }
                             else{
+                                PlayerManager.current.temp_gun_progress1 = progress1;
+                                PlayerManager.current.temp_gun_progress2 = progress2;
+                                PlayerManager.current.temp_gun_progressNum = progressNum;
                                 PlayerManager.current.Invoke("SwitchToLaser",0.1f);
                             }
                         }
@@ -162,22 +197,37 @@ public class PickUpScript : MonoBehaviour
                                 //Repair Gun
                             }
                             else{
+                                PlayerManager.current.temp_gun_progress1 = progress1;
+                                PlayerManager.current.temp_gun_progress2 = progress2;
+                                PlayerManager.current.temp_gun_progressNum = progressNum;
                                 PlayerManager.current.Invoke("SwitchToElectro",0.1f);
                             }
                         }
                     }
                     else{
                         DestroySelf();
-                        if(gunType == 0){   
+                        if(gunType == 0){  
+                            PlayerManager.current.temp_gun_progress1 = progress1;
+                            PlayerManager.current.temp_gun_progress2 = progress2;
+                            PlayerManager.current.temp_gun_progressNum = progressNum;
                             PlayerManager.current.Invoke("PickupBlaster",0.1f);
                         }
                         else if(gunType == 1){  
+                            PlayerManager.current.temp_gun_progress1 = progress1;
+                            PlayerManager.current.temp_gun_progress2 = progress2;
+                            PlayerManager.current.temp_gun_progressNum = progressNum;
                             PlayerManager.current.Invoke("PickupMissile",0.1f);
                         }
-                        else if(gunType == 2){ 
+                        else if(gunType == 2){
+                            PlayerManager.current.temp_gun_progress1 = progress1;
+                            PlayerManager.current.temp_gun_progress2 = progress2;
+                            PlayerManager.current.temp_gun_progressNum = progressNum;
                             PlayerManager.current.Invoke("PickupLaser",0.1f);
                         }
                         else if(gunType == 3){
+                            PlayerManager.current.temp_gun_progress1 = progress1;
+                            PlayerManager.current.temp_gun_progress2 = progress2;
+                            PlayerManager.current.temp_gun_progressNum = progressNum;
                             PlayerManager.current.Invoke("PickupElectro",0.1f);
                         }
                     }
@@ -186,18 +236,30 @@ public class PickUpScript : MonoBehaviour
                     if(!PlayerManager.current.hasLegs){
                         DestroySelf();
                         if(legType == 0){
+                            PlayerManager.current.temp_legs_progress1 = progress1;
+                            PlayerManager.current.temp_legs_progress2 = progress2;
+                            PlayerManager.current.temp_legs_progressNum = progressNum;
                             PlayerManager.current.Invoke("PickupWorkerBoots",0.1f);
                         }
                         else if(legType == 1){
+                            PlayerManager.current.temp_legs_progress1 = progress1;
+                            PlayerManager.current.temp_legs_progress2 = progress2;
+                            PlayerManager.current.temp_legs_progressNum = progressNum;
                             PlayerManager.current.Invoke("PickupJumpBoots",0.1f);
                         }
                     }
                     else{
                         DestroySelf();
                         if(legType == 0){
+                            PlayerManager.current.temp_legs_progress1 = progress1;
+                            PlayerManager.current.temp_legs_progress2 = progress2;
+                            PlayerManager.current.temp_legs_progressNum = progressNum;
                             PlayerManager.current.Invoke("SwitchToWorkerBoots",0.1f);
                         }
                         else if(legType == 1){
+                            PlayerManager.current.temp_legs_progress1 = progress1;
+                            PlayerManager.current.temp_legs_progress2 = progress2;
+                            PlayerManager.current.temp_legs_progressNum = progressNum;
                             PlayerManager.current.Invoke("SwitchToJumpBoots",0.1f);
                         }
                     }
@@ -209,9 +271,11 @@ public class PickUpScript : MonoBehaviour
                         PlayerManager.current.Invoke("SetBackupPoint",0.1f);
                         pingObject.SetActive(true);
                         pingAnim.SetBool("hidden", false);
-                        isUsed = true;
+
+                        DisablePickupParticles();
                         
                         GameController.current.prevBotOwner = prevBotOwner;
+                        isUsed = true;
                     }
                 }
             }    
@@ -247,6 +311,10 @@ public class PickUpScript : MonoBehaviour
         UI_PickUp.SetActive(false);
     }
 
+    public void SetScenePos(){
+        scenePos = transform.position;
+    }
+
     public void DropNewPickup(){
         spriteRend.material = whiteSpriteMat;
         isSpawning = true;
@@ -254,15 +322,75 @@ public class PickUpScript : MonoBehaviour
 
         transform.eulerAngles = new Vector3(transform.eulerAngles.x, Random.Range(0, 360), transform.eulerAngles.z);
 
-        float speed = 100.0f;
+        float speed = 50.0f;
         rb.isKinematic = false;
         Vector3 force = transform.forward;
-        force = new Vector3(force.x, 3, 0);
+        force = new Vector3(force.x, 2, 0);
         rb.AddForce(force * speed);
         transform.eulerAngles = new Vector3(transform.eulerAngles.x, 0, transform.eulerAngles.z);
         UI_PickUp.SetActive(false);
 
         GameController.current.Invoke("HighlightPickups", 0.1f);
+        TransferUpgradeProperties();
+    }
+
+    public void TransferUpgradeProperties(){
+        progressNum = progress1 + progress2;
+
+        if(progressNum == 0){
+            UISpriteRend.sprite = sprite_pickup_0;
+        }
+        else if(progressNum == 1){
+            UISpriteRend.sprite = sprite_pickup_1;
+        }
+        else if(progressNum == 2){
+            UISpriteRend.sprite = sprite_pickup_2;
+        }
+        else if(progressNum == 3){
+            UISpriteRend.sprite = sprite_pickup_3;
+        }
+        else if(progressNum == 4){
+            UISpriteRend.sprite = sprite_pickup_4;
+        }
+        else if(progressNum == 5){
+            UISpriteRend.sprite = sprite_pickup_5;
+        }
+        else if(progressNum == 6){
+            UISpriteRend.sprite = sprite_pickup_6;
+        }
+
+        //rename gameobject
+        if(pickupType == 0){
+            gameObject.name = "BotHead " + progressNum.ToString();
+        }
+        else if(pickupType == 1){
+            gameObject.name = "WorkerBody " + progressNum.ToString();
+        }
+        else if(pickupType == 2){
+            gameObject.name = "WorkerDrill " + progressNum.ToString();
+        }
+        else if(pickupType == 3){
+            if(legType == 0){
+                gameObject.name = "BlasterGun " + progressNum.ToString();
+            }
+            else if(legType == 1){
+                gameObject.name = "MissileLauncher " + progressNum.ToString();
+            }
+            else if(legType == 2){
+                gameObject.name = "EnergyBeam " + progressNum.ToString();
+            }
+            else if(legType == 3){
+                gameObject.name = "ElectroGun " + progressNum.ToString();
+            }
+        }
+        else if(pickupType == 4){
+            if(legType == 0){
+                gameObject.name = "WorkerLegs " + progressNum.ToString();
+            }
+            else if(legType == 1){
+                gameObject.name = "WorkerLegs " + progressNum.ToString();
+            }
+        }
     }
 
     public void EnablePickupParticles(){
@@ -274,13 +402,12 @@ public class PickUpScript : MonoBehaviour
         EraseOutline();
     }
 
-    public void SwitchText(){
-        UISpriteRend.sprite = sprite_switch;
+    public void DefaultText(){
         DrawText();
     }
-    public void DefaultText(){
-        UISpriteRend.sprite = sprite_default;
-        DrawText();
+
+    public void RemoveFromList(){
+        GameController.current.ListPickups.Remove(gameObject);
     }
 
     public void DestroySelf(){

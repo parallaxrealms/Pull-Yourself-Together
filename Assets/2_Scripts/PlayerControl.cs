@@ -35,6 +35,7 @@ public class PlayerControl : MonoBehaviour
     public SpriteRenderer gunSpriteRend;
     public Material gunMaterial;
     public GameObject bulletOrigin;
+    public WeaponArmScript gunArmScript;
 
     public GameObject drillArm;
     public SpriteRenderer drillSpriteRend;
@@ -171,26 +172,28 @@ public class PlayerControl : MonoBehaviour
     }
 
     private void GunControls(){
-        if(Input.GetButton("Fire1") && gunReady){
-            gunReady = false;
-            if(gunType == 0){
-                FireBlaster();
+        if(!MenuManager.current.isMouseOver){
+            if(Input.GetButton("Fire1") && gunReady){
+                gunReady = false;
+                if(gunType == 0){
+                    FireBlaster();
+                }
+                else if(gunType == 1){
+                    FireMissile();
+                }
+                else if(gunType == 2){
+                    FireLaser();
+                }
+                else if(gunType == 3){
+                    FireElectro();
+                }
             }
-            else if(gunType == 1){
-                FireMissile();
+            if(gunFacing){
+                GunArmAim();
             }
-            else if(gunType == 2){
-                FireLaser();
+            else{
+                ResetGunAim();
             }
-            else if(gunType == 3){
-                FireElectro();
-            }
-        }
-        if(gunFacing){
-            GunArmAim();
-        }
-        else{
-            ResetGunAim();
         }
     }
 
@@ -297,6 +300,7 @@ public class PlayerControl : MonoBehaviour
             _gunCooldownTime = electroValues.gunCooldownTime;
         }
         gunArm.SetActive(true);
+        gunArmScript = gunArm.GetComponent<WeaponArmScript>();
     }
     public void DisableGunArm(){
         gunArm.SetActive(false);
@@ -368,6 +372,13 @@ public class PlayerControl : MonoBehaviour
     }
     public void SwitchLegs(){
         
+    }
+
+    public void PlayBlasterImpact(){
+        if(PlayerManager.current.hasGun){
+            WeaponArmScript weaponScript = gunArm.GetComponent<WeaponArmScript>();
+            weaponScript.Invoke("PlayBlasterImpact",0.01f);
+        }
     }
 
     public void TakeHit(){

@@ -8,17 +8,80 @@ public class SceneInit : MonoBehaviour
     public string triggerSpawnName;
 
     public bool isFalling = false;
-
     public int sceneTrackNum;
-    
     public bool backedUp = false;
+
+    public int levelID;
+    public bool levelVisited;
 
     void Awake(){
         triggerSpawnName = GameController.current.triggerSpawnName;
-        MenuManager.current.Invoke("FadeFromBlack",0.1f);
-
         MusicManager.current.currentTrackNum = sceneTrackNum;
         MusicManager.current.Invoke("PlayMusic",0.1f);
+
+        MenuManager.current.currentLevelID = levelID;
+        ObjectManager.current.currentLevelID = levelID;
+        if(levelID == 1){
+            if(!GameController.current.init_CoL_0){
+                levelVisited = false;
+                GameController.current.init_CoL_0 = true;
+            }
+            else{
+                levelVisited = true;
+            }
+        }
+        else if(levelID == 2){
+            if(!GameController.current.init_CoL_1){
+                levelVisited = false;
+                GameController.current.init_CoL_1 = true;
+            }
+            else{
+                levelVisited = true;
+            }
+        }
+        else if(levelID == 3){
+            if(!GameController.current.init_CoL_2){
+                levelVisited = false;
+                GameController.current.init_CoL_2 = true;
+            }
+            else{
+                levelVisited = true;
+            }
+        }
+        else if(levelID == 4){
+            if(!GameController.current.init_Abyss_0){
+                levelVisited = false;
+                GameController.current.init_Abyss_0 = true;
+            }
+            else{
+                levelVisited = true;
+            }
+        }
+        else if(levelID == 5){
+            if(!GameController.current.init_Abyss_1){
+                levelVisited = false;
+                GameController.current.init_Abyss_1 = true;
+            }
+            else{
+                levelVisited = true;
+            }
+        }
+        else if(levelID == 6){
+            if(!GameController.current.init_Abyss_Boss){
+                levelVisited = false;
+                GameController.current.init_Abyss_Boss = true;
+            }
+            else{
+                levelVisited = true;
+            }
+        }
+        if(!levelVisited){
+            GameController.current.newScene = true;
+        }
+        else{
+            GameController.current.newScene = false;
+        }
+        GameController.current.Invoke("ResetScenePickups",0.1f);
     }
 
     // Start is called before the first frame update
@@ -40,16 +103,21 @@ public class SceneInit : MonoBehaviour
             playerSpawnPoint = GameObject.Find(triggerSpawnName);
 
             if(PlayerManager.current.sceneDirection == "Left"){
-                PlayerManager.current.spawnPosition = new Vector3(playerSpawnPoint.transform.position.x - 10.0f,playerSpawnPoint.transform.position.y,playerSpawnPoint.transform.position.z);
+                PlayerManager.current.spawnPosition = new Vector3(playerSpawnPoint.transform.position.x - 15.0f,playerSpawnPoint.transform.position.y,playerSpawnPoint.transform.position.z);
             }
             if(PlayerManager.current.sceneDirection == "Right"){
-                PlayerManager.current.spawnPosition = new Vector3(playerSpawnPoint.transform.position.x + 10.0f,playerSpawnPoint.transform.position.y,playerSpawnPoint.transform.position.z);
+                PlayerManager.current.spawnPosition = new Vector3(playerSpawnPoint.transform.position.x + 15.0f,playerSpawnPoint.transform.position.y,playerSpawnPoint.transform.position.z);
             }
             if(PlayerManager.current.sceneDirection == "Down"){
-                PlayerManager.current.spawnPosition = new Vector3(playerSpawnPoint.transform.position.x,playerSpawnPoint.transform.position.y + 5.0f,playerSpawnPoint.transform.position.z);
+                PlayerManager.current.spawnPosition = new Vector3(playerSpawnPoint.transform.position.x,playerSpawnPoint.transform.position.y - 12.0f,playerSpawnPoint.transform.position.z);
+            }
+            if(PlayerManager.current.sceneDirection == "Up"){
+                PlayerManager.current.spawnPosition = new Vector3(playerSpawnPoint.transform.position.x,playerSpawnPoint.transform.position.y + 40.0f,playerSpawnPoint.transform.position.z);
             }
             PlayerManager.current.Invoke("RebootNewMap", 0.1f);
         }
+
+        MenuManager.current.Invoke("ResetTitleCard", 0.1f);
     }
 
     // Update is called once per frame

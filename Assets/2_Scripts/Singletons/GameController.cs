@@ -8,13 +8,24 @@ public class GameController : MonoBehaviour
 {
     public static GameController current;
 
+    public GameObject gameCamera;
+    private Vector3 camOriginalPos;
+
     public string sceneChangeName;
     public GameObject triggerSpawn;
     public string triggerSpawnName;
 
+    public bool init_CoL_0;
+    public bool init_CoL_1;
+    public bool init_CoL_2;
+    public bool init_Abyss_0;
+    public bool init_Abyss_1;
+    public bool init_Abyss_Boss;
+
     public bool gameStarted = false;
     public bool playerSpawned = false;
     public bool playerRespawning = false;
+    public bool newScene = true;
 
     public GameObject UI_Object;
 
@@ -40,6 +51,9 @@ public class GameController : MonoBehaviour
     private void Awake(){
         DontDestroyOnLoad(this);
         current = this;
+
+        gameCamera = GameObject.Find("Camera");
+        camOriginalPos = gameCamera.transform.position;
     }
     
     public event Action onEnableDebug;
@@ -76,10 +90,20 @@ public class GameController : MonoBehaviour
         Invoke("EnableUI", 0.01f);
     }
 
+    private void ResetGameController(){
+        init_CoL_0 = false;
+        init_CoL_1 = false;
+        init_CoL_2 = false;
+        init_Abyss_0 = false;
+        init_Abyss_1 = false;
+        init_Abyss_Boss = false;
+    }
+
     public void NewGame(){
         if(!gameStarted){
+            ResetGameController();
             MenuManager.current.Invoke("NewGame", 0.01f);
-            SceneManager.LoadScene("TheAbyss_0");
+            SceneManager.LoadScene("CoL_0");
             gameStarted = true;
             Invoke("HighlightPickups",2f);
         }
@@ -99,6 +123,7 @@ public class GameController : MonoBehaviour
         DestroyAllEnemyObjects();
         SceneManager.LoadScene("MainMenu");
         MenuManager.current.Invoke("GameOver", 0.1f);
+        gameCamera.transform.position = camOriginalPos;
     }
 
     public void BossFightStarted(){
@@ -143,7 +168,6 @@ public class GameController : MonoBehaviour
 
     public void DestroyClosestBotAfterSpawn(){
         GameObject prevBot = prevBotOwner;
-        Debug.Log("prevbot: " + prevBotOwner);
         LostBotMeta prevBotScript = prevBot.GetComponent<LostBotMeta>();
         prevBotScript.Invoke("LoseLegs", 0.01f);
         prevBotScript.Invoke("LoseDrill", 0.01f);
@@ -151,6 +175,14 @@ public class GameController : MonoBehaviour
         prevBotScript.Invoke("LoseBody", 0.01f);
         GameController.current.ListBots.Remove(prevBotOwner);
         Destroy(prevBotOwner);
+    }
+
+    public void SetCurrentScenePos(){
+        foreach (GameObject pickup in ListPickups)
+        {
+            PickUpScript pickupScript = pickup.GetComponent<PickUpScript>();
+            pickupScript.Invoke("SetScenePos", 0.01f);
+        }
     }
 
     public void InactivateEnemies(){
@@ -186,73 +218,107 @@ public class GameController : MonoBehaviour
             if(pickupScript.pickupType == 0 || pickupScript.pickupType == 9){ //Head Reset
                 if(!pickupScript.isUsed){
                     pickupScript.Invoke("EnablePickupParticles", 0.01f);
+                    pickupScript.Invoke("DrawOutline", 0.01f);
                 }
             }
             if(pickupScript.pickupType == 1){ //Body
                 if(hasBody == false){
                     pickupScript.Invoke("EnablePickupParticles", 0.01f);
+                    pickupScript.Invoke("DrawOutline", 0.01f);
                 }
                 else{
                     pickupScript.Invoke("DisablePickupParticles", 0.01f);
-                    pickupScript.Invoke("DrawOutline", 0.01f);
+                    pickupScript.Invoke("EraseOutline", 0.01f);
                 }
             }
             if(pickupScript.pickupType == 2){ //Drill
                 if(hasBody == true){
                     if(hasDrill == false){
                         pickupScript.Invoke("EnablePickupParticles", 0.01f);
+                        pickupScript.Invoke("DrawOutline", 0.01f);
                     }
                     else{
                         pickupScript.Invoke("DisablePickupParticles", 0.01f);
-                        pickupScript.Invoke("DrawOutline", 0.01f);
+                        pickupScript.Invoke("EraseOutline", 0.01f);
                     }
                 }
                 else{
                     pickupScript.Invoke("DisablePickupParticles", 0.01f);
+                    pickupScript.Invoke("EraseOutline", 0.01f);
+
                 }
             }
             if(pickupScript.pickupType == 3){ //Gun
                 if(hasBody == true){
                     if(hasGun == false){
                         pickupScript.Invoke("EnablePickupParticles", 0.01f);
+                        pickupScript.Invoke("DrawOutline", 0.01f);
                     }
                     else{
-                        pickupScript.Invoke("DisablePickupParticles", 0.01f);
-                        pickupScript.Invoke("DrawOutline", 0.01f);
+                        if(pickupScript.gunType != PlayerManager.current.gunType){
+                            pickupScript.Invoke("EnablePickupParticles", 0.01f);
+                            pickupScript.Invoke("DrawOutline", 0.01f);
+                        }
+                        else{
+                            pickupScript.Invoke("DisablePickupParticles", 0.01f);
+                            pickupScript.Invoke("EraseOutline", 0.01f);
+                        }
                     }
                 }
                 else{
                     pickupScript.Invoke("DisablePickupParticles", 0.01f);
+                    pickupScript.Invoke("EraseOutline", 0.01f);
+
                 }
             }
             if(pickupScript.pickupType == 4){ //Legs
                 if(hasBody == true){
                     if(hasLegs == false){
                         pickupScript.Invoke("EnablePickupParticles", 0.01f);
+                        pickupScript.Invoke("DrawOutline", 0.01f);
                     }
                     else{
-                        pickupScript.Invoke("DisablePickupParticles", 0.01f);
-                        pickupScript.Invoke("DrawOutline", 0.01f);
+                        if(pickupScript.legType != PlayerManager.current.legType){
+                            pickupScript.Invoke("EnablePickupParticles", 0.01f);
+                            pickupScript.Invoke("DrawOutline", 0.01f);
+                        }
+                        else{
+                            pickupScript.Invoke("DisablePickupParticles", 0.01f);
+                            pickupScript.Invoke("EraseOutline", 0.01f);
+                        }
                     }
                 }
                 else{
                     pickupScript.Invoke("DisablePickupParticles", 0.01f);
+                    pickupScript.Invoke("EraseOutline", 0.01f);
+
                 }
             }
         }
     }
 
+    public void ResetScenePickups(){
+        Debug.Log("ResetScenePickups " + newScene);
+        if(!newScene){
+           foreach (GameObject pickup in ListPickups){
+                PickUpScript pickupScript = pickup.GetComponent<PickUpScript>();
+                pickupScript.Invoke("DestroySelf", 0.01f);
+           }
+           ObjectManager.current.Invoke("SpawnCachedPickups", 0.01f);
+        } 
+    }
+
     public void RebootFromCheckpoint(){
-        DestroyAllEnemyObjects();
-        ResetEnemyPlayerObjects();
         EnableUI();
-        HighlightPickups();
         if(prevBotOwner != null){
             DestroyClosestBotAfterSpawn();
         }
+        ResetEnemyPlayerObjects();
+        HighlightPickups();
     }
 
     public void DestroyAllEnemyObjects(){
+        Debug.Log("DestroyAllEnemyObjects");
         ListWorms.Clear();
         ListBuzzers.Clear();
         ListBots.Clear();
@@ -261,11 +327,18 @@ public class GameController : MonoBehaviour
     }
 
     public void ChangeSceneTo(){
-        SceneManager.LoadScene(sceneChangeName);
-        sceneChangeName = null;
+        DestroyAllEnemyObjects();
+        if(sceneChangeName != null){
+            SceneManager.LoadScene(sceneChangeName);
+            sceneChangeName = null;
+        }
     }
-
-    public void TransitionToSceneChange(){
-        MenuManager.current.Invoke("ChangeSceneTo", 0.1f);
+    public void ChangeSceneAndReboot(){
+        DestroyAllEnemyObjects();
+        string backupScene = PlayerManager.current.backupSceneName;
+        if(backupScene != null){
+            SceneManager.LoadScene(backupScene);
+            backupScene = null;
+        }
     }
 }

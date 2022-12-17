@@ -25,10 +25,26 @@ public class PlayerManager : MonoBehaviour
     public UI_Parts partsUIScript;
 
     public bool hasHead = false;
+
     public bool hasBody = false;
+    public int temp_body_progress1;
+    public int temp_body_progress2;
+    public int temp_body_progressNum;
+
     public bool hasDrill = false;
+    public int temp_drill_progress1;
+    public int temp_drill_progress2;
+    public int temp_drill_progressNum;
+
     public bool hasGun = false;
+    public int temp_gun_progress1;
+    public int temp_gun_progress2;
+    public int temp_gun_progressNum;
+
     public bool hasLegs = false;
+    public int temp_legs_progress1;
+    public int temp_legs_progress2;
+    public int temp_legs_progressNum;
 
     public int gunType = 0;
     public int legType = 0;
@@ -62,6 +78,8 @@ public class PlayerManager : MonoBehaviour
     public GameObject pickup_LegsObject;
     public GameObject pickup_LegsJumpObject;
 
+    public bool playerPartDropped = false;
+
     private ControlledCapsuleCollider playerCollider;
     public CapsuleCollider capsuleCollider;
 
@@ -75,7 +93,7 @@ public class PlayerManager : MonoBehaviour
     public string backupSceneName;
     
     public bool isHit = false;
-    public float hitCooldown = 0.5f;
+    public float hitCooldown = 0.75f;
 
     public int numOfCorite;
     public int numOfNymrite;
@@ -97,11 +115,7 @@ public class PlayerManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if(canMove){
-            if(hasLegs){
-                
-            }
-        }
+        
     }
 
     private void FixedUpdate() {
@@ -111,12 +125,13 @@ public class PlayerManager : MonoBehaviour
             }
             else{
                 RecoverFromHit();
-                hitCooldown = 0.5f;
+                hitCooldown = 0.75f;
             }
         }
     }
 
     private void InitPlayer(){
+        Debug.Log("playerInit");
         GameController.current.Invoke("GetUI", 0.1f);
         mainCamera = GameObject.Find("Camera");
         cameraScript = mainCamera.GetComponent<BasicCameraTracker>();
@@ -144,6 +159,8 @@ public class PlayerManager : MonoBehaviour
         cameraScript.m_Target = currentPlayerObject;
         controlScript = currentPlayerObject.GetComponent<PlayerControl>();
         playerHealthManager.Invoke("GainHead", 0.2f);
+        partsUIScript.Invoke("GainWorkerHead", 0.1f);
+        
         audio.clip = clip_reboot;
         audio.Play();
         hasHead = true;
@@ -160,13 +177,13 @@ public class PlayerManager : MonoBehaviour
             RebootPlayer();
         }
         else{
-            GameController.current.Invoke("DestroyAllEnemyObjects", 0.01f);
+            MenuManager.current.Invoke("ChangeSceneAndReboot",0.01f);
             GameController.current.playerRespawning = true;
-            SceneManager.LoadScene(backupSceneName);
         }
     }
 
     public void RebootPlayer(){
+        Debug.Log("RebootPlayer");
         isDead = false;
         backedUp = false;
         Destroy(currentPlayerObject); 
@@ -188,7 +205,6 @@ public class PlayerManager : MonoBehaviour
     public void RebootNewMap(){
         currentPlayerObject.transform.position = spawnPosition;
         cameraScript.m_Target = currentPlayerObject;
-        GameController.current.Invoke("ResetEnemyPlayerObjects", 0.01f);
     }
 
     //Pickup Bodies
@@ -198,6 +214,10 @@ public class PlayerManager : MonoBehaviour
         audio.clip = clip_pickup;
         audio.Play();
         playerHealthManager.Invoke("GainBody", 0.1f);
+        //Transfer upgrade nums from pickup script
+        partsUIScript.temp_progress1 = temp_body_progress1;
+        partsUIScript.temp_progress2 = temp_body_progress2;
+        partsUIScript.temp_progressNum = temp_body_progressNum;
         partsUIScript.Invoke("GainWorkerBody", 0.1f);
 
         currentPlayerObject = Instantiate(player1_Prefab, spawnPosition, Quaternion.identity) as GameObject;
@@ -207,7 +227,6 @@ public class PlayerManager : MonoBehaviour
         cameraScript.m_Target = currentPlayerObject;
 
         GameController.current.Invoke("ResetEnemyPlayerObjects", 0.01f);
-
     }
 
     //Pickup Drills
@@ -216,6 +235,10 @@ public class PlayerManager : MonoBehaviour
         controlScript.Invoke("EnableDrillArm", 0.1f);
         cameraScript.m_Target = currentPlayerObject;
         playerHealthManager.Invoke("GainDrillArm", 0.1f);
+        //Transfer upgrade nums from pickup script
+        partsUIScript.temp_progress1 = temp_drill_progress1;
+        partsUIScript.temp_progress2 = temp_drill_progress2;
+        partsUIScript.temp_progressNum = temp_drill_progressNum;
         partsUIScript.Invoke("GainWorkerDrill", 0.1f);
         audio.clip = clip_pickup;
         audio.Play();
@@ -229,6 +252,10 @@ public class PlayerManager : MonoBehaviour
         controlScript.Invoke("EnableGunArm", 0.1f);
         cameraScript.m_Target = currentPlayerObject;
         playerHealthManager.Invoke("GainBlasterGun", 0.1f);
+        //Transfer upgrade nums from pickup script
+        partsUIScript.temp_progress1 = temp_gun_progress1;
+        partsUIScript.temp_progress2 = temp_gun_progress2;
+        partsUIScript.temp_progressNum = temp_gun_progressNum;
         partsUIScript.Invoke("GainBlaster", 0.1f);
         audio.clip = clip_pickup;
         audio.Play();
@@ -240,6 +267,10 @@ public class PlayerManager : MonoBehaviour
         controlScript.Invoke("EnableGunArm", 0.1f);
         cameraScript.m_Target = currentPlayerObject;
         playerHealthManager.Invoke("GainMissileLauncher", 0.1f);
+        //Transfer upgrade nums from pickup script
+        partsUIScript.temp_progress1 = temp_gun_progress1;
+        partsUIScript.temp_progress2 = temp_gun_progress2;
+        partsUIScript.temp_progressNum = temp_gun_progressNum;
         partsUIScript.Invoke("GainMissileLauncher", 0.1f);
         audio.clip = clip_pickup;
         audio.Play();
@@ -251,6 +282,10 @@ public class PlayerManager : MonoBehaviour
         controlScript.Invoke("EnableGunArm", 0.1f);
         cameraScript.m_Target = currentPlayerObject;
         playerHealthManager.Invoke("GainLaserBeam", 0.1f);
+        //Transfer upgrade nums from pickup script
+        partsUIScript.temp_progress1 = temp_gun_progress1;
+        partsUIScript.temp_progress2 = temp_gun_progress2;
+        partsUIScript.temp_progressNum = temp_gun_progressNum;
         partsUIScript.Invoke("GainLaserBeam", 0.1f);
         audio.clip = clip_pickup;
         audio.Play();
@@ -262,6 +297,11 @@ public class PlayerManager : MonoBehaviour
         controlScript.Invoke("EnableGunArm", 0.1f);
         cameraScript.m_Target = currentPlayerObject;
         playerHealthManager.Invoke("GainAutoBlaster", 0.1f);
+        //Transfer upgrade nums from pickup script
+        partsUIScript.temp_progress1 = temp_gun_progress1;
+        partsUIScript.temp_progress2 = temp_gun_progress2;
+        partsUIScript.temp_progressNum = temp_gun_progressNum;
+        //
         audio.clip = clip_pickup;
         audio.Play();
     }
@@ -276,6 +316,10 @@ public class PlayerManager : MonoBehaviour
         currentPlayerObject.transform.position = spawnPosition;
         cameraScript.m_Target = currentPlayerObject;
         playerHealthManager.Invoke("GainWorkerBoots", 0.01f);
+        //Transfer upgrade nums from pickup script
+        partsUIScript.temp_progress1 = temp_legs_progress1;
+        partsUIScript.temp_progress2 = temp_legs_progress2;
+        partsUIScript.temp_progressNum = temp_legs_progressNum;
         partsUIScript.Invoke("GainWorkerBoots", 0.1f);
 
         audio.clip = clip_pickup;
@@ -304,6 +348,10 @@ public class PlayerManager : MonoBehaviour
         currentPlayerObject.transform.position = spawnPosition;
         cameraScript.m_Target = currentPlayerObject;
         playerHealthManager.Invoke("GainJumpBoots", 0.01f);
+        //Transfer upgrade nums from pickup script
+        partsUIScript.temp_progress1 = temp_legs_progress1;
+        partsUIScript.temp_progress2 = temp_legs_progress2;
+        partsUIScript.temp_progressNum = temp_legs_progressNum;
         partsUIScript.Invoke("GainJumpBoots", 0.1f);
 
         audio.clip = clip_pickup;
@@ -341,7 +389,26 @@ public class PlayerManager : MonoBehaviour
     }
 
 
-//Losing Parts
+    //Losing Parts
+    public void DropAllParts(){
+        playerPartDropped = true;
+        if(hasLegs){
+            DropLegs();
+        }
+        if(hasDrill){
+            DropDrill();
+        }
+        if(hasGun){
+            DropGun();
+        }
+        if(hasBody){
+            DropBody();
+        }
+
+        audio.clip = clip_dropPart;
+        audio.Play();
+    }
+    
     //Drop Guns
     public void DropGun(){
         if(gunType == 0){
@@ -361,92 +428,150 @@ public class PlayerManager : MonoBehaviour
     public void DropBlaster(){
         hasGun = false;
         controlScript.Invoke("DisableGunArm", 0.1f);
-        cameraScript.m_Target = currentPlayerObject;
         playerHealthManager.Invoke("LoseBlasterGun", 0.1f);
-        audio.clip = clip_dropPart;
-        audio.Play();
 
-        //Spawn Gun Pickup
-        GameObject pickup_Blaster = Instantiate(pickup_BlasterObject, new Vector3(currentPlayerObject.transform.position.x,currentPlayerObject.transform.position.y,currentPlayerObject.transform.position.z), Quaternion.identity) as GameObject;
+        if(playerPartDropped){
+            //Spawn Gun Pickup
+            GameObject pickup_Blaster = Instantiate(pickup_BlasterObject, new Vector3(currentPlayerObject.transform.position.x,currentPlayerObject.transform.position.y,currentPlayerObject.transform.position.z), Quaternion.identity) as GameObject;
 
-        PickUpScript pickUpScript = pickup_Blaster.GetComponent<PickUpScript>();
-        pickUpScript.Invoke("DropNewPickup", 0.01f);
-        pickUpScript.pickupType = 3;
-        pickUpScript.gunType = gunType;
+            PickUpScript pickUpScript = pickup_Blaster.GetComponent<PickUpScript>();
+            pickUpScript.pickupType = 3;
+            pickUpScript.gunType = gunType;
+            pickUpScript.progress1 = temp_gun_progress1;
+            pickUpScript.progress2 = temp_gun_progress2;
+            pickUpScript.progressNum = temp_gun_progressNum;
+            pickUpScript.Invoke("DropNewPickup", 0.01f);
+        }
+        else{
+            cameraScript.m_Target = currentPlayerObject;
+            audio.clip = clip_dropPart;
+            audio.Play();
+
+            //Spawn Gun Pickup
+            GameObject pickup_Blaster = Instantiate(pickup_BlasterObject, new Vector3(currentPlayerObject.transform.position.x,currentPlayerObject.transform.position.y,currentPlayerObject.transform.position.z), Quaternion.identity) as GameObject;
+
+            PickUpScript pickUpScript = pickup_Blaster.GetComponent<PickUpScript>();
+            pickUpScript.pickupType = 3;
+            pickUpScript.gunType = gunType;
+            pickUpScript.progress1 = temp_gun_progress1;
+            pickUpScript.progress2 = temp_gun_progress2;
+            pickUpScript.progressNum = temp_gun_progressNum;
+            pickUpScript.Invoke("DropNewPickup", 0.01f);
+        }
     }
     public void DropMissile(){
         hasGun = false;
         controlScript.Invoke("DisableGunArm", 0.1f);
-        cameraScript.m_Target = currentPlayerObject;
         playerHealthManager.Invoke("LoseMissileLauncher", 0.1f);
-        audio.clip = clip_dropPart;
-        audio.Play();
 
-        //Spawn Gun Pickup
-        GameObject pickup_Missile = Instantiate(pickup_MissileObject, new Vector3(currentPlayerObject.transform.position.x,currentPlayerObject.transform.position.y,currentPlayerObject.transform.position.z), Quaternion.identity) as GameObject;
+        if(playerPartDropped){
+           //Spawn Gun Pickup
+            GameObject pickup_Missile = Instantiate(pickup_MissileObject, new Vector3(currentPlayerObject.transform.position.x,currentPlayerObject.transform.position.y,currentPlayerObject.transform.position.z), Quaternion.identity) as GameObject;
 
-        PickUpScript pickUpScript = pickup_Missile.GetComponent<PickUpScript>();
-        pickUpScript.Invoke("DropNewPickup", 0.01f);
-        pickUpScript.pickupType = 3;
-        pickUpScript.gunType = gunType;
+            PickUpScript pickUpScript = pickup_Missile.GetComponent<PickUpScript>();
+            pickUpScript.pickupType = 3;
+            pickUpScript.gunType = gunType;
+            pickUpScript.progress1 = temp_gun_progress1;
+            pickUpScript.progress2 = temp_gun_progress2;
+            pickUpScript.progressNum = temp_gun_progressNum;
+            pickUpScript.Invoke("DropNewPickup", 0.01f);
+        }
+        else{
+            cameraScript.m_Target = currentPlayerObject;
+            audio.clip = clip_dropPart;
+            audio.Play();
+
+            //Spawn Gun Pickup
+            GameObject pickup_Missile = Instantiate(pickup_MissileObject, new Vector3(currentPlayerObject.transform.position.x,currentPlayerObject.transform.position.y,currentPlayerObject.transform.position.z), Quaternion.identity) as GameObject;
+
+            PickUpScript pickUpScript = pickup_Missile.GetComponent<PickUpScript>();
+            pickUpScript.pickupType = 3;
+            pickUpScript.gunType = gunType;
+            pickUpScript.progress1 = temp_gun_progress1;
+            pickUpScript.progress2 = temp_gun_progress2;
+            pickUpScript.progressNum = temp_gun_progressNum;
+            pickUpScript.Invoke("DropNewPickup", 0.01f);
+        }
     }
     public void DropLaser(){
         hasGun = false;
         controlScript.Invoke("DisableGunArm", 0.1f);
-        cameraScript.m_Target = currentPlayerObject;
         playerHealthManager.Invoke("LoseLaserBeam", 0.1f);
-        audio.clip = clip_dropPart;
-        audio.Play();
 
-        //Spawn Gun Pickup
-        GameObject pickup_Laser = Instantiate(pickup_LaserObject, new Vector3(currentPlayerObject.transform.position.x,currentPlayerObject.transform.position.y,currentPlayerObject.transform.position.z), Quaternion.identity) as GameObject;
+        if(playerPartDropped){
+           //Spawn Gun Pickup
+            GameObject pickup_Laser = Instantiate(pickup_LaserObject, new Vector3(currentPlayerObject.transform.position.x,currentPlayerObject.transform.position.y,currentPlayerObject.transform.position.z), Quaternion.identity) as GameObject;
 
-        PickUpScript pickUpScript = pickup_Laser.GetComponent<PickUpScript>();
-        pickUpScript.Invoke("DropNewPickup", 0.01f);
-        pickUpScript.pickupType = 3;
-        pickUpScript.gunType = gunType;
+            PickUpScript pickUpScript = pickup_Laser.GetComponent<PickUpScript>();
+            pickUpScript.pickupType = 3;
+            pickUpScript.gunType = gunType;
+            pickUpScript.progress1 = temp_gun_progress1;
+            pickUpScript.progress2 = temp_gun_progress2;
+            pickUpScript.progressNum = temp_gun_progressNum;
+            pickUpScript.Invoke("DropNewPickup", 0.01f);
+        }
+        else{
+            cameraScript.m_Target = currentPlayerObject;
+            audio.clip = clip_dropPart;
+            audio.Play();
+
+            //Spawn Gun Pickup
+            GameObject pickup_Laser = Instantiate(pickup_LaserObject, new Vector3(currentPlayerObject.transform.position.x,currentPlayerObject.transform.position.y,currentPlayerObject.transform.position.z), Quaternion.identity) as GameObject;
+
+            PickUpScript pickUpScript = pickup_Laser.GetComponent<PickUpScript>();
+            pickUpScript.pickupType = 3;
+            pickUpScript.gunType = gunType;
+            pickUpScript.progress1 = temp_gun_progress1;
+            pickUpScript.progress2 = temp_gun_progress2;
+            pickUpScript.progressNum = temp_gun_progressNum;
+            pickUpScript.Invoke("DropNewPickup", 0.01f);
+        }
     }
     public void DropElectro(){
         hasGun = false;
         controlScript.Invoke("DisableGunArm", 0.1f);
-        cameraScript.m_Target = currentPlayerObject;
         playerHealthManager.Invoke("LoseAutoBlaster", 0.1f);
-        audio.clip = clip_dropPart;
-        audio.Play();
 
-        //Spawn Gun Pickup
-        GameObject pickup_Electro = Instantiate(pickup_ElectroObject, new Vector3(currentPlayerObject.transform.position.x,currentPlayerObject.transform.position.y,currentPlayerObject.transform.position.z), Quaternion.identity) as GameObject;
+        if(playerPartDropped){
+           //Spawn Gun Pickup
+            GameObject pickup_Electro = Instantiate(pickup_ElectroObject, new Vector3(currentPlayerObject.transform.position.x,currentPlayerObject.transform.position.y,currentPlayerObject.transform.position.z), Quaternion.identity) as GameObject;
 
-        PickUpScript pickUpScript = pickup_Electro.GetComponent<PickUpScript>();
-        pickUpScript.Invoke("DropNewPickup", 0.01f);
-        pickUpScript.pickupType = 3;
-        pickUpScript.gunType = gunType;
-    }
-
-    public void Death(){
-        isDead = true;
-        GameController.current.Invoke("InactivateEnemies", 0.01f);
-        audio.clip = clip_death;
-        audio.Play();
-        if(backedUp){
-            RebootBackup();
+            PickUpScript pickUpScript = pickup_Electro.GetComponent<PickUpScript>();
+            pickUpScript.pickupType = 3;
+            pickUpScript.gunType = gunType;
+            pickUpScript.progress1 = temp_gun_progress1;
+            pickUpScript.progress2 = temp_gun_progress2;
+            pickUpScript.progressNum = temp_gun_progressNum;
+            pickUpScript.Invoke("DropNewPickup", 0.01f);
         }
         else{
-            GameOver();
+            cameraScript.m_Target = currentPlayerObject;
+            audio.clip = clip_dropPart;
+            audio.Play();
+
+            //Spawn Gun Pickup
+            GameObject pickup_Electro = Instantiate(pickup_ElectroObject, new Vector3(currentPlayerObject.transform.position.x,currentPlayerObject.transform.position.y,currentPlayerObject.transform.position.z), Quaternion.identity) as GameObject;
+
+            PickUpScript pickUpScript = pickup_Electro.GetComponent<PickUpScript>();
+            pickUpScript.pickupType = 3;
+            pickUpScript.gunType = gunType;
+            pickUpScript.progress1 = temp_gun_progress1;
+            pickUpScript.progress2 = temp_gun_progress2;
+            pickUpScript.progressNum = temp_gun_progressNum;
+            pickUpScript.Invoke("DropNewPickup", 0.01f);
         }
-    }
-    public void GameOver(){
-        GameController.current.Invoke("GameOver", 0.01f);
     }
     
     public void DropBody(){
         hasBody = false;
+
         DestroyOldSelf();
         currentPlayerObject = Instantiate(player0_Prefab, spawnPosition, Quaternion.identity) as GameObject;
         TransferPlayerProperties();
         currentPlayerObject.transform.parent = transform;
         currentPlayerObject.transform.position = spawnPosition;
         cameraScript.m_Target = currentPlayerObject;
+
         audio.clip = clip_dropPart;
         audio.Play();
 
@@ -460,23 +585,45 @@ public class PlayerManager : MonoBehaviour
         GameObject pickup_Body = Instantiate(pickup_BodyObject, new Vector3(currentPlayerObject.transform.position.x,currentPlayerObject.transform.position.y,currentPlayerObject.transform.position.z), Quaternion.identity) as GameObject;
 
         PickUpScript pickUpScript = pickup_Body.GetComponent<PickUpScript>();
-        pickUpScript.Invoke("DropNewPickup", 0.01f);
         pickUpScript.pickupType = 1;
+        pickUpScript.progress1 = temp_body_progress1;
+        pickUpScript.progress2 = temp_body_progress2;
+        pickUpScript.progressNum = temp_body_progressNum;
+        pickUpScript.Invoke("DropNewPickup", 0.01f);
+
+        playerPartDropped = false;
     }
     public void DropDrill(){
         hasDrill = false;
         controlScript.Invoke("DisableDrillArm", 0.1f);
-        cameraScript.m_Target = currentPlayerObject;
         playerHealthManager.Invoke("LoseDrillArm", 0.1f);
-        audio.clip = clip_dropPart;
-        audio.Play();
 
-        //Spawn Drill Pickup
-        GameObject pickup_Drill = Instantiate(pickup_DrillObject, new Vector3(currentPlayerObject.transform.position.x,currentPlayerObject.transform.position.y,currentPlayerObject.transform.position.z), Quaternion.identity) as GameObject;
+        if(playerPartDropped){
+            //Spawn Drill Pickup
+            GameObject pickup_Drill = Instantiate(pickup_DrillObject, new Vector3(currentPlayerObject.transform.position.x,currentPlayerObject.transform.position.y,currentPlayerObject.transform.position.z), Quaternion.identity) as GameObject;
 
-        PickUpScript pickUpScript = pickup_Drill.GetComponent<PickUpScript>();
-        pickUpScript.Invoke("DropNewPickup", 0.01f);
-        pickUpScript.pickupType = 2;
+            PickUpScript pickUpScript = pickup_Drill.GetComponent<PickUpScript>();
+            pickUpScript.pickupType = 2;
+            pickUpScript.progress1 = temp_drill_progress1;
+            pickUpScript.progress2 = temp_drill_progress2;
+            pickUpScript.progressNum = temp_drill_progressNum;
+            pickUpScript.Invoke("DropNewPickup", 0.01f);
+        }
+        else{
+            cameraScript.m_Target = currentPlayerObject;
+            audio.clip = clip_dropPart;
+            audio.Play();
+
+            //Spawn Drill Pickup
+            GameObject pickup_Drill = Instantiate(pickup_DrillObject, new Vector3(currentPlayerObject.transform.position.x,currentPlayerObject.transform.position.y,currentPlayerObject.transform.position.z), Quaternion.identity) as GameObject;
+
+            PickUpScript pickUpScript = pickup_Drill.GetComponent<PickUpScript>();
+            pickUpScript.pickupType = 2;
+            pickUpScript.progress1 = temp_drill_progress1;
+            pickUpScript.progress2 = temp_drill_progress2;
+            pickUpScript.progressNum = temp_drill_progressNum;
+            pickUpScript.Invoke("DropNewPickup", 0.01f);
+        }
     }
 
 
@@ -492,68 +639,104 @@ public class PlayerManager : MonoBehaviour
 
     public void DropWorkerBoots(){
         hasLegs = false;
-        DestroyOldSelf();
-        currentPlayerObject = Instantiate(player1_Prefab, spawnPosition, Quaternion.identity) as GameObject;
-        TransferPlayerProperties();
-        currentPlayerObject.transform.parent = transform;
-        currentPlayerObject.transform.position = spawnPosition;
-        cameraScript.m_Target = currentPlayerObject;
-        audio.clip = clip_dropPart;
-        audio.Play();
-
-        GetColliderHeights();
-
         playerHealthManager.Invoke("LoseWorkerBoots", 0.1f);
+        Debug.Log("temps: " + temp_legs_progress1 + " : " + temp_legs_progress2 + " : " + temp_legs_progressNum);
+        if(playerPartDropped){
+             //Spawn Worker Boots Pickup
+            GameObject pickup_WorkerBoots = Instantiate(pickup_LegsObject, new Vector3(currentPlayerObject.transform.position.x,currentPlayerObject.transform.position.y,currentPlayerObject.transform.position.z), Quaternion.identity) as GameObject;
 
-        if(hasDrill){
-            controlScript.Invoke("EnableDrillArm", 0.1f);
+            PickUpScript pickUpScript = pickup_WorkerBoots.GetComponent<PickUpScript>();
+            pickUpScript.pickupType = 4;
+            pickUpScript.legType = 0;
+            pickUpScript.progress1 = temp_legs_progress1;
+            pickUpScript.progress2 = temp_legs_progress2;
+            pickUpScript.progressNum = temp_legs_progressNum;
+            pickUpScript.Invoke("DropNewPickup", 0.01f);
         }
-        if(hasGun){
-            controlScript.Invoke("EnableGunArm", 0.1f);
+        else{
+            DestroyOldSelf();
+            currentPlayerObject = Instantiate(player1_Prefab, spawnPosition, Quaternion.identity) as GameObject;
+            TransferPlayerProperties();
+            currentPlayerObject.transform.parent = transform;
+            currentPlayerObject.transform.position = spawnPosition;
+            cameraScript.m_Target = currentPlayerObject;
+
+            GetColliderHeights();
+
+            GameController.current.Invoke("ResetEnemyPlayerObjects", 0.01f);
+
+            //Spawn Worker Boots Pickup
+            GameObject pickup_WorkerBoots = Instantiate(pickup_LegsObject, new Vector3(currentPlayerObject.transform.position.x,currentPlayerObject.transform.position.y,currentPlayerObject.transform.position.z), Quaternion.identity) as GameObject;
+
+            PickUpScript pickUpScript = pickup_WorkerBoots.GetComponent<PickUpScript>();
+            pickUpScript.pickupType = 4;
+            pickUpScript.legType = 0;
+            pickUpScript.progress1 = temp_legs_progress1;
+            pickUpScript.progress2 = temp_legs_progress2;
+            pickUpScript.progressNum = temp_legs_progressNum;
+            pickUpScript.Invoke("DropNewPickup", 0.01f);
+
+            if(hasDrill){
+                controlScript.Invoke("EnableDrillArm", 0.1f);
+            }
+            if(hasGun){
+                controlScript.Invoke("EnableGunArm", 0.1f);
+            }
+
+            audio.clip = clip_dropPart;
+            audio.Play();
         }
-
-        GameController.current.Invoke("ResetEnemyPlayerObjects", 0.01f);
-
-
-        //Spawn Legs Pickup
-        GameObject pickup_Legs = Instantiate(pickup_LegsObject, new Vector3(currentPlayerObject.transform.position.x,currentPlayerObject.transform.position.y,currentPlayerObject.transform.position.z), Quaternion.identity) as GameObject;
-
-        PickUpScript pickUpScript = pickup_Legs.GetComponent<PickUpScript>();
-        pickUpScript.Invoke("DropNewPickup", 0.01f);
-        pickUpScript.pickupType = 4;
     }
 
     public void DropJumpBoots(){
         hasLegs = false;
-        DestroyOldSelf();
-        currentPlayerObject = Instantiate(player1_Prefab, spawnPosition, Quaternion.identity) as GameObject;
-        TransferPlayerProperties();
-        currentPlayerObject.transform.parent = transform;
-        currentPlayerObject.transform.position = spawnPosition;
-        cameraScript.m_Target = currentPlayerObject;
-        audio.clip = clip_dropPart;
-        audio.Play();
-
-        GetColliderHeights();
-
         playerHealthManager.Invoke("LoseJumpBoots", 0.1f);
 
-        if(hasDrill){
+        if(playerPartDropped){
+            //Spawn Jump Boots Pickup
+            GameObject pickup_JumpBoots= Instantiate(pickup_LegsJumpObject, new Vector3(currentPlayerObject.transform.position.x,currentPlayerObject.transform.position.y,currentPlayerObject.transform.position.z), Quaternion.identity) as GameObject;
+
+            PickUpScript pickUpScript = pickup_JumpBoots.GetComponent<PickUpScript>();
+            pickUpScript.pickupType = 4;
+            pickUpScript.legType = 1;
+            pickUpScript.progress1 = temp_legs_progress1;
+            pickUpScript.progress2 = temp_legs_progress2;
+            pickUpScript.progressNum = temp_legs_progressNum;
+            pickUpScript.Invoke("DropNewPickup", 0.01f);
+        }
+        else{
+            DestroyOldSelf();
+            currentPlayerObject = Instantiate(player1_Prefab, spawnPosition, Quaternion.identity) as GameObject;
+            TransferPlayerProperties();
+            currentPlayerObject.transform.parent = transform;
+            currentPlayerObject.transform.position = spawnPosition;
+            cameraScript.m_Target = currentPlayerObject;
+
+            GetColliderHeights();
+
+            GameController.current.Invoke("ResetEnemyPlayerObjects", 0.01f);
+
+            if(hasDrill){
             controlScript.Invoke("EnableDrillArm", 0.1f);
+            }
+            if(hasGun){
+                controlScript.Invoke("EnableGunArm", 0.1f);
+            }
+
+            //Spawn Jump Boots Pickup
+            GameObject pickup_JumpBoots = Instantiate(pickup_LegsJumpObject, new Vector3(currentPlayerObject.transform.position.x,currentPlayerObject.transform.position.y,currentPlayerObject.transform.position.z), Quaternion.identity) as GameObject;
+
+            PickUpScript pickUpScript = pickup_JumpBoots.GetComponent<PickUpScript>();
+            pickUpScript.pickupType = 4;
+            pickUpScript.legType = 1;
+            pickUpScript.progress1 = temp_legs_progress1;
+            pickUpScript.progress2 = temp_legs_progress2;
+            pickUpScript.progressNum = temp_legs_progressNum;
+            pickUpScript.Invoke("DropNewPickup", 0.01f);
+
+            audio.clip = clip_dropPart;
+            audio.Play();
         }
-        if(hasGun){
-            controlScript.Invoke("EnableGunArm", 0.1f);
-        }
-
-        GameController.current.Invoke("ResetEnemyPlayerObjects", 0.01f);
-
-        //Spawn Jump Boots Pickup
-        GameObject pickup_JumpBoots= Instantiate(pickup_LegsJumpObject, new Vector3(currentPlayerObject.transform.position.x,currentPlayerObject.transform.position.y,currentPlayerObject.transform.position.z), Quaternion.identity) as GameObject;
-
-        PickUpScript pickUpScript = pickup_JumpBoots.GetComponent<PickUpScript>();
-        pickUpScript.Invoke("DropNewPickup", 0.01f);
-        pickUpScript.pickupType = 4;
-        pickUpScript.legType = 1;
     }
 
     //Switching Guns
@@ -626,7 +809,22 @@ public class PlayerManager : MonoBehaviour
         PickupJumpBoots();
     }
 
-
+    public void Death(){
+        isDead = true;
+        GameController.current.Invoke("InactivateEnemies", 0.01f);
+        audio.clip = clip_death;
+        audio.Play();
+        if(backedUp){
+            RebootBackup();
+        }
+        else{
+            GameOver();
+        }
+    }
+    public void GameOver(){
+        Destroy(currentPlayerObject);
+        GameController.current.Invoke("GameOver", 0.01f);
+    }
 
     public void TakeHit(){
         if(!isHit && !isDead){
@@ -701,7 +899,6 @@ public class PlayerManager : MonoBehaviour
         backupSceneName = scene.name;
         GameObject sceneInit = GameObject.Find("SceneInit");
         SceneInit sceneInitScript = sceneInit.GetComponent<SceneInit>();
-        Debug.Log("Backed up on: " + backupSceneName);
     }
 
     public void TransferPlayerProperties(){

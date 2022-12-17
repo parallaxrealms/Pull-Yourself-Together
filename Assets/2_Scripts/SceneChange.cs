@@ -9,6 +9,8 @@ public class SceneChange : MonoBehaviour
     public string sceneToName;
     public string playerWalkDirection;
 
+    public bool triggered = false;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -23,10 +25,15 @@ public class SceneChange : MonoBehaviour
 
     private void OnTriggerEnter(Collider other) {
         if(other.gameObject.tag == "Player"){
-            PlayerManager.current.sceneDirection = playerWalkDirection;
-            GameController.current.sceneChangeName = sceneToName;
-            GameController.current.triggerSpawnName = triggerConnectionName;
-            GameController.current.Invoke("TransitionToSceneChange", 0.01f);
+            if(!triggered){
+                GameController.current.Invoke("SetCurrentScenePos", 0.01f);
+                PlayerManager.current.sceneDirection = playerWalkDirection;
+                GameController.current.sceneChangeName = sceneToName;
+                GameController.current.triggerSpawnName = triggerConnectionName;
+                ObjectManager.current.Invoke("SaveCurrentObjects",0.1f);
+                MenuManager.current.Invoke("ChangeSceneTo", 0.01f);
+                triggered = true;
+            }
         }
     }
 

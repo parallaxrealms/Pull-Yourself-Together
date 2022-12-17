@@ -30,7 +30,7 @@ public class CrystalScript : MonoBehaviour
 
     public Vector3 drillPos;
 
-    public float chunkSpawnTimer = 0.05f;
+    public float chunkSpawnTimer = 0.1f;
     public bool chunkSpawned = false;
 
     // Start is called before the first frame update
@@ -46,10 +46,10 @@ public class CrystalScript : MonoBehaviour
         chunkSpawnPos = new Vector3(chunkSpawnOrigin.transform.position.x,chunkSpawnOrigin.transform.position.y,chunkSpawnOrigin.transform.position.z);
 
         if(size == 0){
-            numOfChunks = 4;
+            numOfChunks = 3;
         }
         else if(size == 1){
-            numOfChunks = 8;
+            numOfChunks = 6;
         }
     }
 
@@ -74,12 +74,11 @@ public class CrystalScript : MonoBehaviour
                 }
                 else{
                     SpawnChunks();
-                    chunkSpawnTimer = .05f;
+                    chunkSpawnTimer = 0.1f;
                 }
             }
             else{
                 chunkSpawned = false;
-                DestroySelf();
             }
         }
     }
@@ -118,8 +117,8 @@ public class CrystalScript : MonoBehaviour
     }
 
     private void CrystalDestroyed(){
+        anim.SetBool("Break", true);
         chunkSpawned = true;
-        spriteRend.enabled = false;
         collider.enabled = false;
     }
 

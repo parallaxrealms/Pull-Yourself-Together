@@ -23,7 +23,7 @@ public class DoorTriggeredScript : MonoBehaviour
 
     public bool isTriggered = false;
     public bool closeTriggered = false;
-    public bool staysOpen = false;
+    public bool staysOpen = true;
 
     public float doorMoveSpeed = 1.0f;
     public float doorOpenTimer = 5.0f;
@@ -55,23 +55,7 @@ public class DoorTriggeredScript : MonoBehaviour
             }
             else{
                 isTriggered = false;
-                if(!staysOpen){
-                    closeTriggered = true;
-                    triggerScript.Invoke("CloseDoor",0.01f);
-                }
                 doorOpenTimer = 5.0f;
-            }
-        }
-
-        if(closeTriggered){
-            if(doorClosedTimer > 0){
-                doorClosedTimer -= Time.deltaTime;
-                doorSlide.transform.Translate(new Vector3(0f,-doorMoveSpeed,0f) * Time.deltaTime, Space.World);
-            }
-            else{
-                closeTriggered = false;
-                doorClosedTimer = 5.0f;
-                triggerScript.Invoke("ResetTrigger",0.01f);
             }
         }
     }

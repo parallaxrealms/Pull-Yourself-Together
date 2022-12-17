@@ -397,7 +397,6 @@ public class LostBotScript : MonoBehaviour
         smokeParticles.Stop();
     }
 
-
     private void OnTriggerEnter(Collider other) {
         if(other.gameObject.tag == "Player_Bullet"){
             if(!isHit){
@@ -406,14 +405,6 @@ public class LostBotScript : MonoBehaviour
                     damageTaken = bulletScript.damage;
                     TakeHit();
                 }
-            }
-        }
-        if(other.gameObject.tag == "Player_Electro"){
-            if(!isHit){
-                BulletPhysics bulletScript = other.gameObject.GetComponent<BulletPhysics>();
-                damageTaken = bulletScript.damage;
-                TakeHit();
-                Shock();
             }
         }
     }

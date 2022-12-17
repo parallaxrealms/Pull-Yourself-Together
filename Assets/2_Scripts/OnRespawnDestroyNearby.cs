@@ -5,8 +5,7 @@ using UnityEngine;
 public class OnRespawnDestroyNearby : MonoBehaviour
 {
     public bool destroyTimerOn = false;
-    public float destroyTimer = 1.0f;
-
+    public float destroyTimer = 2.0f;
 
     // Start is called before the first frame update
     void Start()
@@ -29,17 +28,23 @@ public class OnRespawnDestroyNearby : MonoBehaviour
     }
 
     private void OnTriggerEnter(Collider other) {
-        if(other.gameObject.tag == "Interactable_Bot"){
-            destroyTimerOn = false;
-            PickUpScript pickupScript = other.gameObject.GetComponent<PickUpScript>();
-            pickupScript.Invoke("DestroySelf", 0.1f);
-            DestroySelf();
+        if(gameObject.tag == "Player"){
+            if(other.gameObject.tag == "Interactable_Bot"){
+                Debug.Log("Destroyed Bot Head");
+                destroyTimerOn = false;
+                PickUpScript pickupScript = other.gameObject.GetComponent<PickUpScript>();
+                pickupScript.Invoke("DestroySelf", 0.1f);
+                DestroySelf();
+            }
         }
-        if(other.gameObject.tag == "Enemy"){
-            destroyTimerOn = false;
-            LostBotScript lostBotScript = other.gameObject.GetComponent<LostBotScript>();
-            lostBotScript.Invoke("DeathOnRespawn", 0.1f);
-            DestroySelf();
+        else if(gameObject.tag == "Respawn"){
+            if(other.gameObject.tag == "Enemy"){
+                Debug.Log("trigger2 " + other.gameObject.name);
+                destroyTimerOn = false;
+                LostBotScript lostBotScript = other.gameObject.GetComponent<LostBotScript>();
+                lostBotScript.Invoke("DestroySelf", 0.1f);
+                DestroySelf();
+            }
         }
     }
 

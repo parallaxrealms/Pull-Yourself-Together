@@ -89,21 +89,6 @@ public class DoorHitTrigger : MonoBehaviour
         }
     }
 
-    private void CloseDoor(){
-        if(parentScript.doorType == 0){
-            spriteRend.sprite = coriteRend;
-        }
-        if(parentScript.doorType == 1){
-            spriteRend.sprite = velriteRend;
-        }
-        if(parentScript.doorType == 2){
-            spriteRend.sprite = nymriteRend;
-        }
-        if(parentScript.doorType == 3){
-            spriteRend.sprite = zyriteRend;
-        }
-    }
-
     public void ResetTrigger(){
         collider.enabled = true;
         triggerLight.SetActive(true);

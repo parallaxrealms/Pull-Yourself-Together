@@ -7,7 +7,7 @@ public class InteractableScript : MonoBehaviour
     private GameObject parentObject;
     private PickUpScript pickUpScript;
 
-    public float spawnTimer = 1.0f;
+    public float spawnTimer = .7f;
     public bool isSpawning = true;
 
     // Start is called before the first frame update
@@ -31,12 +31,12 @@ public class InteractableScript : MonoBehaviour
             }
             else{
                 isSpawning = false;
-                spawnTimer = 1.0f;
+                spawnTimer = .7f;
             }
         }
     }
 
-    private void OnTriggerEnter(Collider other) {
+    private void OnTriggerStay(Collider other) {
         if(!isSpawning){
             if(other.gameObject.tag == "Player"){
                 if(pickUpScript.pickupType == 1){ //If this pickup is Body
@@ -47,9 +47,7 @@ public class InteractableScript : MonoBehaviour
                             pickUpScript.Invoke("DrawOutline", 0.1f);
                         }
                         else{
-                            pickUpScript.activated = true;
-                            pickUpScript.Invoke("SwitchText", 0.01f);
-                            pickUpScript.Invoke("DrawOutline", 0.1f);
+                            pickUpScript.Invoke("EraseOutline", 0.1f);
                         }
                     }
                 }
@@ -61,9 +59,7 @@ public class InteractableScript : MonoBehaviour
                             pickUpScript.Invoke("DrawOutline", 0.1f);
                         }
                         else{
-                            pickUpScript.activated = true;
-                            pickUpScript.Invoke("SwitchText", 0.01f);
-                            pickUpScript.Invoke("DrawOutline", 0.1f);
+                            pickUpScript.Invoke("EraseOutline", 0.1f);
                         }
                     }
                 }
@@ -75,9 +71,14 @@ public class InteractableScript : MonoBehaviour
                             pickUpScript.Invoke("DrawOutline", 0.1f);
                         }
                         else{
-                            pickUpScript.activated = true;
-                            pickUpScript.Invoke("SwitchText", 0.01f);
-                            pickUpScript.Invoke("DrawOutline", 0.1f);
+                            if(pickUpScript.gunType != PlayerManager.current.gunType){
+                                pickUpScript.activated = true;
+                                pickUpScript.Invoke("DefaultText", 0.01f);
+                                pickUpScript.Invoke("DrawOutline", 0.1f);
+                            }
+                            else{
+                                pickUpScript.Invoke("EraseOutline", 0.1f);
+                            }
                         }
                     }
                 }
@@ -89,9 +90,12 @@ public class InteractableScript : MonoBehaviour
                             pickUpScript.Invoke("DrawOutline", 0.1f);
                         }
                         else{
-                            pickUpScript.activated = true;
-                            pickUpScript.Invoke("SwitchText", 0.01f);
-                            pickUpScript.Invoke("DrawOutline", 0.1f);
+                            if(pickUpScript.legType != PlayerManager.current.legType){
+                                pickUpScript.activated = true;
+
+                                pickUpScript.Invoke("DefaultText", 0.01f);
+                                pickUpScript.Invoke("DrawOutline", 0.1f);
+                            }
                         }
                     }
                 }

@@ -5,6 +5,10 @@ using UnityEngine.UI;
 
 public class UI_CrystalManager : MonoBehaviour
 {
+    public int temp_corite;
+    public int temp_velrite;
+    public int temp_nymrite;
+    public int temp_zyrite;
 
     public GameObject UIObject_Corite;
     public SpriteRenderer rend_Corite;
@@ -81,6 +85,7 @@ public class UI_CrystalManager : MonoBehaviour
 
     public void ShowCrystalUITemp(){
         timerEnabled = true;
+        timer = 4f;
         SyncCrystals();
         ShowCrystalUI();
     }
@@ -161,5 +166,30 @@ public class UI_CrystalManager : MonoBehaviour
             rend_Zyrite.sprite = UIObject_ZyriteInactive;
         }
         text_num_Zyrite.text = PlayerManager.current.numOfZyrite.ToString();
+    }
+
+    public void SubtractFromUpgrading(){
+        PlayerManager.current.numOfCorite -= temp_corite;
+        if(PlayerManager.current.numOfCorite < 1){
+            rend_Corite.sprite = UIObject_CoriteInactive;
+        }
+        PlayerManager.current.numOfVelrite -= temp_velrite;
+        if(PlayerManager.current.numOfVelrite < 1){
+            rend_Velrite.sprite = UIObject_VelriteInactive;
+        }
+        PlayerManager.current.numOfNymrite -= temp_nymrite;
+        if(PlayerManager.current.numOfNymrite < 1){
+            rend_Nymrite.sprite = UIObject_NymriteInactive;
+        }
+        PlayerManager.current.numOfZyrite -= temp_zyrite;
+        if(PlayerManager.current.numOfZyrite < 1){
+            rend_Zyrite.sprite = UIObject_ZyriteInactive;
+        }
+        ShowCrystalUITemp();
+
+        temp_corite = 0;
+        temp_velrite = 0;
+        temp_nymrite = 0;
+        temp_zyrite = 0;
     }
 }

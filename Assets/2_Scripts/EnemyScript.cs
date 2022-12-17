@@ -52,17 +52,17 @@ public class EnemyScript : MonoBehaviour
     public float aggroResetTimer;
     public float detectionRadius;
 
-
-    // Start is called before the first frame update
-    void Start()
-    {
+    void Awake(){
         if(enemyName == "Worm" || enemyName == "Green Worm"){
             GameController.current.ListWorms.Add(gameObject);
         }
         if(enemyName == "Buzzer"  || enemyName == "Red Buzzer"){
             GameController.current.ListBuzzers.Add(gameObject);
         }
-
+    }
+    // Start is called before the first frame update
+    void Start()
+    {
         anim = GetComponent<Animator>();
         collider = GetComponent<BoxCollider>();
         spriteRend = GetComponent<SpriteRenderer>();
