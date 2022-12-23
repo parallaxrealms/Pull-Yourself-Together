@@ -120,6 +120,21 @@ public class UI_Parts : MonoBehaviour
         }
     }
 
+    public void TriggerAllPartsDrop(){
+        if(PlayerManager.current.hasLegs){
+            legsPartScript.Invoke("DropPart", 0.01f);
+        }
+        if(PlayerManager.current.hasDrill){
+            rightArmScript.Invoke("DropPart", 0.01f);
+        }
+        if(PlayerManager.current.hasGun){
+            leftArmScript.Invoke("DropPart", 0.01f);
+        }
+        if(PlayerManager.current.hasBody){
+            bodyPartScript.Invoke("DropPart", 0.01f);
+        }
+    }
+
     public void GainWorkerHead(){
         headPartScript.progress1 = temp_progress1;
         headPartScript.progress2 = temp_progress2;

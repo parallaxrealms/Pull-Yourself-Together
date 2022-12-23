@@ -198,6 +198,8 @@ public class MenuManager : MonoBehaviour
         mainMenuScreen.SetActive(true);
         gameOverScreen.SetActive(false);
         menuState = 1;
+        AudioManager.current.currentTrackNum = 1;
+        AudioManager.current.PlayMusicTrack();
     }
     public void GameOver(){
         FadeFromBlack();

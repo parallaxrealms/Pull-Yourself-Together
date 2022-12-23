@@ -72,6 +72,22 @@ public class DoorHitTrigger : MonoBehaviour
                 triggerLight.SetActive(false);
             }
         }
+        if(other.gameObject.tag == "MissileAOE"){
+            MissileAOE missileAOEscript = other.gameObject.GetComponent<MissileAOE>();
+
+            if(parentScript.doorType == 0){
+                parentScript.Invoke("OpenDoor", 0.01f);
+                OpenDoor();
+                collider.enabled = false;
+                triggerLight.SetActive(false);
+            }
+            else if(parentScript.doorType == missileAOEscript.bulletType){
+                parentScript.Invoke("OpenDoor", 0.01f);
+                OpenDoor();
+                collider.enabled = false;
+                triggerLight.SetActive(false);
+            }
+        }
     }
 
     private void OpenDoor(){

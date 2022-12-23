@@ -19,9 +19,12 @@ public class UI_Part_Select : MonoBehaviour
     public GameObject windowInfo;
     public UI_Window_Part windowInfoScript;
     private Vector3 windowPos;
+    private Vector3 windowClosedPos;
     public bool windowOpen;
 
-    public GameObject newWindowInfoObject;
+    public GameObject windowInfo_type1;
+    public GameObject windowInfo_type2;
+    public GameObject windowInfo_type3;
 
     public Sprite bg_active;
     public Sprite bg_inactive;
@@ -29,7 +32,6 @@ public class UI_Part_Select : MonoBehaviour
     public bool partEnabled;
 
     public GameObject activeHeldObject;
-    public GameObject newActiveHeldObject;
     public SpriteRenderer objectSprite;
     public Sprite object1;
     public Sprite object2;
@@ -51,13 +53,14 @@ public class UI_Part_Select : MonoBehaviour
         spriteRend = GetComponent<SpriteRenderer>(); 
 
         objectSprite = activeHeldObject.GetComponent<SpriteRenderer>();
+        windowClosedPos = new Vector3(0,-100f,0);
 
         windowInfo = Instantiate(windowInfoObject, new Vector3(0,0,0), Quaternion.identity) as GameObject;
         windowPos = new Vector3(5.5f,0f,-1f);
         windowInfo.transform.parent = transform;
         windowInfo.transform.localPosition = windowPos;
         windowInfoScript = windowInfo.GetComponent<UI_Window_Part>();
-        windowInfo.SetActive(false);
+        windowInfo.transform.position = windowClosedPos;
 
         if(partType == 0){
             partEnabled = true;
@@ -84,55 +87,56 @@ public class UI_Part_Select : MonoBehaviour
         
     }
 
-    public void ResetNewPart(){
-        //Change window based on new object picked up
+    private void ResetPart(){
+        Debug.Log("ResetPart IS CALLED");
 
-        //Check upgrade nums
+        Destroy(windowInfo);
+        windowInfo = null;
         
-        activeHeldObject = newActiveHeldObject;
         objectSprite = activeHeldObject.GetComponent<SpriteRenderer>();
 
-        windowInfoObject = newWindowInfoObject;
+        if(partType == 3){//Guns
+            if(partSubType == 0){
+                objectSprite.sprite = object1;
+                windowInfoObject = windowInfo_type1;
+            }
+            if(partSubType == 1){
+                objectSprite.sprite = object2;
+                windowInfoObject = windowInfo_type2;
+            }
+            if(partSubType == 2){
+                objectSprite.sprite = object3;
+                windowInfoObject = windowInfo_type3;
+            }
+        }
+        if(partType == 4){//Legs
+            if(partSubType == 0){
+                objectSprite.sprite = object1;
+                windowInfoObject = windowInfo_type1;
+            }
+            if(partSubType == 1){
+                objectSprite.sprite = object2;
+                windowInfoObject = windowInfo_type2;
+            }
+        }
 
         windowInfo = Instantiate(windowInfoObject, new Vector3(0,0,0), Quaternion.identity) as GameObject;
         windowPos = new Vector3(5.5f,0f,-1f);
         windowInfo.transform.parent = transform;
-        windowInfo.transform.localPosition = windowPos;
+        windowInfo.transform.localPosition = windowClosedPos;
         windowInfoScript = windowInfo.GetComponent<UI_Window_Part>();
-        windowInfo.SetActive(false);
+
+        windowInfoScript.Invoke("SetCurrentPartProperties",0);
 
         partEnabled = true;
-        if(windowInfoScript.partType == 3){ //Guns
-            if(windowInfoScript.subType == 0){ //Blaster
-                objectSprite.sprite = object1;
-            }
-            else if(windowInfoScript.subType == 1){ //Missile
-                objectSprite.sprite = object2;
-            }
-            else if(windowInfoScript.subType == 2){ //Beam
-                objectSprite.sprite = object3;
-            }
-        }
-        if(windowInfoScript.partType == 4){ //Legs
-            if(windowInfoScript.subType == 0){ //Worker
-                objectSprite.sprite = object1;
-            }
-            else if(windowInfoScript.subType == 1){ //Jump
-                objectSprite.sprite = object2;
-            }
-        }
 
-        if(windowInfoScript.partType == 0){
-            buttonSpriteRend = selfDButton.GetComponent<SpriteRenderer>();
-            buttonCollider = selfDButton.GetComponent<BoxCollider>();
-            buttonScript = selfDButton.GetComponent<PartButtonScript>();
-            disablePartUI();
-        }
-        else{
+        if(partType != 0){
             buttonSpriteRend = dropButton.GetComponent<SpriteRenderer>();
             buttonCollider = dropButton.GetComponent<BoxCollider>();
             buttonScript = dropButton.GetComponent<PartButtonScript>();
-            disablePartUI();
+        }
+        if(windowOpen){
+            CloseWindow(); 
         }
     }
 
@@ -160,7 +164,6 @@ public class UI_Part_Select : MonoBehaviour
     }
 
     public void DropPart(){
-        Debug.Log("DropPart: " + progress1 + " : " + progress2 + " : " + progressNum);
         TransferPartProperties();
         DropPartDisableUI();
         if(partType == 0){//Head
@@ -196,30 +199,27 @@ public class UI_Part_Select : MonoBehaviour
     }
 
     public void TransferPartProperties(){
+        Debug.Log("UI_Part_Select TransferPartProperties");
         progressNum = progress1 + progress2;
         if(partType == 1){
             PlayerManager.current.temp_body_progress1 = progress1;
             PlayerManager.current.temp_body_progress2 = progress2;
             PlayerManager.current.temp_body_progressNum = progressNum;
-            Debug.Log("body: " + PlayerManager.current.temp_body_progress1 + " : " + PlayerManager.current.temp_body_progress2 + " : " + PlayerManager.current.temp_body_progressNum);
         }
         if(partType == 2){
             PlayerManager.current.temp_drill_progress1 = progress1;
             PlayerManager.current.temp_drill_progress2 = progress2;
             PlayerManager.current.temp_drill_progressNum = progressNum;
-            Debug.Log("drill: " + PlayerManager.current.temp_drill_progress1 + " : " + PlayerManager.current.temp_drill_progress2 + " : " + PlayerManager.current.temp_drill_progressNum);
         }
         if(partType == 3){
             PlayerManager.current.temp_gun_progress1 = progress1;
             PlayerManager.current.temp_gun_progress2 = progress2;
             PlayerManager.current.temp_gun_progressNum = progressNum;
-            Debug.Log("gun: " + PlayerManager.current.temp_gun_progress1 + " : " + PlayerManager.current.temp_gun_progress2 + " : " + PlayerManager.current.temp_gun_progressNum);
         }
         if(partType == 4){
             PlayerManager.current.temp_legs_progress1 = progress1;
             PlayerManager.current.temp_legs_progress2 = progress2;
             PlayerManager.current.temp_legs_progressNum = progressNum;
-            Debug.Log("legs: " + PlayerManager.current.temp_legs_progress1 + " : " + PlayerManager.current.temp_legs_progress2 + " : " + PlayerManager.current.temp_legs_progressNum);
         }
     }
 
@@ -252,6 +252,7 @@ public class UI_Part_Select : MonoBehaviour
     }
     public void GainBlaster(){
         partEnabled = true;
+        partSubType = 0;
         objectSprite.sprite = object1;
         if(partType != 0){
             dropButton.SetActive(true);
@@ -259,9 +260,11 @@ public class UI_Part_Select : MonoBehaviour
         if(parentScript.isEnabled){
             enablePartUI();
         }
+        ResetPart();
     }
     public void GainMissileLauncher(){
         partEnabled = true;
+        partSubType = 1;
         objectSprite.sprite = object2;
         if(partType != 0){
             dropButton.SetActive(true);
@@ -269,9 +272,11 @@ public class UI_Part_Select : MonoBehaviour
         if(parentScript.isEnabled){
             enablePartUI();
         }
+        ResetPart();
     }
     public void GainLaserBeam(){
         partEnabled = true;
+        partSubType = 2;
         objectSprite.sprite = object3;
         if(partType != 0){
             dropButton.SetActive(true);
@@ -279,9 +284,11 @@ public class UI_Part_Select : MonoBehaviour
         if(parentScript.isEnabled){
             enablePartUI();
         }
+        ResetPart();
     }
     public void GainWorkerBoots(){
         partEnabled = true;
+        partSubType = 0;
         objectSprite.sprite = object1;
         if(partType != 0){
             dropButton.SetActive(true);
@@ -289,9 +296,11 @@ public class UI_Part_Select : MonoBehaviour
         if(parentScript.isEnabled){
             enablePartUI();
         }
+        ResetPart();
     }
     public void GainJumpBoots(){
         partEnabled = true;
+        partSubType = 1;
         objectSprite.sprite = object2;
         if(partType != 0){
             dropButton.SetActive(true);
@@ -299,6 +308,7 @@ public class UI_Part_Select : MonoBehaviour
         if(parentScript.isEnabled){
             enablePartUI();
         }
+        ResetPart();
     }
 
     public void DropPartDisableUI(){
@@ -314,19 +324,20 @@ public class UI_Part_Select : MonoBehaviour
     }
 
     public void OpenWindow(){
-        windowInfo.SetActive(true);
+        Debug.Log("openWindow");
+        windowInfo.transform.localPosition = windowPos;
         windowInfoScript.Invoke("Reset",0.01f);
         windowOpen = true;
     }
 
     public void CloseWindow(){
         if(windowOpen){
-            windowInfo.SetActive(false);
+            windowInfo.transform.localPosition = windowClosedPos;
             windowOpen = false;
         }
         Invoke("turnMouseOverOffDelayed",0.2f);
     }
-    void turnMouseOverOffDelayed(){
+    public void turnMouseOverOffDelayed(){
         MenuManager.current.isMouseOver = false;
     }
 

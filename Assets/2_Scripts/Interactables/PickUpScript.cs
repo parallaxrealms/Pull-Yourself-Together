@@ -47,7 +47,7 @@ public class PickUpScript : MonoBehaviour
     public int pickupType = 0;//0=Head, 1=Body, 2=Drill, 3=Gun, 4=Legs, 9=BackupPoint
 
     public int gunType;//0=Bullet, 1=Missile, 2=Laser, 3=EMP
-    public int drillType;//0=Weak, 1=Sturdy, 2=Extended
+    public int drillType;//0=Weak
     public int bodyType;//0=worker body, 1=soldier body
     public int legType;//0=worker boots, 1=jump boots
 
@@ -134,9 +134,6 @@ public class PickUpScript : MonoBehaviour
                 }
                 if(pickupType == 1){
                     if(!PlayerManager.current.hasBody){
-                        PlayerManager.current.temp_body_progress1 = progress1;
-                        PlayerManager.current.temp_body_progress2 = progress2;
-                        PlayerManager.current.temp_body_progressNum = progressNum;
                         PlayerManager.current.Invoke("PickupBody",0.1f);
                         DestroySelf();
                     }
@@ -146,9 +143,6 @@ public class PickUpScript : MonoBehaviour
                 }
                 else if(pickupType == 2){
                     if(!PlayerManager.current.hasDrill){
-                        PlayerManager.current.temp_drill_progress1 = progress1;
-                        PlayerManager.current.temp_drill_progress2 = progress2;
-                        PlayerManager.current.temp_drill_progressNum = progressNum;
                         PlayerManager.current.Invoke("PickupDrill",0.1f);
                         DestroySelf();
                     }
@@ -158,15 +152,15 @@ public class PickUpScript : MonoBehaviour
                 }
                 else if(pickupType == 3){ //Guns
                     if(PlayerManager.current.hasGun){
-                        DestroySelf();
+                        PlayerManager.current.currentPickup_progress1 = progress1;
+                        PlayerManager.current.currentPickup_progress2 = progress2;
+                        Debug.Log("Step1: progress1 = " + progress1);
+                        Debug.Log("Step1: progress2 = " + progress2);
                         if(gunType == 0){   //Blaster
                             if(PlayerManager.current.gunType == 0){
                                 //Repair Gun
                             }
                             else{
-                                PlayerManager.current.temp_gun_progress1 = progress1;
-                                PlayerManager.current.temp_gun_progress2 = progress2;
-                                PlayerManager.current.temp_gun_progressNum = progressNum;
                                 PlayerManager.current.Invoke("SwitchToBlaster",0.1f);
                             }
                         }
@@ -175,9 +169,6 @@ public class PickUpScript : MonoBehaviour
                                 //Repair Gun
                             }
                             else{
-                                PlayerManager.current.temp_gun_progress1 = progress1;
-                                PlayerManager.current.temp_gun_progress2 = progress2;
-                                PlayerManager.current.temp_gun_progressNum = progressNum;
                                 PlayerManager.current.Invoke("SwitchToMissile",0.1f);
                             }
                         }
@@ -186,9 +177,6 @@ public class PickUpScript : MonoBehaviour
                                 //Repair Gun
                             }
                             else{
-                                PlayerManager.current.temp_gun_progress1 = progress1;
-                                PlayerManager.current.temp_gun_progress2 = progress2;
-                                PlayerManager.current.temp_gun_progressNum = progressNum;
                                 PlayerManager.current.Invoke("SwitchToLaser",0.1f);
                             }
                         }
@@ -197,69 +185,44 @@ public class PickUpScript : MonoBehaviour
                                 //Repair Gun
                             }
                             else{
-                                PlayerManager.current.temp_gun_progress1 = progress1;
-                                PlayerManager.current.temp_gun_progress2 = progress2;
-                                PlayerManager.current.temp_gun_progressNum = progressNum;
                                 PlayerManager.current.Invoke("SwitchToElectro",0.1f);
                             }
                         }
+                        DestroySelf();
                     }
                     else{
-                        DestroySelf();
+                        PlayerManager.current.currentPickup_progress1 = progress1;
+                        PlayerManager.current.currentPickup_progress2 = progress2;
+                        Debug.Log("Step1: progress1 = " + progress1);
+                        Debug.Log("Step1: progress2 = " + progress2);
                         if(gunType == 0){  
-                            PlayerManager.current.temp_gun_progress1 = progress1;
-                            PlayerManager.current.temp_gun_progress2 = progress2;
-                            PlayerManager.current.temp_gun_progressNum = progressNum;
                             PlayerManager.current.Invoke("PickupBlaster",0.1f);
                         }
                         else if(gunType == 1){  
-                            PlayerManager.current.temp_gun_progress1 = progress1;
-                            PlayerManager.current.temp_gun_progress2 = progress2;
-                            PlayerManager.current.temp_gun_progressNum = progressNum;
                             PlayerManager.current.Invoke("PickupMissile",0.1f);
                         }
                         else if(gunType == 2){
-                            PlayerManager.current.temp_gun_progress1 = progress1;
-                            PlayerManager.current.temp_gun_progress2 = progress2;
-                            PlayerManager.current.temp_gun_progressNum = progressNum;
                             PlayerManager.current.Invoke("PickupLaser",0.1f);
                         }
-                        else if(gunType == 3){
-                            PlayerManager.current.temp_gun_progress1 = progress1;
-                            PlayerManager.current.temp_gun_progress2 = progress2;
-                            PlayerManager.current.temp_gun_progressNum = progressNum;
-                            PlayerManager.current.Invoke("PickupElectro",0.1f);
-                        }
+                        DestroySelf();
                     }
                 }
                 else if(pickupType == 4){
                     if(!PlayerManager.current.hasLegs){
                         DestroySelf();
                         if(legType == 0){
-                            PlayerManager.current.temp_legs_progress1 = progress1;
-                            PlayerManager.current.temp_legs_progress2 = progress2;
-                            PlayerManager.current.temp_legs_progressNum = progressNum;
                             PlayerManager.current.Invoke("PickupWorkerBoots",0.1f);
                         }
                         else if(legType == 1){
-                            PlayerManager.current.temp_legs_progress1 = progress1;
-                            PlayerManager.current.temp_legs_progress2 = progress2;
-                            PlayerManager.current.temp_legs_progressNum = progressNum;
                             PlayerManager.current.Invoke("PickupJumpBoots",0.1f);
                         }
                     }
                     else{
                         DestroySelf();
                         if(legType == 0){
-                            PlayerManager.current.temp_legs_progress1 = progress1;
-                            PlayerManager.current.temp_legs_progress2 = progress2;
-                            PlayerManager.current.temp_legs_progressNum = progressNum;
                             PlayerManager.current.Invoke("SwitchToWorkerBoots",0.1f);
                         }
                         else if(legType == 1){
-                            PlayerManager.current.temp_legs_progress1 = progress1;
-                            PlayerManager.current.temp_legs_progress2 = progress2;
-                            PlayerManager.current.temp_legs_progressNum = progressNum;
                             PlayerManager.current.Invoke("SwitchToJumpBoots",0.1f);
                         }
                     }
@@ -322,10 +285,10 @@ public class PickUpScript : MonoBehaviour
 
         transform.eulerAngles = new Vector3(transform.eulerAngles.x, Random.Range(0, 360), transform.eulerAngles.z);
 
-        float speed = 50.0f;
+        float speed = 15.0f;
         rb.isKinematic = false;
         Vector3 force = transform.forward;
-        force = new Vector3(force.x, 2, 0);
+        force = new Vector3(force.x, 3, 0);
         rb.AddForce(force * speed);
         transform.eulerAngles = new Vector3(transform.eulerAngles.x, 0, transform.eulerAngles.z);
         UI_PickUp.SetActive(false);
@@ -370,16 +333,16 @@ public class PickUpScript : MonoBehaviour
             gameObject.name = "WorkerDrill " + progressNum.ToString();
         }
         else if(pickupType == 3){
-            if(legType == 0){
+            if(gunType == 0){
                 gameObject.name = "BlasterGun " + progressNum.ToString();
             }
-            else if(legType == 1){
+            else if(gunType == 1){
                 gameObject.name = "MissileLauncher " + progressNum.ToString();
             }
-            else if(legType == 2){
+            else if(gunType == 2){
                 gameObject.name = "EnergyBeam " + progressNum.ToString();
             }
-            else if(legType == 3){
+            else if(gunType == 3){
                 gameObject.name = "ElectroGun " + progressNum.ToString();
             }
         }

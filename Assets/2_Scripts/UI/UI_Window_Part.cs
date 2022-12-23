@@ -22,8 +22,6 @@ public class UI_Window_Part : MonoBehaviour
   public Sprite sprite_num_2;
   public Sprite sprite_num_3;
   public Sprite sprite_num_4;
-  public Sprite sprite_num_5;
-  public Sprite sprite_num_6;
 
 
   public SpriteRenderer spriteRend;
@@ -66,14 +64,6 @@ public class UI_Window_Part : MonoBehaviour
   private UI_Part_UpgradeSlot ugpradeSlot4Script;
   private bool upgrade4;
 
-  public GameObject upgradeSlot5;
-  private UI_Part_UpgradeSlot ugpradeSlot5Script;
-  private bool upgrade5;
-
-  public GameObject upgradeSlot6;
-  private UI_Part_UpgradeSlot ugpradeSlot6Script;
-  private bool upgrade6;
-
   public GameObject xButton;
   public OnClickExitWindow xButtonScript;
 
@@ -101,8 +91,9 @@ public class UI_Window_Part : MonoBehaviour
         ugpradeSlot2Script = upgradeSlot2.GetComponent<UI_Part_UpgradeSlot>();
         ugpradeSlot3Script = upgradeSlot3.GetComponent<UI_Part_UpgradeSlot>();
         ugpradeSlot4Script = upgradeSlot4.GetComponent<UI_Part_UpgradeSlot>();
-        ugpradeSlot5Script = upgradeSlot5.GetComponent<UI_Part_UpgradeSlot>();
-        ugpradeSlot6Script = upgradeSlot6.GetComponent<UI_Part_UpgradeSlot>();
+
+        xButtonScript.Invoke("Reset",0.01f);
+        Reset();
     }
 
     // Update is called once per frame
@@ -112,15 +103,36 @@ public class UI_Window_Part : MonoBehaviour
     }
 
     public void Reset(){
-      xButtonScript.Invoke("Reset",0.01f);
-      GetCurrentPartProperties();
+      SetCurrentPartProperties();
       OpenInfo();
     }
 
-    public void GetCurrentPartProperties(){
+    public void SetCurrentPartProperties(){
       upgrade1Progress = parentScript.progress1;
       upgrade2Progress = parentScript.progress2;
       upgradeNum = parentScript.progressNum;
+
+      if(partType == 0){
+
+      }
+      else if(partType == 1){
+
+      }
+      else if(partType == 2){
+
+      }
+      else if(partType == 3){
+        PlayerManager.current.gun_progress1 = upgrade1Progress;
+        PlayerManager.current.gun_progress2 = upgrade2Progress;
+        PlayerManager.current.temp_gun_progress1 = upgrade1Progress;
+        PlayerManager.current.temp_gun_progress2 = upgrade2Progress;
+        Debug.Log("SetCurrentPartProperties");
+        Debug.Log("upgrade1Progress : " + upgrade1Progress);
+        Debug.Log("upgrade2Progress : " + upgrade2Progress);
+      }
+      else if(partType == 4){
+
+      }
 
       RefreshUpgradeSlotNum();
     }
@@ -135,15 +147,9 @@ public class UI_Window_Part : MonoBehaviour
         upgrade1Progress += 1;
       }
       if(ugpradeSlotScript.slotNum == 2){
-        upgrade1Progress += 1;
+        upgrade2Progress += 1;
       }
       if(ugpradeSlotScript.slotNum == 3){
-        upgrade2Progress += 1;
-      }
-      if(ugpradeSlotScript.slotNum == 4){
-        upgrade2Progress += 1;
-      }
-      if(ugpradeSlotScript.slotNum == 5){
         upgrade2Progress += 1;
       }
       upgradeNum = upgrade1Progress + upgrade2Progress;
@@ -152,7 +158,7 @@ public class UI_Window_Part : MonoBehaviour
       parentScript.progress2 = upgrade2Progress;
       parentScript.progressNum = upgradeNum;
 
-      GetCurrentPartProperties();
+      SetCurrentPartProperties();
     }
 
     public void RefreshUpgradeSlotNum(){
@@ -171,12 +177,6 @@ public class UI_Window_Part : MonoBehaviour
       else if(upgradeNum == 4){
         totalNum_spriteRend.sprite = sprite_num_4;
       }
-      else if(upgradeNum == 5){
-        totalNum_spriteRend.sprite = sprite_num_5;
-      }
-      else if(upgradeNum == 6){
-        totalNum_spriteRend.sprite = sprite_num_6;
-      }
 
       if(upgrade1Progress == 0){
         upgrade1Num_spriteRend.sprite = sprite_num_0;
@@ -186,9 +186,6 @@ public class UI_Window_Part : MonoBehaviour
       }
       else if(upgrade1Progress == 2){
         upgrade1Num_spriteRend.sprite = sprite_num_2;
-      }
-      else if(upgrade1Progress == 3){
-        upgrade1Num_spriteRend.sprite = sprite_num_3;
       }
 
       if(upgrade2Progress == 0){
@@ -200,9 +197,6 @@ public class UI_Window_Part : MonoBehaviour
       else if(upgrade2Progress == 2){
         upgrade2Num_spriteRend.sprite = sprite_num_2;
       }
-      else if(upgrade2Progress == 3){
-        upgrade2Num_spriteRend.sprite = sprite_num_3;
-      }
     }
 
     public void RefreshUpgrades(){
@@ -210,54 +204,35 @@ public class UI_Window_Part : MonoBehaviour
       if(upgrade1Progress == 0){
         upgrade1 = false;
         upgrade2 = false;
-        upgrade3 = false;
         ugpradeSlot1Script.Invoke("ResetSlot",0.01f);
         ugpradeSlot2Script.Invoke("ResetSlot",0.01f);
-        ugpradeSlot3Script.Invoke("ResetSlot",0.01f);
       }
       else if(upgrade1Progress == 1){
         upgrade1 = true;
         ugpradeSlot1Script.Invoke("FillSlot",0.01f);
         ugpradeSlot2Script.Invoke("ResetSlot",0.01f);
-        ugpradeSlot3Script.Invoke("ResetSlot",0.01f);
       }
       else if(upgrade1Progress == 2){
         upgrade2 = true;
         ugpradeSlot1Script.Invoke("FillSlot",0.01f);
         ugpradeSlot2Script.Invoke("FillSlot",0.01f);
-        ugpradeSlot3Script.Invoke("ResetSlot",0.01f);
       }
-      else if(upgrade1Progress == 3){
-        upgrade3 = true;
-        ugpradeSlot1Script.Invoke("FillSlot",0.01f);
-        ugpradeSlot2Script.Invoke("FillSlot",0.01f);
-        ugpradeSlot3Script.Invoke("FillSlot",0.01f);
-      }
+
       if(upgrade2Progress == 0){
+        upgrade3 = false;
         upgrade4 = false;
-        upgrade5 = false;
-        upgrade6 = false;
+        ugpradeSlot3Script.Invoke("ResetSlot",0.01f);
         ugpradeSlot4Script.Invoke("ResetSlot",0.01f);
-        ugpradeSlot5Script.Invoke("ResetSlot",0.01f);
-        ugpradeSlot6Script.Invoke("ResetSlot",0.01f);
       }
       else if(upgrade2Progress == 1){
-        upgrade4 = true;
-        ugpradeSlot4Script.Invoke("FillSlot",0.01f);
-        ugpradeSlot5Script.Invoke("ResetSlot",0.01f);
-        ugpradeSlot6Script.Invoke("ResetSlot",0.01f);
+        upgrade3 = true;
+        ugpradeSlot3Script.Invoke("FillSlot",0.01f);
+        ugpradeSlot4Script.Invoke("ResetSlot",0.01f);
       }
       else if(upgrade2Progress == 2){
-        upgrade5 = true;
+        upgrade4 = true;
+        ugpradeSlot3Script.Invoke("FillSlot",0.01f);
         ugpradeSlot4Script.Invoke("FillSlot",0.01f);
-        ugpradeSlot5Script.Invoke("FillSlot",0.01f);
-        ugpradeSlot6Script.Invoke("ResetSlot",0.01f);
-      }
-      else if(upgrade2Progress == 3){
-        upgrade6 = true;
-        ugpradeSlot4Script.Invoke("FillSlot",0.01f);
-        ugpradeSlot5Script.Invoke("FillSlot",0.01f);
-        ugpradeSlot6Script.Invoke("FillSlot",0.01f);
       }
     }
     
@@ -296,7 +271,7 @@ public class UI_Window_Part : MonoBehaviour
 
     public void CloseAllWindows(){
       parentScript.Invoke("CloseAllWindows",0.01f);
-        MenuManager.current.isMouseOver = false;
+      MenuManager.current.isMouseOver = false;
     }
 
     private void OnMouseEnter() {

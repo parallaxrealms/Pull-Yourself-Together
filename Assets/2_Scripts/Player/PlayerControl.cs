@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Rendering.Universal;
 
 public class PlayerControl : MonoBehaviour
 {
@@ -10,6 +11,12 @@ public class PlayerControl : MonoBehaviour
     public GameObject spriteAnimatorObject;
     public Animator spriteAnim;
     public SpriteAnimator spriteAnimScript;
+    public GameObject playerLight0;
+    public GameObject playerLight1;
+    public GameObject playerLight2;
+    public GameObject playerLight3;
+
+    public int lightUpgradeNum;
 
     public GroundedCharacterController characterControllerScript;
 
@@ -43,6 +50,8 @@ public class PlayerControl : MonoBehaviour
     private DrillArmScript drillArmScript;
     public Animator drillAnimator;
     public BoxCollider drillCollider;
+
+    public bool drillStopped = false;
 
     public GameObject drillSmokeObject;
     private ParticleSystem smokeParticles;
@@ -80,19 +89,26 @@ public class PlayerControl : MonoBehaviour
 
     public float _gunFireRate;
     public float _gunCooldownTime;
+    public float _gunCooldownTime_original;
 
-    public float drillCooldownTime = 1.0f;
+    public float drillCooldownTime = 0.0f;
     public bool canMove = true;
     public bool isChangingScene = false;
-    public bool gunReady = true;
-    public bool drillReady = true;
+    public bool gunReady = false;
+    public bool drillReady = false;
 
     public SpriteRenderer spriteRend;
     public Material spriteMaterial;
     public Material hitMaterial;
     public float tintFadeSpeed = 0.25f;
 
+    public float startCooldownTimer = 1.0f;
+    public bool started = false;
+
     public GameObject onHitParticles;
+
+    private EnemyScript enemyScript;
+    private CyberMantisScript bossScript;
 
     // Start is called before the first frame update
     void Start()
@@ -127,11 +143,22 @@ public class PlayerControl : MonoBehaviour
 
         UI_CrystalManager = MenuManager.current.CrystalManager;
         crystalManagerScript = UI_CrystalManager.GetComponent<UI_CrystalManager>();
+        lightUpgradeNum = PlayerManager.current.head_progress1;
+        ChangeHeadVisibility();
     }
 
     // Update is called once per frame
     void Update()
     {
+        if(!started){
+            if(startCooldownTimer > 0f){
+                startCooldownTimer -= Time.deltaTime;
+            }
+            else{
+                started = true;
+            }
+        }
+        
         if(!isDead){
             if(canMove){
                 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
@@ -167,13 +194,18 @@ public class PlayerControl : MonoBehaviour
 
     void FixedUpdate(){
         if(!isDead){
-            CooldownTimer();
+            if(PlayerManager.current.hasDrill){
+                CooldownTimerDrill();
+            }
+            if(PlayerManager.current.hasGun){
+                CooldownTimerGun();
+            }
         }
     }
 
     private void GunControls(){
         if(!MenuManager.current.isMouseOver){
-            if(Input.GetButton("Fire1") && gunReady){
+            if(Input.GetButton("Fire1") && gunReady && started){
                 gunReady = false;
                 if(gunType == 0){
                     FireBlaster();
@@ -198,33 +230,36 @@ public class PlayerControl : MonoBehaviour
     }
 
     private void DrillControls(){
-        if(Input.GetButtonDown("Fire2")){
+        if(Input.GetButton("Fire2")){
             if(drillReady){
                 UseDrill();
             }
         }
         if(Input.GetButtonUp("Fire2")){
-            if(drillReady){
-                StopDrill();
+            StopDrill();
+        }
+    }
+
+    private void CooldownTimerGun(){
+        if(PlayerManager.current.hasGun){
+            if(_gunCooldownTime > 0.0f){
+                _gunCooldownTime -= Time.deltaTime;
+            }
+            else{
+                gunReady = true;
             }
         }
     }
 
-
-    private void CooldownTimer(){
-        if(_gunCooldownTime > 0.0f){
-            _gunCooldownTime -= Time.deltaTime;
-        }
-        else{
-            gunReady = true;
-        }
-
-        if(drillCooldownTime > 0.0f){
-            drillCooldownTime -= Time.deltaTime;
-            drillReady = false;
-        }
-        else{
-            drillReady = true;
+    private void CooldownTimerDrill(){
+        if(PlayerManager.current.hasDrill){
+            if(drillCooldownTime > 0.0f){
+                drillCooldownTime -= Time.deltaTime;
+                drillReady = false;
+            }
+            else{
+                drillReady = true;
+            }
         }
     }
 
@@ -270,12 +305,13 @@ public class PlayerControl : MonoBehaviour
         smokeParticles = drillSmokeObject.GetComponent<ParticleSystem>();
         drillArm.SetActive(true);
         drillArmScript = drillArm.GetComponent<DrillArmScript>();
-        drillCollider = drillArm.GetComponent<BoxCollider>();
         drillAnimator = drillArm.GetComponent<Animator>();
         StopDrill();
     }
     public void DisableDrillArm(){
-        drillArm.SetActive(false);
+        if(drillArm != null){
+            drillArm.SetActive(false);
+        }
     }
 
     public void EnableGunArm(){
@@ -299,11 +335,14 @@ public class PlayerControl : MonoBehaviour
             _gunFireRate = electroValues.gunFireRate;
             _gunCooldownTime = electroValues.gunCooldownTime;
         }
+        _gunCooldownTime_original = _gunCooldownTime;
         gunArm.SetActive(true);
         gunArmScript = gunArm.GetComponent<WeaponArmScript>();
     }
     public void DisableGunArm(){
-        gunArm.SetActive(false);
+        if(gunArm != null){
+            gunArm.SetActive(false);
+        }
     }
 
 
@@ -345,33 +384,15 @@ public class PlayerControl : MonoBehaviour
     }
 
     private void UseDrill(){
-        drillAnimator.SetBool("Active", true);
-        drillCollider.enabled = true;
-        smokeParticles.Play();
-        drillArmScript.Invoke("DrillOn",0.01f);
-
+            drillAnimator.SetBool("Active", true);
+            smokeParticles.Play();
+            drillCooldownTime = 1.0f;
+            drillArmScript.Invoke("DrillOn",0.01f);
     }
     private void StopDrill(){
-        drillAnimator.SetBool("Active", false);
-        drillCollider.enabled = false;
-        smokeParticles.Stop();
-        drillArmScript.Invoke("DrillOff",0.01f);
-    }
-
-    public void SwitchHead(){
-
-    }
-    public void SwitchBody(){
-        
-    }
-    public void SwitchDrill(){
-        
-    }
-    public void SwitchGun(){
-        
-    }
-    public void SwitchLegs(){
-        
+            drillAnimator.SetBool("Active", false);
+            smokeParticles.Stop();
+            drillArmScript.Invoke("DrillOff",0.01f);
     }
 
     public void PlayBlasterImpact(){
@@ -437,5 +458,84 @@ public class PlayerControl : MonoBehaviour
         canMove = false;
         PlayerManager.current.isChangingScene = true;
         PlayerManager.current.canMove = false;
+    }
+
+
+    public void ChangeHeadVisibility(){
+        if(lightUpgradeNum == 0){
+            playerLight0.SetActive(true);
+            playerLight1.SetActive(false);
+            playerLight2.SetActive(false);
+            playerLight3.SetActive(false);
+        }
+        else if(lightUpgradeNum == 1){
+            playerLight0.SetActive(false);
+            playerLight1.SetActive(true);
+            playerLight2.SetActive(false);
+            playerLight3.SetActive(false);
+        }
+        else if(lightUpgradeNum == 2){
+            playerLight0.SetActive(false);
+            playerLight1.SetActive(false);
+            playerLight2.SetActive(true);
+            playerLight3.SetActive(false);
+        }
+        else if(lightUpgradeNum == 3){
+            playerLight0.SetActive(false);
+            playerLight1.SetActive(false);
+            playerLight2.SetActive(false);
+            playerLight3.SetActive(true);
+        }
+    }
+
+    private void OnTriggerEnter(Collider other) {
+        if(other.gameObject.tag == "Enemy_Bullet"){
+            if(!PlayerManager.current.isHit && !PlayerManager.current.isDead){
+                EnemyBulletPhysics eBulletPhysics = other.gameObject.GetComponent<EnemyBulletPhysics>();
+                if(eBulletPhysics.bulletType == 1){
+                    PlayerManager.current.Invoke("TakeHardHit",0.01f);
+                }
+                else{
+                    PlayerManager.current.Invoke("TakeHit",0.01f);
+                }
+            }
+        }
+        if(other.gameObject.tag == "MissileAOE"){
+            if(!PlayerManager.current.isHit && !PlayerManager.current.isDead){
+                PlayerManager.current.Invoke("TakeHardHit",0.01f);
+            }
+        }
+
+        if(other.gameObject.tag == "BossHitCollision"){
+            if(!PlayerManager.current.isHit && !PlayerManager.current.isDead){
+                bossScript = other.gameObject.transform.parent.gameObject.GetComponent<CyberMantisScript>();
+                bossScript.attackCollider.enabled = false;
+                bossScript.Invoke("FindPlayer", 0.01f);
+                PlayerManager.current.Invoke("TakeHit",0.01f);
+            }
+        }
+
+        if(other.gameObject.name == "BossTrigger"){
+            GameObject blueBot = GameObject.Find("BlueBot");
+            BlueBotScript blueBotScript = blueBot.GetComponent<BlueBotScript>();
+
+            blueBotScript.Invoke("ActivateDialogue", 0.01f);
+            Destroy(other.gameObject);
+        }
+    }
+
+    private void OnTriggerStay(Collider other) {
+        if(other.gameObject.tag == "Enemy_Hit"){
+            PlayerManager.current.Invoke("TakeHit",0.01f);
+        }
+
+        if(other.gameObject.tag == "HitCollision"){
+            if(!PlayerManager.current.isHit && !PlayerManager.current.isDead){
+                enemyScript = other.gameObject.transform.parent.gameObject.GetComponent<EnemyScript>();
+                enemyScript.attackCollider.enabled = false;
+                enemyScript.Invoke("AggroReset", 0.01f);
+                PlayerManager.current.Invoke("TakeHit",0.01f);
+            }
+        }
     }
 }

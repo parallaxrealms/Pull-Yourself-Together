@@ -5,6 +5,8 @@ using UnityEngine.UI;
 
 public class UI_CrystalManager : MonoBehaviour
 {
+    private GameObject partsUI;
+    private UI_Parts partsUIScript;
     public int temp_corite;
     public int temp_velrite;
     public int temp_nymrite;
@@ -44,6 +46,9 @@ public class UI_CrystalManager : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        partsUI = GameObject.Find("UI_Player_Parts");
+        partsUIScript = partsUI.GetComponent<UI_Parts>();
+
         rend_Corite = UIObject_Corite.GetComponent<SpriteRenderer>();
         UIObject_CoriteInactive = rend_Corite.sprite;
         text_num_Corite = Num_Corite.GetComponent<Text>();
@@ -73,8 +78,10 @@ public class UI_CrystalManager : MonoBehaviour
                 timer -= Time.deltaTime;
             }
             else{
-                timerEnabled = false;   
-                HideCrystalUI();
+                timerEnabled = false;
+                if(!partsUIScript.isEnabled){
+                    HideCrystalUI();
+                } 
                 timer = 4f;
             }
         }
@@ -187,6 +194,25 @@ public class UI_CrystalManager : MonoBehaviour
         }
         ShowCrystalUITemp();
 
+        temp_corite = 0;
+        temp_velrite = 0;
+        temp_nymrite = 0;
+        temp_zyrite = 0;
+    }
+
+    public void Reset(){
+        PlayerManager.current.numOfCorite = 0;
+        PlayerManager.current.numOfVelrite = 0;
+        PlayerManager.current.numOfNymrite = 0;
+        PlayerManager.current.numOfZyrite = 0;
+        text_num_Corite.text = PlayerManager.current.numOfCorite.ToString();
+        text_num_Velrite.text = PlayerManager.current.numOfVelrite.ToString();
+        text_num_Nymrite.text = PlayerManager.current.numOfNymrite.ToString();
+        text_num_Zyrite.text = PlayerManager.current.numOfZyrite.ToString();
+        rend_Corite.sprite = UIObject_CoriteInactive;
+        rend_Velrite.sprite = UIObject_VelriteInactive;
+        rend_Nymrite.sprite = UIObject_NymriteInactive;
+        rend_Zyrite.sprite = UIObject_ZyriteInactive;
         temp_corite = 0;
         temp_velrite = 0;
         temp_nymrite = 0;

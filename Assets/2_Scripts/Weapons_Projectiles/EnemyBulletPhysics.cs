@@ -5,11 +5,9 @@ using UnityEngine;
 public class EnemyBulletPhysics : MonoBehaviour
 {
     public PlayerWeaponScriptableObject defaultGunValues;
-
-    public AudioSource audio;
-    public AudioClip clip_missileExplode;
-    public AudioClip clip_hitImpactSound;
-
+    
+    public SphereCollider collider;
+    public BoxCollider collider_missile;
 
     public Animator anim;
 
@@ -24,6 +22,9 @@ public class EnemyBulletPhysics : MonoBehaviour
     public GameObject playerObject;
     private Vector3 playerPos;
 
+
+    public Vector3 lastHitPos;
+
     public GameObject bulletImpactParticles;
     public GameObject bulletImpactParticles_white;
     public GameObject missileAOE;
@@ -36,6 +37,9 @@ public class EnemyBulletPhysics : MonoBehaviour
 
     public float _lifespanTimer;
 
+    private float destroyTimer = 0.1f;
+    private bool destroyed = false;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -43,7 +47,7 @@ public class EnemyBulletPhysics : MonoBehaviour
 
         playerPos = playerObject.transform.position;
 
-         _speed = defaultGunValues.bulletSpeed;
+         _speed = defaultGunValues.bulletSpeed / 2;
          _lifespanTimer = defaultGunValues.lifespanTime;
          bulletType = defaultGunValues.bulletType;
 
@@ -53,6 +57,7 @@ public class EnemyBulletPhysics : MonoBehaviour
         damage = defaultGunValues.damageAmount;
 
         if(bulletType == 1){
+            collider_missile = GetComponent<BoxCollider>();
             anim = GetComponent<Animator>();
             
             transform.rotation = Quaternion.LookRotation(Vector3.forward, playerPos - transform.position);
@@ -70,70 +75,69 @@ public class EnemyBulletPhysics : MonoBehaviour
             DestroySelf();
         }
     }
-
-    public void OnTriggerEnter(Collider other){
-        Vector3 hitPos = other.gameObject.transform.position;
+        private void OnTriggerEnter(Collider other) {  
         if(other.gameObject.tag == "Ground"){
+            lastHitPos = other.gameObject.transform.position;
             if(bulletType == 0){
-                GameObject impactParticles = Instantiate(bulletImpactParticles, hitPos, Quaternion.identity) as GameObject;
-                DestroySelf();
+                BlasterBulletCollision();   
             }
             else if(bulletType == 1){
-                rb.velocity = Vector3.zero;
-                anim.SetBool("isHit", true);
-                GameObject impactParticles = Instantiate(missileImpactParticles, hitPos, Quaternion.identity) as GameObject;
-                missileAOE = Instantiate(missileHitAOE, hitPos, Quaternion.identity) as GameObject;
-                missileHitCollider = missileAOE.GetComponent<SphereCollider>();
-                missileHitCollider.enabled = false;
+                MissileLauncherCollision();
             }
             else if(bulletType == 2){
-                GameObject impactParticles = Instantiate(laserHit, hitPos, Quaternion.identity) as GameObject;
+                GameObject impactParticles = Instantiate(laserHit, lastHitPos, Quaternion.identity) as GameObject;
             }
         }
         if(other.gameObject.tag == "BulletCollision"){
+            lastHitPos = other.gameObject.transform.position;
             if(bulletType == 0){
-                GameObject impactParticles_white = Instantiate(bulletImpactParticles_white, hitPos, Quaternion.identity) as GameObject;
-                DestroySelf();
+                BlasterBulletCollision();   
             }
             else if(bulletType == 1){
-                rb.velocity = Vector3.zero;
-                anim.SetBool("isHit", true);
-                GameObject impactParticles = Instantiate(missileImpactParticles, hitPos, Quaternion.identity) as GameObject;
-                missileAOE = Instantiate(missileHitAOE, hitPos, Quaternion.identity) as GameObject;
-                missileHitCollider = missileAOE.GetComponent<SphereCollider>();
-                missileHitCollider.enabled = false;
+                MissileLauncherCollision();
             }
             else if(bulletType == 2){
-                GameObject impactParticles = Instantiate(laserHit, hitPos, Quaternion.identity) as GameObject;
+                GameObject impactParticles = Instantiate(laserHit, lastHitPos, Quaternion.identity) as GameObject;
             }
         }
         if(other.gameObject.tag == "Player"){
+            lastHitPos = other.gameObject.transform.position;
             if(bulletType == 0){
-                GameObject impactParticles_white = Instantiate(bulletImpactParticles_white, hitPos, Quaternion.identity) as GameObject;
-                DestroySelf();
+                BlasterBulletCollision();   
             }
             else if(bulletType == 1){
-                rb.velocity = Vector3.zero;
-                anim.SetBool("isHit", true);
-                GameObject impactParticles = Instantiate(missileImpactParticles, hitPos, Quaternion.identity) as GameObject;
-                missileAOE = Instantiate(missileHitAOE, hitPos, Quaternion.identity) as GameObject;
-                missileHitCollider = missileAOE.GetComponent<SphereCollider>();
-                missileHitCollider.enabled = false;
+                MissileLauncherCollision();
             }
             else if(bulletType == 2){
-                GameObject impactParticles = Instantiate(laserHit, hitPos, Quaternion.identity) as GameObject;
+                GameObject impactParticles = Instantiate(laserHit, lastHitPos, Quaternion.identity) as GameObject;
             }
         }
     }
 
-     public void OnTriggerExit(Collider other){
+    public void MissileLauncherCollision(){
+        EnableAOECollider();
+        rb.velocity = Vector3.zero;
+        collider_missile.enabled = false;
+        GameObject impactParticles = Instantiate(missileImpactParticles, lastHitPos, Quaternion.identity) as GameObject;
+        anim.SetBool("isHit", true);
+    }
 
+    public void BlasterBulletCollision(){
+        //play blaster sound
+        GameObject impactParticles = Instantiate(bulletImpactParticles, lastHitPos, Quaternion.identity) as GameObject;
+        DestroySelf();  
+    }
+
+    public void EnableAOECollider(){
+        missileAOE = Instantiate(missileHitAOE, lastHitPos, Quaternion.identity) as GameObject;
+        MissileAOE missileAOEscript = missileAOE.GetComponent<MissileAOE>();
+        missileAOEscript.damage = damage;
     }
 
     public void DisableAOECollider(){
         missileHitCollider.enabled = false;
     }
-
+    
     public void DestroySelf(){
         Destroy(gameObject);
     }

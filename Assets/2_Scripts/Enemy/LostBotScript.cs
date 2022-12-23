@@ -7,6 +7,10 @@ public class LostBotScript : MonoBehaviour
     public LostBotScriptableObject enemyData;
 
     public string enemyName;
+
+    [SerializeField] private GameObject damageNum;
+    private DamageNum damageNumScript;
+    private Vector3 dmgNumPos;
     
     public GameObject parentObject;
     public LostBotMeta parentScript;
@@ -355,7 +359,7 @@ public class LostBotScript : MonoBehaviour
 
     private void UseGun(){
         anim.SetBool("isAttacking", true);
-        bulletSpawnPos = new Vector3(bulletOrigin.transform.position.x,bulletOrigin.transform.position.y + 0.15f, bulletOrigin.transform.position.z);
+        bulletSpawnPos = new Vector3(bulletOrigin.transform.position.x,bulletOrigin.transform.position.y, bulletOrigin.transform.position.z);
 
         if(gunType == 0){
             GameObject newEnemyBullet = Instantiate(projectile_bullet,bulletSpawnPos, Quaternion.identity) as GameObject;
@@ -407,6 +411,15 @@ public class LostBotScript : MonoBehaviour
                 }
             }
         }
+        if(other.gameObject.tag == "MissileAOE"){
+            if(!isHit){
+                if(!isDead){
+                    MissileAOE missileAOEscript = other.gameObject.GetComponent<MissileAOE>();
+                    damageTaken = missileAOEscript.damage;
+                    TakeHit();
+                }
+            }
+        }
     }
 
     private void OnTriggerStay(Collider other) {
@@ -428,6 +441,7 @@ public class LostBotScript : MonoBehaviour
 
     public void TakeHit(){
         StopGun();
+        DisplayDamage();
         attackCollider.enabled = false;
         isHit = true;
         spriteRend.material = hitMaterial;
@@ -475,12 +489,22 @@ public class LostBotScript : MonoBehaviour
             }
         }
     }
+
     public void RecoverFromHit(){
         isHit = false;
         spriteRend.material = spriteMaterial;
         damageTaken = 0.0f;
     }
 
+    public void DisplayDamage(){
+        dmgNumPos = transform.position;
+        GameObject newDamageNum = Instantiate(damageNum, new Vector3(dmgNumPos.x, dmgNumPos.y, dmgNumPos.z), Quaternion.identity) as GameObject;
+        GameObject canvasObject = GameObject.Find("WorldCanvas");
+        newDamageNum.transform.SetParent(canvasObject.transform);
+        DamageNum damageNumScript = newDamageNum.GetComponent<DamageNum>();
+        damageNumScript.damageNum = Mathf.RoundToInt(damageTaken);
+    }
+    
     public void EnableDrillArm(){
         smokeParticles = drillSmokeObject.GetComponent<ParticleSystem>();
         drillObject.SetActive(true);
@@ -620,9 +644,13 @@ public class LostBotScript : MonoBehaviour
         pickUpScript.Invoke("DropNewPickup", 0.01f);
         pickUpScript.prevBotOwner = gameObject;
 
-        DestroySelf();
         isDead = true;
         activated = false;
+
+        AudioManager.current.currentSFXTrack = 3;
+        AudioManager.current.PlaySfx();
+
+        DestroySelf();
     }
 
     public void DestroySelf(){

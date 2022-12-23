@@ -63,23 +63,50 @@ public class UI_Part_UpgradeSlot : MonoBehaviour
     void OnMouseDown(){
         if(!isActivated){
             if(PlayerManager.current.numOfCorite >= req_corite && PlayerManager.current.numOfVelrite >= req_velrite && PlayerManager.current.numOfNymrite >= req_nymrite && PlayerManager.current.numOfZyrite >= req_zyrite){
-                spriteRend.sprite = greenFill;
-                hoverWhite.SetActive(false);
-                //play upgrade sound
-                crystalManagerScript.temp_corite = req_corite;
-                crystalManagerScript.temp_velrite = req_velrite;
-                crystalManagerScript.temp_nymrite = req_nymrite;
-                crystalManagerScript.temp_zyrite = req_zyrite;
-                crystalManagerScript.Invoke("SubtractFromUpgrading", 0.01f);
-
-                parentScript.currentSlotUpgrading = gameObject;
-                parentScript.Invoke("IncreaseUpgradeNum",0.01f);
-                isActivated = true;
+                if(slotNum == 0 || slotNum == 2){
+                    ActivateSlot();
+                }
+                else{
+                    if(slotNum == 1){
+                        if(parentScript.upgrade1Progress == 1){
+                            ActivateSlot();
+                        }
+                        else{
+                            //play deny sound
+                        }
+                    }
+                    if(slotNum == 3){
+                        if(parentScript.upgrade2Progress == 1){
+                            ActivateSlot();
+                        }
+                        else{
+                            //play deny sound
+                        }
+                    }
+                }
             }
             else{
                 //play deny sound
             }
         }
+    }
+     
+    private void ActivateSlot(){
+        spriteRend.sprite = greenFill;
+        hoverWhite.SetActive(false);
+        //play upgrade sound
+        crystalManagerScript.temp_corite = req_corite;
+        crystalManagerScript.temp_velrite = req_velrite;
+        crystalManagerScript.temp_nymrite = req_nymrite;
+        crystalManagerScript.temp_zyrite = req_zyrite;
+        crystalManagerScript.Invoke("SubtractFromUpgrading", 0.01f);
+
+        parentScript.currentSlotUpgrading = gameObject;
+        parentScript.Invoke("IncreaseUpgradeNum",0.01f);
+        isActivated = true;
+
+        AudioManager.current.currentSFXTrack = 4;
+        AudioManager.current.PlaySfx();
     }
 
     public void ResetSlot(){

@@ -5,7 +5,12 @@ using UnityEngine;
 public class SpawnerScript : MonoBehaviour
 {
     public SpawnerScriptableObject spawnerData;
-    
+
+    [SerializeField] private GameObject damageNum;
+    private DamageNum damageNumScript;
+    private Vector3 dmgNumPos;
+    private int damageTaken;
+
     public int spawnerType = 0; //0 = Ground, 1 = Hanging/Single
 
     public GameObject enemyToSpawn;
@@ -30,8 +35,11 @@ public class SpawnerScript : MonoBehaviour
     public Material spriteMaterial;
     public Material hitMaterial;
 
-    public int maxEnemiesToSpawn = 10;
+    public int maxEnemiesToSpawn = 12;
     public int enemiesSpawned = 0;
+
+    private float cooldownTimer = 1.0f;
+    private bool drillCooldown = false;
 
     
     // Start is called before the first frame update
@@ -54,6 +62,16 @@ public class SpawnerScript : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if(drillCooldown){
+            if(cooldownTimer > 0){
+                cooldownTimer -= Time.deltaTime;
+            }
+            else{
+                drillCooldown = false;
+                cooldownTimer = 1.0f;
+            }
+        }
+
         if(health <= 0 ){
             DestroySelf();
         }
@@ -110,13 +128,20 @@ public class SpawnerScript : MonoBehaviour
                 TakeHit(bulletScript.damage);
             }
         }
+        if(other.gameObject.tag == "MissileAOE"){
+            if(!isHit){
+                MissileAOE missileAOEscript = other.gameObject.GetComponent<MissileAOE>();
+
+                TakeHit(missileAOEscript.damage);
+            }
+        }
     }
-    
+
     private void OnTriggerStay(Collider other) {
         if(other.gameObject.tag == "PlayerDrill"){
-            if(!isHit){
-
-                TakeHit(0.25f);
+            if(!drillCooldown){
+                TakeHit(1);
+                drillCooldown = true;
             }
         }
     }
@@ -151,9 +176,20 @@ public class SpawnerScript : MonoBehaviour
         isHit = true;
         health -= amountOfDMG;
         spriteRend.material = hitMaterial;
+        damageTaken = Mathf.RoundToInt(amountOfDMG);
+        DisplayDamage();
     }
     public void RecoverFromHit(){
         isHit = false;
         spriteRend.material = spriteMaterial;
+    }
+
+    public void DisplayDamage(){
+        dmgNumPos = transform.position;
+        GameObject newDamageNum = Instantiate(damageNum, new Vector3(dmgNumPos.x, dmgNumPos.y, dmgNumPos.z), Quaternion.identity) as GameObject;
+        GameObject canvasObject = GameObject.Find("WorldCanvas");
+        newDamageNum.transform.SetParent(canvasObject.transform);
+        DamageNum damageNumScript = newDamageNum.GetComponent<DamageNum>();
+        damageNumScript.damageNum = damageTaken;
     }
 }

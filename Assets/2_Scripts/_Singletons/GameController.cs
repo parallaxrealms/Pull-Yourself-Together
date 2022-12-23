@@ -3,10 +3,14 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using DG.Tweening;
 
 public class GameController : MonoBehaviour
 {
     public static GameController current;
+
+    private GameObject crystalManager;
+    private UI_CrystalManager crystalManagerScript;
 
     public GameObject gameCamera;
     private Vector3 camOriginalPos;
@@ -34,7 +38,6 @@ public class GameController : MonoBehaviour
     public List<GameObject> ListBots = new List<GameObject>();
     public List<GameObject> ListBosses = new List<GameObject>();
 
-    public List<GameObject> ListDoors = new List<GameObject>();
     public List<GameObject> ListCrystals = new List<GameObject>();
     public List<GameObject> ListPickups = new List<GameObject>();
 
@@ -48,12 +51,19 @@ public class GameController : MonoBehaviour
 
     public GameObject prevBotOwner;
 
+    public bool playerFellAbyss;
+
     private void Awake(){
         DontDestroyOnLoad(this);
         current = this;
 
         gameCamera = GameObject.Find("Camera");
         camOriginalPos = gameCamera.transform.position;
+
+        crystalManager = GameObject.Find("CrystalManager");
+        crystalManagerScript = crystalManager.GetComponent<UI_CrystalManager>();
+
+        DOTween.Init();
     }
     
     public event Action onEnableDebug;
@@ -84,8 +94,6 @@ public class GameController : MonoBehaviour
         }
     }
 
-
-
     public void GetUI(){
         Invoke("EnableUI", 0.01f);
     }
@@ -97,6 +105,7 @@ public class GameController : MonoBehaviour
         init_Abyss_0 = false;
         init_Abyss_1 = false;
         init_Abyss_Boss = false;
+        crystalManagerScript.Invoke("Reset",0);
     }
 
     public void NewGame(){
@@ -121,14 +130,15 @@ public class GameController : MonoBehaviour
         gameStarted = false;
         playerSpawned = false;
         DestroyAllEnemyObjects();
+        ObjectManager.current.Invoke("ClearAll", 0.1f);
         SceneManager.LoadScene("MainMenu");
         MenuManager.current.Invoke("GameOver", 0.1f);
         gameCamera.transform.position = camOriginalPos;
     }
 
     public void BossFightStarted(){
-        MusicManager.current.currentTrackNum = 6;
-        MusicManager.current.Invoke("PlayMusic", 0.1f);
+        AudioManager.current.currentTrackNum = 6;
+        AudioManager.current.Invoke("PlayMusic", 0.1f);
     }
 
     public void EnableUI(){
@@ -182,6 +192,11 @@ public class GameController : MonoBehaviour
         {
             PickUpScript pickupScript = pickup.GetComponent<PickUpScript>();
             pickupScript.Invoke("SetScenePos", 0.01f);
+        }
+        foreach (GameObject crystal in ListCrystals)
+        {
+            CrystalScript crystalScript = crystal.GetComponent<CrystalScript>();
+            crystalScript.Invoke("SetScenePos", 0.01f);
         }
     }
 
@@ -297,14 +312,18 @@ public class GameController : MonoBehaviour
         }
     }
 
-    public void ResetScenePickups(){
-        Debug.Log("ResetScenePickups " + newScene);
+    public void ResetSceneObjects(){
         if(!newScene){
            foreach (GameObject pickup in ListPickups){
                 PickUpScript pickupScript = pickup.GetComponent<PickUpScript>();
                 pickupScript.Invoke("DestroySelf", 0.01f);
            }
+           foreach (GameObject crystal in ListCrystals){
+                CrystalScript crystalScript = crystal.GetComponent<CrystalScript>();
+                crystalScript.Invoke("DestroySelf", 0.01f);
+           }
            ObjectManager.current.Invoke("SpawnCachedPickups", 0.01f);
+           ObjectManager.current.Invoke("SpawnCachedCrystals", 0.01f);
         } 
     }
 
@@ -318,12 +337,12 @@ public class GameController : MonoBehaviour
     }
 
     public void DestroyAllEnemyObjects(){
-        Debug.Log("DestroyAllEnemyObjects");
         ListWorms.Clear();
         ListBuzzers.Clear();
         ListBots.Clear();
         ListBosses.Clear();
         ListPickups.Clear();
+        ListCrystals.Clear();
     }
 
     public void ChangeSceneTo(){

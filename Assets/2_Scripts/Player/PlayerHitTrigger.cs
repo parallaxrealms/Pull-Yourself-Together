@@ -36,6 +36,11 @@ public class PlayerHitTrigger : MonoBehaviour
                 }
             }
         }
+        if(other.gameObject.tag == "MissileAOE"){
+            if(!PlayerManager.current.isHit && !PlayerManager.current.isDead){
+                PlayerManager.current.Invoke("TakeHardHit",0.01f);
+            }
+        }
 
         if(other.gameObject.tag == "BossHitCollision"){
             if(!PlayerManager.current.isHit && !PlayerManager.current.isDead){

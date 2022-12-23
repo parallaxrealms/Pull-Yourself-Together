@@ -6,8 +6,13 @@ public class CrystalScript : MonoBehaviour
 {
     public CrystalScriptableObject crystalData;
 
+    [SerializeField] private GameObject damageNum;
+    private DamageNum damageNumScript;
+
     public int size = 0;//0 = small, 1 = large
     public int numOfChunks = 0;
+
+    public Vector3 scenePos;
 
     public PlayerControl controlScript;
 
@@ -32,7 +37,10 @@ public class CrystalScript : MonoBehaviour
 
     public float chunkSpawnTimer = 0.1f;
     public bool chunkSpawned = false;
-
+    
+    void Awake(){
+        GameController.current.ListCrystals.Add(gameObject);
+    }
     // Start is called before the first frame update
     void Start()
     {
@@ -89,26 +97,45 @@ public class CrystalScript : MonoBehaviour
                 controlScript = PlayerManager.current.currentPlayerObject.GetComponent<PlayerControl>();
 
                 drillPos = other.gameObject.transform.position;
-                if(controlScript.facingLeft){
-                    drillPos = new Vector3(drillPos.x - 1.0f, drillPos.y, drillPos.z);
-                }
-                else{
-                    drillPos = new Vector3(drillPos.x + 1.0f, drillPos.y, drillPos.z);
-                }
-
-                if(_health > 1){
-                    GameObject hitParticles = Instantiate(crystalHitParticle, new Vector3(drillPos.x, drillPos.y, drillPos.z), Quaternion.identity) as GameObject;
-                    drillCooldown = true;
-                    _health--;
-                    anim.SetBool("Hit", true);
-                }
-                else if(_health == 1){
-                    CrystalDestroyed();
-                    GameObject hitParticles = Instantiate(crystalHitParticle, new Vector3(drillPos.x, drillPos.y, drillPos.z), Quaternion.identity) as GameObject;
-                    drillCooldown = true;
-                }
+                TakeHit();
             }
         }
+    }
+
+    public void TakeHit(){
+        if(controlScript.facingLeft){
+            drillPos = new Vector3(drillPos.x - 1.0f, drillPos.y, drillPos.z);
+        }
+        else{
+            drillPos = new Vector3(drillPos.x + 1.0f, drillPos.y, drillPos.z);
+        }
+
+        if(_health > 1){
+            GameObject hitParticles = Instantiate(crystalHitParticle, new Vector3(drillPos.x, drillPos.y, drillPos.z), Quaternion.identity) as GameObject;
+            drillCooldown = true;
+            _health--;
+            anim.SetBool("Hit", true);
+
+            DisplayDamage();
+        }
+        else if(_health == 1){
+            DisplayDamage();
+            CrystalDestroyed();
+            GameObject hitParticles = Instantiate(crystalHitParticle, new Vector3(drillPos.x, drillPos.y, drillPos.z), Quaternion.identity) as GameObject;
+            drillCooldown = true;
+        }
+    }
+
+    public void DisplayDamage(){
+        GameObject newDamageNum = Instantiate(damageNum, new Vector3(drillPos.x, drillPos.y + 0.5f, drillPos.z), Quaternion.identity) as GameObject;
+        GameObject canvasObject = GameObject.Find("WorldCanvas");
+        newDamageNum.transform.SetParent(canvasObject.transform);
+        DamageNum damageNumScript = newDamageNum.GetComponent<DamageNum>();
+        damageNumScript.damageNum = 1;
+    }
+
+    public void SetScenePos(){
+        scenePos = transform.position;
     }
 
     private void SpawnChunks(){
@@ -122,7 +149,12 @@ public class CrystalScript : MonoBehaviour
         collider.enabled = false;
     }
 
+    public void RemoveFromList(){
+        GameController.current.ListCrystals.Remove(gameObject);
+    }
+
     private void DestroySelf(){
         Destroy(gameObject);
+        GameController.current.ListCrystals.Remove(gameObject);
     }
 }

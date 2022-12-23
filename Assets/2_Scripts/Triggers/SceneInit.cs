@@ -16,8 +16,8 @@ public class SceneInit : MonoBehaviour
 
     void Awake(){
         triggerSpawnName = GameController.current.triggerSpawnName;
-        MusicManager.current.currentTrackNum = sceneTrackNum;
-        MusicManager.current.Invoke("PlayMusic",0.1f);
+        AudioManager.current.currentTrackNum = sceneTrackNum;
+        AudioManager.current.PlayMusicTrack();
 
         MenuManager.current.currentLevelID = levelID;
         ObjectManager.current.currentLevelID = levelID;
@@ -81,7 +81,7 @@ public class SceneInit : MonoBehaviour
         else{
             GameController.current.newScene = false;
         }
-        GameController.current.Invoke("ResetScenePickups",0.1f);
+        GameController.current.Invoke("ResetSceneObjects",0.1f);
     }
 
     // Start is called before the first frame update

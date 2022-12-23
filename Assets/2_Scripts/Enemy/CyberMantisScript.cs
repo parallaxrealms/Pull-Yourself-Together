@@ -7,6 +7,10 @@ public class CyberMantisScript : MonoBehaviour
     private GameObject gameController;
     public BossScriptableObject bossData;
 
+    [SerializeField] private GameObject damageNum;
+    private DamageNum damageNumScript;
+    private Vector3 dmgNumPos;
+
     private AudioSource audio;
     public AudioClip fallingClip;
     public AudioClip activateClip;
@@ -235,6 +239,14 @@ public class CyberMantisScript : MonoBehaviour
         isHit = false;
         spriteRend.material = spriteMaterial;
         damageTaken = 0.0f;
+    }
+
+    public void DisplayDamage(){
+        GameObject newDamageNum = Instantiate(damageNum, new Vector3(dmgNumPos.x, dmgNumPos.y + 0.5f, dmgNumPos.z), Quaternion.identity) as GameObject;
+        GameObject canvasObject = GameObject.Find("WorldCanvas");
+        newDamageNum.transform.SetParent(canvasObject.transform);
+        DamageNum damageNumScript = newDamageNum.GetComponent<DamageNum>();
+        damageNumScript.damageNum = 1;
     }
 
     public void Death(){

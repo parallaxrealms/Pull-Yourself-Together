@@ -7,6 +7,10 @@ public class EnemyScript : MonoBehaviour
     private GameObject gameController;
     public CreatureScriptableObject enemyData;
 
+    [SerializeField] private GameObject damageNum;
+    private DamageNum damageNumScript;
+    private Vector3 dmgNumPos;
+
     public string enemyName;
 
     public GameObject detectionObject;
@@ -53,27 +57,12 @@ public class EnemyScript : MonoBehaviour
     public float detectionRadius;
 
     void Awake(){
-        if(enemyName == "Worm" || enemyName == "Green Worm"){
-            GameController.current.ListWorms.Add(gameObject);
-        }
-        if(enemyName == "Buzzer"  || enemyName == "Red Buzzer"){
-            GameController.current.ListBuzzers.Add(gameObject);
-        }
-    }
-    // Start is called before the first frame update
-    void Start()
-    {
         anim = GetComponent<Animator>();
         collider = GetComponent<BoxCollider>();
         spriteRend = GetComponent<SpriteRenderer>();
         spriteMaterial = spriteRend.material;
         detectionScript = detectionObject.GetComponent<EnemyDetectScript>();
         triggerDetectSphere = detectionObject.GetComponent<SphereCollider>();
-        
-        if(PlayerManager.current.hasHead){
-            playerObject = PlayerManager.current.currentPlayerObject;
-        }
-
         attackCollider = attackTriggerObject.GetComponent<BoxCollider>();
 
         health = enemyData.health;
@@ -82,11 +71,26 @@ public class EnemyScript : MonoBehaviour
         moveAwaySpeed = enemyData.moveAwaySpeed;
         aggroResetTimer = enemyData.aggroResetTimer;
         detectionRadius = enemyData.detectionRadius;
-
         idleSpeed = speed;
 
         //Change detection collider radius to
         triggerDetectSphere.radius = detectionRadius;
+
+        if(enemyName == "Worm" || enemyName == "Green Worm"){
+            GameController.current.ListWorms.Add(gameObject);
+        }
+        if(enemyName == "Buzzer"  || enemyName == "Red Buzzer"){
+            GameController.current.ListBuzzers.Add(gameObject);
+        }
+
+        if(PlayerManager.current.hasHead){
+            playerObject = PlayerManager.current.currentPlayerObject;
+        }
+    }
+    // Start is called before the first frame update
+    void Start()
+    {  
+        
     }
 
     // Update is called once per frame
@@ -224,6 +228,13 @@ public class EnemyScript : MonoBehaviour
                 TakeHit();
             }
         }
+        if(other.gameObject.tag == "MissileAOE"){
+            if(!isHit){
+                MissileAOE missileAOEscript = other.gameObject.GetComponent<MissileAOE>();
+                damageTaken = missileAOEscript.damage;
+                TakeHit();
+            }
+        }
     }
 
     public void TakeHit(){
@@ -234,12 +245,22 @@ public class EnemyScript : MonoBehaviour
         if(health <= 0.0f){
             Death();
         }
+        DisplayDamage();
     }
     public void RecoverFromHit(){
         speed = enemyData.speed;
         isHit = false;
         spriteRend.material = spriteMaterial;
         damageTaken = 0.0f;
+    }
+
+    public void DisplayDamage(){
+        dmgNumPos = transform.position;
+        GameObject newDamageNum = Instantiate(damageNum, new Vector3(dmgNumPos.x, dmgNumPos.y + 0.5f, dmgNumPos.z), Quaternion.identity) as GameObject;
+        GameObject canvasObject = GameObject.Find("WorldCanvas");
+        newDamageNum.transform.SetParent(canvasObject.transform);
+        DamageNum damageNumScript = newDamageNum.GetComponent<DamageNum>();
+        damageNumScript.damageNum = Mathf.RoundToInt(damageTaken);
     }
 
     public void Death(){

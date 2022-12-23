@@ -12,6 +12,7 @@ public class BulletPhysics : MonoBehaviour
     public Vector3 lastHitPos;
 
     public SphereCollider collider;
+    public BoxCollider collider_missile;
 
     public int bulletType;
 
@@ -25,7 +26,11 @@ public class BulletPhysics : MonoBehaviour
     public GameObject bulletImpactParticles;
     public GameObject bulletImpactParticles_white;
     public GameObject missileAOE;
-    public GameObject missileHitAOE;
+    public GameObject missile_0_AOE;
+    public GameObject missile_1_AOE;
+    public GameObject missile_2_AOE;
+    public GameObject missile_3_AOE;
+
     public SphereCollider missileHitCollider;
     public GameObject missileImpactParticles;
     public GameObject laserHit;
@@ -53,6 +58,8 @@ public class BulletPhysics : MonoBehaviour
         }
         if(bulletType == 1){
             anim = GetComponent<Animator>();
+
+            collider_missile = GetComponent<BoxCollider>();
             
             mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
 
@@ -79,12 +86,7 @@ public class BulletPhysics : MonoBehaviour
                 BlasterBulletCollision();   
             }
             else if(bulletType == 1){
-                rb.velocity = Vector3.zero;
-                anim.SetBool("isHit", true);
-                GameObject impactParticles = Instantiate(missileImpactParticles, lastHitPos, Quaternion.identity) as GameObject;
-                missileAOE = Instantiate(missileHitAOE, lastHitPos, Quaternion.identity) as GameObject;
-                missileHitCollider = missileAOE.GetComponent<SphereCollider>();
-                missileHitCollider.enabled = false;
+                MissileLauncherCollision();
             }
             else if(bulletType == 2){
                 GameObject impactParticles = Instantiate(laserHit, lastHitPos, Quaternion.identity) as GameObject;
@@ -96,12 +98,7 @@ public class BulletPhysics : MonoBehaviour
                 BlasterBulletCollision();
             }
             else if(bulletType == 1){
-                rb.velocity = Vector3.zero;
-                anim.SetBool("isHit", true);
-                GameObject impactParticles = Instantiate(missileImpactParticles, lastHitPos, Quaternion.identity) as GameObject;
-                missileAOE = Instantiate(missileHitAOE, lastHitPos, Quaternion.identity) as GameObject;
-                missileHitCollider = missileAOE.GetComponent<SphereCollider>();
-                missileHitCollider.enabled = false;
+                MissileLauncherCollision();
             }
             else if(bulletType == 2){
                 GameObject impactParticles = Instantiate(laserHit, lastHitPos, Quaternion.identity) as GameObject;
@@ -113,12 +110,7 @@ public class BulletPhysics : MonoBehaviour
                 BlasterBulletCollision();
             }
             else if(bulletType == 1){
-                rb.velocity = Vector3.zero;
-                anim.SetBool("isHit", true);
-                GameObject impactParticles = Instantiate(missileImpactParticles, lastHitPos, Quaternion.identity) as GameObject;
-                missileAOE = Instantiate(missileHitAOE, lastHitPos, Quaternion.identity) as GameObject;
-                missileHitCollider = missileAOE.GetComponent<SphereCollider>();
-                missileHitCollider.enabled = false;
+                MissileLauncherCollision();
             }
             else if(bulletType == 2){
                 GameObject impactParticles = Instantiate(laserHit, lastHitPos, Quaternion.identity) as GameObject;
@@ -130,12 +122,7 @@ public class BulletPhysics : MonoBehaviour
                 BlasterBulletCollision();
             }
             else if(bulletType == 1){
-                rb.velocity = Vector3.zero;
-                anim.SetBool("isHit", true);
-                GameObject impactParticles = Instantiate(missileImpactParticles, lastHitPos, Quaternion.identity) as GameObject;
-                missileAOE = Instantiate(missileHitAOE, lastHitPos, Quaternion.identity) as GameObject;
-                missileHitCollider = missileAOE.GetComponent<SphereCollider>();
-                missileHitCollider.enabled = false;
+                MissileLauncherCollision();
             }
             else if(bulletType == 2){
                 GameObject impactParticles = Instantiate(laserHit, lastHitPos, Quaternion.identity) as GameObject;
@@ -143,12 +130,41 @@ public class BulletPhysics : MonoBehaviour
         }
     }
 
+    public void MissileLauncherCollision(){
+        EnableAOECollider();
+        rb.velocity = Vector3.zero;
+        collider_missile.enabled = false;
+        GameObject impactParticles = Instantiate(missileImpactParticles, transform.position, Quaternion.identity) as GameObject;
+        anim.SetBool("isHit", true);
+    }
+
     public void BlasterBulletCollision(){
-        GameObject currentPlayerObject = PlayerManager.current.currentPlayerObject;
-        PlayerControl playerScript = currentPlayerObject.GetComponent<PlayerControl>();
-        playerScript.Invoke("PlayBlasterImpact", 0.01f);
-        GameObject impactParticles = Instantiate(bulletImpactParticles, lastHitPos, Quaternion.identity) as GameObject;
+        AudioManager.current.currentSFXTrack = 0;
+        AudioManager.current.PlaySfx();
+
+        GameObject impactParticles = Instantiate(bulletImpactParticles, transform.position, Quaternion.identity) as GameObject;
+
         DestroySelf();  
+    }
+
+    public void EnableAOECollider(){
+        if(PlayerManager.current.gunType == 1){
+            AudioManager.current.currentSFXTrack = 1;
+            AudioManager.current.PlaySfx();
+
+            if(PlayerManager.current.gun_progress1 == 0){
+                missileAOE = Instantiate(missile_1_AOE, transform.position, Quaternion.identity) as GameObject;
+            }
+            else if(PlayerManager.current.gun_progress1 == 1){
+                missileAOE = Instantiate(missile_2_AOE, transform.position, Quaternion.identity) as GameObject;
+            }
+            else if(PlayerManager.current.gun_progress1 == 2){
+                missileAOE = Instantiate(missile_3_AOE, transform.position, Quaternion.identity) as GameObject;
+            }
+        }
+
+        MissileAOE missileAOEscript = missileAOE.GetComponent<MissileAOE>();
+        missileAOEscript.damage = damage;
     }
 
     public void DisableAOECollider(){
