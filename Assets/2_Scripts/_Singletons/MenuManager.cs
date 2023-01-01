@@ -16,6 +16,10 @@ public class MenuManager : MonoBehaviour
     public GameObject gameOverScreen;
     public GameObject blackScreen;
     public GameObject forewordScreen;
+    public GameObject pauseMenuScreen;
+    public GameObject pressAnyKeyText;
+
+    public bool isPaused = false;
 
     public GameObject titleCard;
     public SpriteRenderer titleSpriteRend;
@@ -57,12 +61,14 @@ public class MenuManager : MonoBehaviour
 
         PartsUI = GameObject.Find("UI_Player_Parts");
         UIPartsScript = PartsUI.GetComponent<UI_Parts>();
-        UIPartsScript.Invoke("DisablePartsUI", 0.1f);
 
         CrystalManager = GameObject.Find("CrystalManager");
         crystalManagerScript = CrystalManager.GetComponent<UI_CrystalManager>();
 
-        GameController.current.Invoke("DisableUI", 0.2f);
+        pauseMenuScreen = GameObject.Find("PauseMenu");
+        pauseMenuScreen.SetActive(false);
+
+        GameController.current.Invoke("DisableUI", 0.1f);
     }
     
     // Start is called before the first frame update
@@ -87,6 +93,7 @@ public class MenuManager : MonoBehaviour
         TempT = title_alpha;
 
         Foreword();
+        ClosePartsUI();
     }
     // Update is called once per frame
     void Update()
@@ -96,10 +103,10 @@ public class MenuManager : MonoBehaviour
                 if (Input.anyKey){
                     if(!fadeFromBlackStarted){
                         if(DebugManager.current.testingMode){
-                            GameController.current.Invoke("NewGame", 0.01f);
+                            GameController.current.NewGame();
                         }
                         else{
-                            GameController.current.Invoke("NewGame", 0.01f);
+                            GameController.current.NewGame();
                         }
                     }
                 }
@@ -107,19 +114,34 @@ public class MenuManager : MonoBehaviour
             if(menuState == 0){
                 if (Input.anyKey){
                     if(!fadeFromBlackStarted){
-                        Invoke("MainMenu", 0.01f);
+                        MainMenu();
                     }
                 }
             }
         }
 
         if(GameController.current.gameStarted){
-            if(Input.GetButtonUp("Tab")){
+            if(Input.GetButtonDown("Tab")){
                 if(!UIPartsScript.isEnabled){
                     OpenPartsUI();
                 }
                 else{
                     ClosePartsUI();
+                }
+            }
+
+            if(Input.GetKeyDown(KeyCode.Escape)){
+                if(isPaused){
+                    pauseMenuScreen.SetActive(false);
+                    GameController.current.ResumeGame();
+                    isPaused = false;
+                }
+                else{
+                    UIPartsScript.CloseAllWindows();
+                    ClosePartsUI();
+                    pauseMenuScreen.SetActive(true);
+                    GameController.current.PauseGame();
+                    isPaused = true;
                 }
             }
         }
@@ -191,12 +213,14 @@ public class MenuManager : MonoBehaviour
         forewordScreen.SetActive(true);
         mainMenuScreen.SetActive(false);
         gameOverScreen.SetActive(false);
+        pressAnyKeyText.SetActive(false);
     }
     public void MainMenu(){
         FadeFromBlack();
         forewordScreen.SetActive(false);
         mainMenuScreen.SetActive(true);
         gameOverScreen.SetActive(false);
+        pressAnyKeyText.SetActive(true);
         menuState = 1;
         AudioManager.current.currentTrackNum = 1;
         AudioManager.current.PlayMusicTrack();
@@ -211,26 +235,24 @@ public class MenuManager : MonoBehaviour
         FadeFromBlack();
         mainMenuScreen.SetActive(false);
         gameOverScreen.SetActive(false);
+        pressAnyKeyText.SetActive(false);
         menuState = 2;
+        ClosePartsUI();
     }
     public void ChangeSceneTo(){
-        GameController.current.Invoke("ChangeSceneTo", 0.1f);
+        GameController.current.ChangeSceneTo();
         FadeFromBlack();
     }
     public void ChangeSceneAndReboot(){
-        GameController.current.Invoke("ChangeSceneAndReboot", 0.1f);
+        GameController.current.ChangeSceneAndReboot();
         FadeFromBlack();
     }
 
     public void OpenPartsUI(){
-        UIPartsScript.Invoke("EnablePartsUI", 0.1f);
+        UIPartsScript.EnablePartsUI();
     }
     public void ClosePartsUI(){
-        UIPartsScript.Invoke("DisablePartsUI", 0.1f);
+        UIPartsScript.DisablePartsUI();
         isMouseOver = false;
-    }
-
-    public void CloseWindows(){
-        
     }
 }

@@ -1,9 +1,11 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class PickUpScript : MonoBehaviour
 {
+    public GameObject originalParent;
     public Rigidbody rb;
     public bool activated = false;
 
@@ -13,6 +15,10 @@ public class PickUpScript : MonoBehaviour
     private GameObject respawnCircle;
     public GameObject respawnCircleObject;
     public Vector3 scenePos;
+    public string sceneName;
+    public int id;
+
+    public bool alreadySpawned;
 
     public SpriteRenderer spriteRend;
 
@@ -62,11 +68,13 @@ public class PickUpScript : MonoBehaviour
 
     public GameObject prevBotOwner;
 
-    // Start is called before the first frame update
-    void Start()
-    {
+    void Awake(){
         sceneInitObject = GameObject.Find("SceneInit");
         sceneInitScript = sceneInitObject.GetComponent<SceneInit>();
+
+        if(transform.parent != null){
+            originalParent = transform.parent.gameObject;
+        }
 
         rb = GetComponent<Rigidbody>();
         spriteRend = GetComponent<SpriteRenderer>();
@@ -74,6 +82,12 @@ public class PickUpScript : MonoBehaviour
 
         UISpriteRend = UI_PickUp.GetComponent<SpriteRenderer>();
 
+        AddToList();
+    }
+
+    // Start is called before the first frame update
+    void Start()
+    {
         if(pickupType == 0 || pickupType == 9){ //Head Backup Point
             pingAnim = pingObject.GetComponent<Animator>();
             pingObject.SetActive(false);
@@ -107,8 +121,6 @@ public class PickUpScript : MonoBehaviour
 
         particlePickup.SetActive(false);
 
-        GameController.current.ListPickups.Add(gameObject);
-
         EraseOutline();
         EraseText();
         TransferUpgradeProperties();
@@ -124,7 +136,7 @@ public class PickUpScript : MonoBehaviour
                     if(!isUsed){
                         PlayerManager.current.backupSpawnPos = new Vector3(transform.position.x, transform.position.y,transform.position.z);
                         PlayerManager.current.backupObject = gameObject;
-                        PlayerManager.current.Invoke("SetBackupPoint",0.1f);
+                        PlayerManager.current.SetBackupPoint();
                         pingObject.SetActive(true);
                         pingAnim.SetBool("hidden", false);
                         isUsed = true;
@@ -134,7 +146,7 @@ public class PickUpScript : MonoBehaviour
                 }
                 if(pickupType == 1){
                     if(!PlayerManager.current.hasBody){
-                        PlayerManager.current.Invoke("PickupBody",0.1f);
+                        PlayerManager.current.PickupBody();
                         DestroySelf();
                     }
                     else{
@@ -143,25 +155,23 @@ public class PickUpScript : MonoBehaviour
                 }
                 else if(pickupType == 2){
                     if(!PlayerManager.current.hasDrill){
-                        PlayerManager.current.Invoke("PickupDrill",0.1f);
+                        PlayerManager.current.PickupDrill();
                         DestroySelf();
                     }
                     else{
-
+                        
                     }
                 }
                 else if(pickupType == 3){ //Guns
                     if(PlayerManager.current.hasGun){
                         PlayerManager.current.currentPickup_progress1 = progress1;
                         PlayerManager.current.currentPickup_progress2 = progress2;
-                        Debug.Log("Step1: progress1 = " + progress1);
-                        Debug.Log("Step1: progress2 = " + progress2);
                         if(gunType == 0){   //Blaster
                             if(PlayerManager.current.gunType == 0){
                                 //Repair Gun
                             }
                             else{
-                                PlayerManager.current.Invoke("SwitchToBlaster",0.1f);
+                                PlayerManager.current.SwitchToBlaster();
                             }
                         }
                         else if(gunType == 1){   //Missile
@@ -169,7 +179,7 @@ public class PickUpScript : MonoBehaviour
                                 //Repair Gun
                             }
                             else{
-                                PlayerManager.current.Invoke("SwitchToMissile",0.1f);
+                                PlayerManager.current.SwitchToMissile();
                             }
                         }
                         else if(gunType == 2){   //Laser
@@ -177,15 +187,7 @@ public class PickUpScript : MonoBehaviour
                                 //Repair Gun
                             }
                             else{
-                                PlayerManager.current.Invoke("SwitchToLaser",0.1f);
-                            }
-                        }
-                        else if(gunType == 3){   //Electro
-                            if(PlayerManager.current.gunType == 3){
-                                //Repair Gun
-                            }
-                            else{
-                                PlayerManager.current.Invoke("SwitchToElectro",0.1f);
+                                PlayerManager.current.SwitchToLaser();
                             }
                         }
                         DestroySelf();
@@ -193,16 +195,14 @@ public class PickUpScript : MonoBehaviour
                     else{
                         PlayerManager.current.currentPickup_progress1 = progress1;
                         PlayerManager.current.currentPickup_progress2 = progress2;
-                        Debug.Log("Step1: progress1 = " + progress1);
-                        Debug.Log("Step1: progress2 = " + progress2);
                         if(gunType == 0){  
-                            PlayerManager.current.Invoke("PickupBlaster",0.1f);
+                            PlayerManager.current.PickupBlaster();
                         }
                         else if(gunType == 1){  
-                            PlayerManager.current.Invoke("PickupMissile",0.1f);
+                            PlayerManager.current.PickupMissile();
                         }
                         else if(gunType == 2){
-                            PlayerManager.current.Invoke("PickupLaser",0.1f);
+                            PlayerManager.current.PickupLaser();
                         }
                         DestroySelf();
                     }
@@ -211,19 +211,19 @@ public class PickUpScript : MonoBehaviour
                     if(!PlayerManager.current.hasLegs){
                         DestroySelf();
                         if(legType == 0){
-                            PlayerManager.current.Invoke("PickupWorkerBoots",0.1f);
+                            PlayerManager.current.PickupWorkerBoots();
                         }
                         else if(legType == 1){
-                            PlayerManager.current.Invoke("PickupJumpBoots",0.1f);
+                            PlayerManager.current.PickupJumpBoots();
                         }
                     }
                     else{
                         DestroySelf();
                         if(legType == 0){
-                            PlayerManager.current.Invoke("SwitchToWorkerBoots",0.1f);
+                            PlayerManager.current.SwitchToWorkerBoots();
                         }
                         else if(legType == 1){
-                            PlayerManager.current.Invoke("SwitchToJumpBoots",0.1f);
+                            PlayerManager.current.SwitchToJumpBoots();
                         }
                     }
                 }
@@ -231,7 +231,7 @@ public class PickUpScript : MonoBehaviour
                     if(!isUsed){
                         PlayerManager.current.backupSpawnPos = new Vector3(transform.position.x, transform.position.y,transform.position.z);
                         PlayerManager.current.backupObject = gameObject;
-                        PlayerManager.current.Invoke("SetBackupPoint",0.1f);
+                        PlayerManager.current.SetBackupPoint();
                         pingObject.SetActive(true);
                         pingAnim.SetBool("hidden", false);
 
@@ -275,10 +275,14 @@ public class PickUpScript : MonoBehaviour
     }
 
     public void SetScenePos(){
+        Debug.Log("SetScenePos : " + scenePos);
         scenePos = transform.position;
     }
 
     public void DropNewPickup(){
+        id = PersistentGameObjects.current.nextID;
+        PersistentGameObjects.current.nextID++;
+
         spriteRend.material = whiteSpriteMat;
         isSpawning = true;
         activated = false;
@@ -293,7 +297,7 @@ public class PickUpScript : MonoBehaviour
         transform.eulerAngles = new Vector3(transform.eulerAngles.x, 0, transform.eulerAngles.z);
         UI_PickUp.SetActive(false);
 
-        GameController.current.Invoke("HighlightPickups", 0.1f);
+        GameController.current.HighlightPickups();
         TransferUpgradeProperties();
     }
 
@@ -324,34 +328,34 @@ public class PickUpScript : MonoBehaviour
 
         //rename gameobject
         if(pickupType == 0){
-            gameObject.name = "BotHead " + progressNum.ToString();
+            gameObject.name = "BotHead " + id.ToString();
         }
         else if(pickupType == 1){
-            gameObject.name = "WorkerBody " + progressNum.ToString();
+            gameObject.name = "WorkerBody " + id.ToString();
         }
         else if(pickupType == 2){
-            gameObject.name = "WorkerDrill " + progressNum.ToString();
+            gameObject.name = "WorkerDrill " + id.ToString();
         }
         else if(pickupType == 3){
             if(gunType == 0){
-                gameObject.name = "BlasterGun " + progressNum.ToString();
+                gameObject.name = "BlasterGun " + id.ToString();
             }
             else if(gunType == 1){
-                gameObject.name = "MissileLauncher " + progressNum.ToString();
+                gameObject.name = "MissileLauncher " + id.ToString();
             }
             else if(gunType == 2){
-                gameObject.name = "EnergyBeam " + progressNum.ToString();
+                gameObject.name = "EnergyBeam " + id.ToString();
             }
             else if(gunType == 3){
-                gameObject.name = "ElectroGun " + progressNum.ToString();
+                gameObject.name = "ElectroGun " + id.ToString();
             }
         }
         else if(pickupType == 4){
             if(legType == 0){
-                gameObject.name = "WorkerLegs " + progressNum.ToString();
+                gameObject.name = "WorkerLegs " + id.ToString();
             }
             else if(legType == 1){
-                gameObject.name = "WorkerLegs " + progressNum.ToString();
+                gameObject.name = "WorkerLegs " + id.ToString();
             }
         }
     }
@@ -369,12 +373,34 @@ public class PickUpScript : MonoBehaviour
         DrawText();
     }
 
+    public void AddToList(){
+        Scene scene = SceneManager.GetActiveScene();
+        sceneName = scene.name;
+
+        GameController.current.ListPickups.Add(gameObject);
+        PersistentGameObjects.current.AddGameObject(gameObject, sceneName);
+    }
+
     public void RemoveFromList(){
         GameController.current.ListPickups.Remove(gameObject);
+        PersistentGameObjects.current.RemoveGameObject(id);
+    }
+
+    public void Active(){
+        RemoveFromList();
+        transform.position = scenePos;
+        rb.useGravity = true;
+        rb.constraints = RigidbodyConstraints.FreezePositionZ | RigidbodyConstraints.FreezeRotation;
+    }
+    public void Inactive(){
+        rb.useGravity = false;
+        rb.constraints = RigidbodyConstraints.FreezeAll;
+        transform.position = new Vector3(9000f,9000f,9000f);
     }
 
     public void DestroySelf(){
         GameController.current.ListPickups.Remove(gameObject);
+        PersistentGameObjects.current.RemoveGameObject(id);
         Destroy(gameObject);
     }
 }

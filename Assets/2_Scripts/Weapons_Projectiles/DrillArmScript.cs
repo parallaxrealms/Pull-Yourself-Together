@@ -4,11 +4,6 @@ using UnityEngine;
 
 public class DrillArmScript : MonoBehaviour
 {
-    private GameObject parentObject;
-    private GameObject parentParentObject;
-    private PlayerControl parentScript;
-    
-    public int entityNum;//0= player, 1=enemy
     private AudioSource audio;
     public AudioClip clip_drill;
 
@@ -23,14 +18,6 @@ public class DrillArmScript : MonoBehaviour
     void Start()
     {
         audio = GetComponent<AudioSource>();
-        if(entityNum == 0){
-            parentObject = transform.parent.gameObject;
-            parentParentObject = parentObject.transform.parent.gameObject;
-            parentScript = parentParentObject.GetComponent<PlayerControl>();
-
-            collider = GetComponent<BoxCollider>();
-            DrillOff();
-        }
     }
 
     // Update is called once per frame
@@ -43,19 +30,9 @@ public class DrillArmScript : MonoBehaviour
         audio.clip = clip_drill;
         audio.loop = true;
         audio.Play();
-        if(entityNum == 0){
-            if(!drillOn){
-                drillOn = true;
-                collider.enabled = true;
-            }
-        }
     }
     public void DrillOff(){
         audio.loop = false;
         audio.Stop();
-        if(entityNum == 0){
-            drillOn = false;
-            collider.enabled = false;
-        }
     }
 }

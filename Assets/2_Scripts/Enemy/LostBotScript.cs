@@ -497,12 +497,14 @@ public class LostBotScript : MonoBehaviour
     }
 
     public void DisplayDamage(){
-        dmgNumPos = transform.position;
-        GameObject newDamageNum = Instantiate(damageNum, new Vector3(dmgNumPos.x, dmgNumPos.y, dmgNumPos.z), Quaternion.identity) as GameObject;
-        GameObject canvasObject = GameObject.Find("WorldCanvas");
-        newDamageNum.transform.SetParent(canvasObject.transform);
-        DamageNum damageNumScript = newDamageNum.GetComponent<DamageNum>();
-        damageNumScript.damageNum = Mathf.RoundToInt(damageTaken);
+        if(GameController.current.damageNumOption){
+            dmgNumPos = transform.position;
+            GameObject newDamageNum = Instantiate(damageNum, new Vector3(dmgNumPos.x, dmgNumPos.y, dmgNumPos.z), Quaternion.identity) as GameObject;
+            GameObject canvasObject = GameObject.Find("WorldCanvas");
+            newDamageNum.transform.SetParent(canvasObject.transform);
+            DamageNum damageNumScript = newDamageNum.GetComponent<DamageNum>();
+            damageNumScript.damageNum = Mathf.RoundToInt(damageTaken);
+        }
     }
     
     public void EnableDrillArm(){

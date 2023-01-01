@@ -66,6 +66,10 @@ public class LostBotMeta : MonoBehaviour
         lostBotScript.activated = true;
     }
 
+    public void Inactive(){
+        lostBotScript.Inactive();
+    }
+
     public void LoseGun(){
         ResetBot();
     }

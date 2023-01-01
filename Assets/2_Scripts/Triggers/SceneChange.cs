@@ -26,12 +26,13 @@ public class SceneChange : MonoBehaviour
     private void OnTriggerEnter(Collider other) {
         if(other.gameObject.tag == "Player"){
             if(!triggered){
-                GameController.current.Invoke("SetCurrentScenePos", 0.01f);
                 PlayerManager.current.sceneDirection = playerWalkDirection;
                 GameController.current.sceneChangeName = sceneToName;
                 GameController.current.triggerSpawnName = triggerConnectionName;
-                ObjectManager.current.Invoke("SaveCurrentObjects",0.1f);
-                MenuManager.current.Invoke("ChangeSceneTo", 0.01f);
+                
+                PersistentGameObjects.current.TransferPersistentObjects();
+
+                MenuManager.current.ChangeSceneTo();
                 triggered = true;
             }
         }

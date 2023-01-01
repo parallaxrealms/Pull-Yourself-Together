@@ -20,7 +20,7 @@ public class SceneInit : MonoBehaviour
         AudioManager.current.PlayMusicTrack();
 
         MenuManager.current.currentLevelID = levelID;
-        ObjectManager.current.currentLevelID = levelID;
+
         if(levelID == 1){
             if(!GameController.current.init_CoL_0){
                 levelVisited = false;
@@ -81,7 +81,6 @@ public class SceneInit : MonoBehaviour
         else{
             GameController.current.newScene = false;
         }
-        GameController.current.Invoke("ResetSceneObjects",0.1f);
     }
 
     // Start is called before the first frame update
@@ -92,11 +91,11 @@ public class SceneInit : MonoBehaviour
             playerSpawnPoint = GameObject.Find("SpawnStartPos");
 
             PlayerManager.current.spawnPosition = playerSpawnPoint.transform.position;
-            PlayerManager.current.Invoke("InitPlayer", 0.01f);
+            PlayerManager.current.InitPlayer();
         }
         else if(GameController.current.playerRespawning){
             PlayerManager.current.spawnPosition = PlayerManager.current.backupSpawnPos;
-            PlayerManager.current.Invoke("RebootPlayer", 0.01f);
+            PlayerManager.current.RebootPlayer();
             GameController.current.playerRespawning = false;
         }
         else{
@@ -114,10 +113,10 @@ public class SceneInit : MonoBehaviour
             if(PlayerManager.current.sceneDirection == "Up"){
                 PlayerManager.current.spawnPosition = new Vector3(playerSpawnPoint.transform.position.x,playerSpawnPoint.transform.position.y + 40.0f,playerSpawnPoint.transform.position.z);
             }
-            PlayerManager.current.Invoke("RebootNewMap", 0.1f);
+            PlayerManager.current.RebootNewMap();
         }
 
-        MenuManager.current.Invoke("ResetTitleCard", 0.1f);
+        MenuManager.current.ResetTitleCard();
     }
 
     // Update is called once per frame

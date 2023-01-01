@@ -38,5 +38,6 @@ public class PartButtonScript : MonoBehaviour
 
     public void OnMouseDown(){
         parentScript.Invoke("DropPart",0.01f);
+        MenuManager.current.isMouseOver = false;
     }
 }

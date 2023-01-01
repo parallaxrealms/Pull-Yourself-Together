@@ -45,8 +45,6 @@ public class UI_Parts : MonoBehaviour
         rightArmScript = rightArmPart.GetComponent<UI_Part_Select>();
         bodyPartScript = bodyPart.GetComponent<UI_Part_Select>();
         legsPartScript = legsPart.GetComponent<UI_Part_Select>();
-
-        DisablePartsUI();
     }
 
     // Update is called once per frame
@@ -79,59 +77,61 @@ public class UI_Parts : MonoBehaviour
     public void EnablePartsUI(){
         isEnabled = true;
         spriteRend.enabled = true;
-        headPartScript.Invoke("enablePartUI", 0.01f);
-        leftArmScript.Invoke("enablePartUI", 0.01f);
-        rightArmScript.Invoke("enablePartUI", 0.01f);
-        bodyPartScript.Invoke("enablePartUI", 0.01f);
-        legsPartScript.Invoke("enablePartUI", 0.01f);
-        crystalManagerScript.Invoke("ShowCrystalUI", 0.1f);
+        headPartScript.enablePartUI();
+        leftArmScript.enablePartUI();
+        rightArmScript.enablePartUI();
+        bodyPartScript.enablePartUI();
+        legsPartScript.enablePartUI();
+        crystalManagerScript.ShowCrystalUI();
     }
 
     public void DisablePartsUI(){
+        headPartScript.disablePartUI();
+        leftArmScript.disablePartUI();
+        rightArmScript.disablePartUI();
+        bodyPartScript.disablePartUI();
+        legsPartScript.disablePartUI();
+        crystalManagerScript.HideCrystalUI();
         isEnabled = false;
         spriteRend.enabled = false;
-        headPartScript.Invoke("disablePartUI", 0.01f);
-        leftArmScript.Invoke("disablePartUI", 0.01f);
-        rightArmScript.Invoke("disablePartUI", 0.01f);
-        bodyPartScript.Invoke("disablePartUI", 0.01f);
-        legsPartScript.Invoke("disablePartUI", 0.01f);
-        crystalManagerScript.Invoke("HideCrystalUI", 0.1f);
     }
     public void CloseAllWindows(){
-        headPartScript.Invoke("CloseWindow", 0.01f);
-        leftArmScript.Invoke("CloseWindow", 0.01f);
-        rightArmScript.Invoke("CloseWindow", 0.01f);
-        bodyPartScript.Invoke("CloseWindow", 0.01f);
-        legsPartScript.Invoke("CloseWindow", 0.01f);
+        headPartScript.CloseWindow();
+        leftArmScript.CloseWindow();
+        rightArmScript.CloseWindow();
+        bodyPartScript.CloseWindow();
+        legsPartScript.CloseWindow();
         MenuManager.current.isMouseOver = false;
-    }
-    public void PlayerDroppedParts(){
-        if(PlayerManager.current.hasLegs){
-            legsPartScript.Invoke("DropPartDisableUI", 0.01f);
-        }
-        if(PlayerManager.current.hasDrill){
-            rightArmScript.Invoke("DropPartDisableUI", 0.01f);
-        }
-        if(PlayerManager.current.hasGun){
-            leftArmScript.Invoke("DropPartDisableUI", 0.01f);
-        }
-        if(PlayerManager.current.hasBody){
-            bodyPartScript.Invoke("DropPartDisableUI", 0.01f);
-        }
     }
 
     public void TriggerAllPartsDrop(){
-        if(PlayerManager.current.hasLegs){
-            legsPartScript.Invoke("DropPart", 0.01f);
+        if(PlayerManager.current.hasBody){
+            bodyPartScript.DropPart();
         }
+    }
+
+    public void DropOtherParts(){
         if(PlayerManager.current.hasDrill){
-            rightArmScript.Invoke("DropPart", 0.01f);
+            rightArmScript.DropPart();
         }
         if(PlayerManager.current.hasGun){
-            leftArmScript.Invoke("DropPart", 0.01f);
+            leftArmScript.DropPart();
         }
-        if(PlayerManager.current.hasBody){
-            bodyPartScript.Invoke("DropPart", 0.01f);
+        if(PlayerManager.current.hasLegs){
+            legsPartScript.DropPart();
+        }
+    }
+
+    public void TriggerLimbPartsDrop(){
+        if(PlayerManager.current.hasDrill){
+            rightArmScript.DropPart();
+        }
+        if(PlayerManager.current.hasGun){
+            leftArmScript.DropPart();
+        }
+        if(PlayerManager.current.hasLegs){
+            Debug.Log("TriggerLimbPartsDrop");
+            legsPartScript.DropPart();
         }
     }
 
@@ -139,48 +139,48 @@ public class UI_Parts : MonoBehaviour
         headPartScript.progress1 = temp_progress1;
         headPartScript.progress2 = temp_progress2;
         headPartScript.progressNum = temp_progressNum;
-        headPartScript.Invoke("GainWorkerHead", 0.01f);
+        headPartScript.GainWorkerHead();
     }
     public void GainWorkerBody(){
         bodyPartScript.progress1 = temp_progress1;
         bodyPartScript.progress2 = temp_progress2;
         bodyPartScript.progressNum = temp_progressNum;
-        bodyPartScript.Invoke("GainWorkerBody", 0.01f);
+        bodyPartScript.GainWorkerBody();
     }
     public void GainWorkerDrill(){
         rightArmScript.progress1 = temp_progress1;
         rightArmScript.progress2 = temp_progress2;
         rightArmScript.progressNum = temp_progressNum;
-        rightArmScript.Invoke("GainWorkerDrill", 0.01f);
+        rightArmScript.GainWorkerDrill();
     }
     public void GainBlaster(){
         leftArmScript.progress1 = temp_progress1;
         leftArmScript.progress2 = temp_progress2;
         leftArmScript.progressNum = temp_progressNum;
-        leftArmScript.Invoke("GainBlaster", 0.01f);
+        leftArmScript.GainBlaster();
     }
     public void GainMissileLauncher(){
         leftArmScript.progress1 = temp_progress1;
         leftArmScript.progress2 = temp_progress2;
         leftArmScript.progressNum = temp_progressNum;
-        leftArmScript.Invoke("GainMissileLauncher", 0.01f);
+        leftArmScript.GainMissileLauncher();
     }
     public void GainLaserBeam(){
         leftArmScript.progress1 = temp_progress1;
         leftArmScript.progress2 = temp_progress2;
         leftArmScript.progressNum = temp_progressNum;
-        leftArmScript.Invoke("GainLaserBeam", 0.01f);
+        leftArmScript.GainLaserBeam();
     }
     public void GainWorkerBoots(){
         legsPartScript.progress1 = temp_progress1;
         legsPartScript.progress2 = temp_progress2;
         legsPartScript.progressNum = temp_progressNum;
-        legsPartScript.Invoke("GainWorkerBoots", 0.01f);
+        legsPartScript.GainWorkerBoots();
     }
     public void GainJumpBoots(){
         legsPartScript.progress1 = temp_progress1;
         legsPartScript.progress2 = temp_progress2;
         legsPartScript.progressNum = temp_progressNum;
-        legsPartScript.Invoke("GainJumpBoots", 0.01f);
+        legsPartScript.GainJumpBoots();
     }
 }

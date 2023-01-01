@@ -53,6 +53,8 @@ public class GameController : MonoBehaviour
 
     public bool playerFellAbyss;
 
+    public bool damageNumOption = true;
+
     private void Awake(){
         DontDestroyOnLoad(this);
         current = this;
@@ -80,24 +82,6 @@ public class GameController : MonoBehaviour
         }
     }
 
-    public event Action onPauseGame;
-    public void PauseGame(){
-        if(onPauseGame != null){
-            onPauseGame();
-        }
-    }
-
-    public event Action onResumeGame;
-    public void ResumeGame(){
-        if(onResumeGame != null){
-            onResumeGame();
-        }
-    }
-
-    public void GetUI(){
-        Invoke("EnableUI", 0.01f);
-    }
-
     private void ResetGameController(){
         init_CoL_0 = false;
         init_CoL_1 = false;
@@ -105,22 +89,22 @@ public class GameController : MonoBehaviour
         init_Abyss_0 = false;
         init_Abyss_1 = false;
         init_Abyss_Boss = false;
-        crystalManagerScript.Invoke("Reset",0);
+        crystalManagerScript.Reset();
     }
 
     public void NewGame(){
         if(!gameStarted){
             ResetGameController();
-            MenuManager.current.Invoke("NewGame", 0.01f);
+            MenuManager.current.NewGame();
             SceneManager.LoadScene("CoL_0");
             gameStarted = true;
-            Invoke("HighlightPickups",2f);
+            Invoke("HighlightPickups",1f);
         }
     }
 
     public void TestGame(){
         if(!gameStarted){
-            MenuManager.current.Invoke("NewGame", 0.01f);
+            MenuManager.current.NewGame();
             SceneManager.LoadScene("TestLevel");
             gameStarted = true;
         }
@@ -130,15 +114,14 @@ public class GameController : MonoBehaviour
         gameStarted = false;
         playerSpawned = false;
         DestroyAllEnemyObjects();
-        ObjectManager.current.Invoke("ClearAll", 0.1f);
         SceneManager.LoadScene("MainMenu");
-        MenuManager.current.Invoke("GameOver", 0.1f);
+        MenuManager.current.GameOver();
         gameCamera.transform.position = camOriginalPos;
     }
 
     public void BossFightStarted(){
         AudioManager.current.currentTrackNum = 6;
-        AudioManager.current.Invoke("PlayMusic", 0.1f);
+        AudioManager.current.PlayMusicTrack();
     }
 
     public void EnableUI(){
@@ -154,25 +137,25 @@ public class GameController : MonoBehaviour
         foreach (GameObject worm in ListWorms)
         {
             EnemyScript enemyScript = worm.GetComponent<EnemyScript>();
-            enemyScript.Invoke("FindPlayer", 0.01f);
+            enemyScript.FindPlayer();
         }
 
         foreach (GameObject buzzer in ListBuzzers)
         {
             EnemyScript enemyScript = buzzer.GetComponent<EnemyScript>();
-            enemyScript.Invoke("FindPlayer", 0.01f);
+            enemyScript.FindPlayer();
         }
 
         foreach (GameObject bot in ListBots)
         {
             LostBotMeta botScript = bot.GetComponent<LostBotMeta>();
-            botScript.Invoke("FindPlayer", 0.01f);
+            botScript.FindPlayer();
         }
 
         foreach (GameObject boss in ListBosses)
         {
             CyberMantisScript bossScript = boss.GetComponent<CyberMantisScript>();
-            bossScript.Invoke("FindPlayer", 0.01f);
+            bossScript.FindPlayer();
         }
     }
 
@@ -187,41 +170,28 @@ public class GameController : MonoBehaviour
         Destroy(prevBotOwner);
     }
 
-    public void SetCurrentScenePos(){
-        foreach (GameObject pickup in ListPickups)
-        {
-            PickUpScript pickupScript = pickup.GetComponent<PickUpScript>();
-            pickupScript.Invoke("SetScenePos", 0.01f);
-        }
-        foreach (GameObject crystal in ListCrystals)
-        {
-            CrystalScript crystalScript = crystal.GetComponent<CrystalScript>();
-            crystalScript.Invoke("SetScenePos", 0.01f);
-        }
-    }
-
     public void InactivateEnemies(){
         foreach (GameObject worm in ListWorms)
         {
             EnemyScript enemyScript = worm.GetComponent<EnemyScript>();
-            enemyScript.Invoke("Inactive", 0.01f);
+            enemyScript.Inactive();
         }
 
         foreach (GameObject buzzer in ListBuzzers)
         {
             EnemyScript enemyScript = buzzer.GetComponent<EnemyScript>();
-            enemyScript.Invoke("Inactive", 0.01f);
+            enemyScript.Inactive();
         }
 
         foreach (GameObject bot in ListBots)
         {
             LostBotMeta botScript = bot.GetComponent<LostBotMeta>();
-            botScript.Invoke("Inactive", 0.01f);
+            botScript.Inactive();
         }
         foreach (GameObject boss in ListBosses)
         {
             CyberMantisScript bossScript = boss.GetComponent<CyberMantisScript>();
-            bossScript.Invoke("Inactive", 0.01f);
+            bossScript.Inactive();
         }
     }
 
@@ -232,100 +202,101 @@ public class GameController : MonoBehaviour
 
             if(pickupScript.pickupType == 0 || pickupScript.pickupType == 9){ //Head Reset
                 if(!pickupScript.isUsed){
-                    pickupScript.Invoke("EnablePickupParticles", 0.01f);
-                    pickupScript.Invoke("DrawOutline", 0.01f);
+                    pickupScript.EnablePickupParticles();
+                    pickupScript.DrawOutline();
                 }
             }
             if(pickupScript.pickupType == 1){ //Body
                 if(hasBody == false){
-                    pickupScript.Invoke("EnablePickupParticles", 0.01f);
-                    pickupScript.Invoke("DrawOutline", 0.01f);
+                    pickupScript.EnablePickupParticles();
+                    pickupScript.DrawOutline();
                 }
                 else{
-                    pickupScript.Invoke("DisablePickupParticles", 0.01f);
-                    pickupScript.Invoke("EraseOutline", 0.01f);
+                    pickupScript.DisablePickupParticles();
+                    pickupScript.EraseOutline();
                 }
             }
             if(pickupScript.pickupType == 2){ //Drill
                 if(hasBody == true){
                     if(hasDrill == false){
-                        pickupScript.Invoke("EnablePickupParticles", 0.01f);
-                        pickupScript.Invoke("DrawOutline", 0.01f);
+                        pickupScript.EnablePickupParticles();
+                        pickupScript.DrawOutline();
                     }
                     else{
-                        pickupScript.Invoke("DisablePickupParticles", 0.01f);
-                        pickupScript.Invoke("EraseOutline", 0.01f);
+                        pickupScript.DisablePickupParticles();
+                        pickupScript.EraseOutline();
                     }
                 }
                 else{
-                    pickupScript.Invoke("DisablePickupParticles", 0.01f);
-                    pickupScript.Invoke("EraseOutline", 0.01f);
+                    pickupScript.DisablePickupParticles();
+                    pickupScript.EraseOutline();
 
                 }
             }
             if(pickupScript.pickupType == 3){ //Gun
                 if(hasBody == true){
                     if(hasGun == false){
-                        pickupScript.Invoke("EnablePickupParticles", 0.01f);
-                        pickupScript.Invoke("DrawOutline", 0.01f);
+                        pickupScript.EnablePickupParticles();
+                        pickupScript.DrawOutline();
                     }
                     else{
                         if(pickupScript.gunType != PlayerManager.current.gunType){
-                            pickupScript.Invoke("EnablePickupParticles", 0.01f);
-                            pickupScript.Invoke("DrawOutline", 0.01f);
+                            pickupScript.EnablePickupParticles();
+                            pickupScript.DrawOutline();
                         }
                         else{
-                            pickupScript.Invoke("DisablePickupParticles", 0.01f);
-                            pickupScript.Invoke("EraseOutline", 0.01f);
+                            pickupScript.DisablePickupParticles();
+                            pickupScript.EraseOutline();
                         }
                     }
                 }
                 else{
-                    pickupScript.Invoke("DisablePickupParticles", 0.01f);
-                    pickupScript.Invoke("EraseOutline", 0.01f);
+                    pickupScript.DisablePickupParticles();
+                    pickupScript.EraseOutline();
 
                 }
             }
             if(pickupScript.pickupType == 4){ //Legs
                 if(hasBody == true){
                     if(hasLegs == false){
-                        pickupScript.Invoke("EnablePickupParticles", 0.01f);
-                        pickupScript.Invoke("DrawOutline", 0.01f);
+                        pickupScript.EnablePickupParticles();
+                        pickupScript.DrawOutline();
                     }
                     else{
                         if(pickupScript.legType != PlayerManager.current.legType){
-                            pickupScript.Invoke("EnablePickupParticles", 0.01f);
-                            pickupScript.Invoke("DrawOutline", 0.01f);
+                            pickupScript.EnablePickupParticles();
+                            pickupScript.DrawOutline();
                         }
                         else{
-                            pickupScript.Invoke("DisablePickupParticles", 0.01f);
-                            pickupScript.Invoke("EraseOutline", 0.01f);
+                            pickupScript.DisablePickupParticles();
+                            pickupScript.EraseOutline();
                         }
                     }
                 }
                 else{
-                    pickupScript.Invoke("DisablePickupParticles", 0.01f);
-                    pickupScript.Invoke("EraseOutline", 0.01f);
+                    pickupScript.DisablePickupParticles();
+                    pickupScript.EraseOutline();
 
                 }
             }
         }
     }
 
-    public void ResetSceneObjects(){
-        if(!newScene){
-           foreach (GameObject pickup in ListPickups){
-                PickUpScript pickupScript = pickup.GetComponent<PickUpScript>();
-                pickupScript.Invoke("DestroySelf", 0.01f);
-           }
-           foreach (GameObject crystal in ListCrystals){
-                CrystalScript crystalScript = crystal.GetComponent<CrystalScript>();
-                crystalScript.Invoke("DestroySelf", 0.01f);
-           }
-           ObjectManager.current.Invoke("SpawnCachedPickups", 0.01f);
-           ObjectManager.current.Invoke("SpawnCachedCrystals", 0.01f);
-        } 
-    }
+    // public void ResetSceneObjects(){
+    //     if(!newScene){
+    //        foreach (GameObject pickup in ListPickups.ToArray()){
+    //             PickUpScript pickupScript = pickup.GetComponent<PickUpScript>();
+    //             pickupScript.DestroySelf();
+    //        }
+    //        foreach (GameObject crystal in ListCrystals.ToArray()){
+    //             CrystalScript crystalScript = crystal.GetComponent<CrystalScript>();
+    //             crystalScript.DestroySelf();
+    //        }
+    //        DestroyAllEnemyObjects();
+    //        ObjectManager.current.SpawnCachedPickups();
+    //        ObjectManager.current.SpawnCachedCrystals();
+    //     } 
+    // }
 
     public void RebootFromCheckpoint(){
         EnableUI();
@@ -348,7 +319,7 @@ public class GameController : MonoBehaviour
     public void ChangeSceneTo(){
         DestroyAllEnemyObjects();
         if(sceneChangeName != null){
-            SceneManager.LoadScene(sceneChangeName);
+            SceneManager.LoadScene(sceneChangeName, LoadSceneMode.Single);
             sceneChangeName = null;
         }
     }
@@ -356,8 +327,36 @@ public class GameController : MonoBehaviour
         DestroyAllEnemyObjects();
         string backupScene = PlayerManager.current.backupSceneName;
         if(backupScene != null){
-            SceneManager.LoadScene(backupScene);
+            SceneManager.LoadScene(backupScene, LoadSceneMode.Single);
             backupScene = null;
+        }
+    }
+
+    public void PauseGame(){
+        Time.timeScale = 0;
+    }
+    public void ResumeGame(){
+        Time.timeScale = 1;
+    }
+
+    public void ScreenMode_Change(Int32 choice){
+        if(choice == 0){
+            Screen.fullScreenMode = FullScreenMode.ExclusiveFullScreen;
+        }
+        else if(choice == 1){
+            Screen.fullScreen = false;
+        }
+        else if(choice == 2){
+            Screen.SetResolution(1280, 720, false);
+        }
+    }
+
+    public void ChangeDamageOption(bool enabled){
+        if(enabled){
+            damageNumOption = true;
+        }
+        else{
+            damageNumOption = false;
         }
     }
 }

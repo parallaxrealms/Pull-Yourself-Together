@@ -29,16 +29,16 @@ public class PlayerHitTrigger : MonoBehaviour
             if(!PlayerManager.current.isHit && !PlayerManager.current.isDead){
                 EnemyBulletPhysics eBulletPhysics = other.gameObject.GetComponent<EnemyBulletPhysics>();
                 if(eBulletPhysics.bulletType == 1){
-                    PlayerManager.current.Invoke("TakeHardHit",0.01f);
+                    PlayerManager.current.TakeHardHit();
                 }
                 else{
-                    PlayerManager.current.Invoke("TakeHit",0.01f);
+                    PlayerManager.current.TakeHit();
                 }
             }
         }
         if(other.gameObject.tag == "MissileAOE"){
             if(!PlayerManager.current.isHit && !PlayerManager.current.isDead){
-                PlayerManager.current.Invoke("TakeHardHit",0.01f);
+                PlayerManager.current.TakeHitLimbs();
             }
         }
 
@@ -46,8 +46,8 @@ public class PlayerHitTrigger : MonoBehaviour
             if(!PlayerManager.current.isHit && !PlayerManager.current.isDead){
                 bossScript = other.gameObject.transform.parent.gameObject.GetComponent<CyberMantisScript>();
                 bossScript.attackCollider.enabled = false;
-                bossScript.Invoke("FindPlayer", 0.01f);
-                PlayerManager.current.Invoke("TakeHit",0.01f);
+                bossScript.FindPlayer();
+                PlayerManager.current.TakeHit();
             }
         }
 
@@ -55,22 +55,22 @@ public class PlayerHitTrigger : MonoBehaviour
             GameObject blueBot = GameObject.Find("BlueBot");
             BlueBotScript blueBotScript = blueBot.GetComponent<BlueBotScript>();
 
-            blueBotScript.Invoke("ActivateDialogue", 0.01f);
+            blueBotScript.ActivateDialogue();
             Destroy(other.gameObject);
         }
     }
 
     private void OnTriggerStay(Collider other) {
         if(other.gameObject.tag == "Enemy_Hit"){
-            PlayerManager.current.Invoke("TakeHit",0.01f);
+            PlayerManager.current.TakeHit();
         }
 
         if(other.gameObject.tag == "HitCollision"){
             if(!PlayerManager.current.isHit && !PlayerManager.current.isDead){
                 enemyScript = other.gameObject.transform.parent.gameObject.GetComponent<EnemyScript>();
                 enemyScript.attackCollider.enabled = false;
-                enemyScript.Invoke("AggroReset", 0.01f);
-                PlayerManager.current.Invoke("TakeHit",0.01f);
+                enemyScript.AggroReset();
+                PlayerManager.current.TakeHit();
             }
         }
     }

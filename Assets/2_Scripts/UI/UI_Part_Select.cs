@@ -69,7 +69,6 @@ public class UI_Part_Select : MonoBehaviour
             buttonSpriteRend = selfDButton.GetComponent<SpriteRenderer>();
             buttonCollider = selfDButton.GetComponent<BoxCollider>();
             buttonScript = selfDButton.GetComponent<PartButtonScript>();
-            disablePartUI();
         }
         else{
             objectSprite.sprite = null;
@@ -77,7 +76,6 @@ public class UI_Part_Select : MonoBehaviour
             buttonSpriteRend = dropButton.GetComponent<SpriteRenderer>();
             buttonCollider = dropButton.GetComponent<BoxCollider>();
             buttonScript = dropButton.GetComponent<PartButtonScript>();
-            disablePartUI();
         }
     }
 
@@ -87,9 +85,7 @@ public class UI_Part_Select : MonoBehaviour
         
     }
 
-    private void ResetPart(){
-        Debug.Log("ResetPart IS CALLED");
-
+    public void ResetPart(){
         Destroy(windowInfo);
         windowInfo = null;
         
@@ -126,8 +122,6 @@ public class UI_Part_Select : MonoBehaviour
         windowInfo.transform.localPosition = windowClosedPos;
         windowInfoScript = windowInfo.GetComponent<UI_Window_Part>();
 
-        windowInfoScript.Invoke("SetCurrentPartProperties",0);
-
         partEnabled = true;
 
         if(partType != 0){
@@ -140,7 +134,7 @@ public class UI_Part_Select : MonoBehaviour
         }
     }
 
-    private void enablePartUI(){
+    public void enablePartUI(){
         if(partEnabled){
             spriteRend.sprite = bg_inactive;
             objectSprite.enabled = true;
@@ -151,15 +145,17 @@ public class UI_Part_Select : MonoBehaviour
             buttonCollider.enabled = true;
         }
     }
-    private void disablePartUI(){
-        objectSprite.enabled = false;
-        collider.enabled = false;  
-        spriteRend.enabled = false;
+    public void disablePartUI(){
+        if(objectSprite != null){
+            objectSprite.enabled = false;
+            collider.enabled = false;  
+            spriteRend.enabled = false;
 
-        buttonSpriteRend.enabled = false;
-        buttonCollider.enabled = false;
-        if(windowOpen){
-            CloseWindow();
+            buttonSpriteRend.enabled = false;
+            buttonCollider.enabled = false;
+            if(windowOpen){
+                CloseWindow();
+            }
         }
     }
 
@@ -167,39 +163,39 @@ public class UI_Part_Select : MonoBehaviour
         TransferPartProperties();
         DropPartDisableUI();
         if(partType == 0){//Head
-            parentScript.Invoke("PlayerDroppedParts", 0.1f);
-            PlayerManager.current.Invoke("DropAllParts", 0.12f);
-            PlayerManager.current.Invoke("Death", 0.12f);
-            parentScript.Invoke("DisablePartsUI", 0.12f);
+            parentScript.DropOtherParts();
+            PlayerManager.current.DropAllParts();
+            PlayerManager.current.Death();
+            parentScript.DisablePartsUI();
         }
-        if(partType == 1){//Body
+        else if(partType == 1){//Body
             if(PlayerManager.current.hasLegs || PlayerManager.current.hasDrill 
             || PlayerManager.current.hasGun){
-                parentScript.Invoke("PlayerDroppedParts", 0.1f);
-                PlayerManager.current.Invoke("DropAllParts", 0.12f);
+                parentScript.DropOtherParts();
+                PlayerManager.current.DropAllParts();
             }
             else{
-
-                PlayerManager.current.Invoke("DropBody", 0.1f);
+                PlayerManager.current.DropBody();
             }
-            parentScript.Invoke("DisablePartsUI", 0.1f);
+            parentScript.DisablePartsUI();
         }
-        if(partType == 2){//Drill
-            PlayerManager.current.Invoke("DropDrill", 0.1f);
-            parentScript.Invoke("DisablePartsUI", 0.12f);
+        else if(partType == 2){//Drill
+            PlayerManager.current.DropDrill();
+            parentScript.DisablePartsUI();
         }
-        if(partType == 3){//Gun
-            PlayerManager.current.Invoke("DropGun", 0.1f);
-            parentScript.Invoke("DisablePartsUI", 0.12f);
+        else if(partType == 3){//Gun
+            PlayerManager.current.DropGun();
+            parentScript.DisablePartsUI();
         }
-        if(partType == 4){//Legs
-            PlayerManager.current.Invoke("DropLegs", 0.1f);
-            parentScript.Invoke("DisablePartsUI", 0.12f);
+        else if(partType == 4){//Legs
+            Debug.Log("DropPart Legs");
+            PlayerManager.current.DropLegs();
+            parentScript.DisablePartsUI();
         }
+        Invoke("turnMouseOverOffDelayed", 0.1f);
     }
 
     public void TransferPartProperties(){
-        Debug.Log("UI_Part_Select TransferPartProperties");
         progressNum = progress1 + progress2;
         if(partType == 1){
             PlayerManager.current.temp_body_progress1 = progress1;
@@ -324,9 +320,8 @@ public class UI_Part_Select : MonoBehaviour
     }
 
     public void OpenWindow(){
-        Debug.Log("openWindow");
         windowInfo.transform.localPosition = windowPos;
-        windowInfoScript.Invoke("Reset",0.01f);
+        windowInfoScript.Reset();
         windowOpen = true;
     }
 
@@ -342,7 +337,7 @@ public class UI_Part_Select : MonoBehaviour
     }
 
     public void CloseAllWindows(){
-        parentScript.Invoke("CloseAllWindows", 0.01f);
+        parentScript.CloseAllWindows();
     }
 
     private void OnMouseOver(){
@@ -357,6 +352,6 @@ public class UI_Part_Select : MonoBehaviour
 
     private void OnMouseDown(){
         CloseAllWindows();
-        Invoke("OpenWindow",0.1f);
+        OpenWindow();
     }
 }

@@ -126,9 +126,6 @@ public class UI_Window_Part : MonoBehaviour
         PlayerManager.current.gun_progress2 = upgrade2Progress;
         PlayerManager.current.temp_gun_progress1 = upgrade1Progress;
         PlayerManager.current.temp_gun_progress2 = upgrade2Progress;
-        Debug.Log("SetCurrentPartProperties");
-        Debug.Log("upgrade1Progress : " + upgrade1Progress);
-        Debug.Log("upgrade2Progress : " + upgrade2Progress);
       }
       else if(partType == 4){
 

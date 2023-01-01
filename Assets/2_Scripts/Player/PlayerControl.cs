@@ -22,11 +22,6 @@ public class PlayerControl : MonoBehaviour
 
     private Rigidbody rb;
 
-    private AudioSource audio;
-    public AudioClip clip_shoot;
-    public AudioClip clip_shootMissile;
-    public AudioClip clip_shootLaser;
-
     private Vector3 mousePos;
     private Vector3 screenPoint;
     private Vector3 direction;
@@ -42,12 +37,11 @@ public class PlayerControl : MonoBehaviour
     public SpriteRenderer gunSpriteRend;
     public Material gunMaterial;
     public GameObject bulletOrigin;
-    public WeaponArmScript gunArmScript;
 
     public GameObject drillArm;
     public SpriteRenderer drillSpriteRend;
     public Material drillMaterial;
-    private DrillArmScript drillArmScript;
+    public PlayerWeaponScriptableObject weaponValues_workerDrill;
     public Animator drillAnimator;
     public BoxCollider drillCollider;
 
@@ -70,30 +64,31 @@ public class PlayerControl : MonoBehaviour
     public GameObject projectileObject_blaster;
     public GameObject projectileObject_missile;
     public GameObject projectileObject_laser;
-    public GameObject projectileObject_electro;
-
-    public bool gunFacing = true;
 
     public int gunType = 0; //0 = blaster, 1 = missile, 2 = laser, 3 = electro
     public int legType = 0; //0 = Worker bot, 1 = Jump Boots
 
-    public PlayerWeaponScriptableObject blasterValues;
-    public PlayerWeaponScriptableObject missileValues;
-    public PlayerWeaponScriptableObject laserValues;
-    public PlayerWeaponScriptableObject electroValues;
+    public PlayerWeaponScriptableObject weaponValues_blaster;
+    public PlayerWeaponScriptableObject weaponValues_missile;
+    public PlayerWeaponScriptableObject weaponValues_energy;
 
     public Sprite sprite_blasterGun;
     public Sprite sprite_missileLauncher;
     public Sprite sprite_laserBeam;
-    public Sprite sprite_electroGrenade;
+
+    public bool canMove = true;
+    public bool isChangingScene = false;
+
+    public bool gunFacing = true;
 
     public float _gunFireRate;
     public float _gunCooldownTime;
     public float _gunCooldownTime_original;
 
     public float drillCooldownTime = 0.0f;
-    public bool canMove = true;
-    public bool isChangingScene = false;
+    public int drillType = 0;
+    public float drillDamage = 1f;
+
     public bool gunReady = false;
     public bool drillReady = false;
 
@@ -135,9 +130,6 @@ public class PlayerControl : MonoBehaviour
         if(PlayerManager.current.hasBody){
             InitWeapons();
         }
-
-        audio = GetComponent<AudioSource>();
-
         spriteRend = spriteAnimatorObject.GetComponent<SpriteRenderer>();
         spriteMaterial = spriteRend.material;
 
@@ -145,6 +137,7 @@ public class PlayerControl : MonoBehaviour
         crystalManagerScript = UI_CrystalManager.GetComponent<UI_CrystalManager>();
         lightUpgradeNum = PlayerManager.current.head_progress1;
         ChangeHeadVisibility();
+        RecoverFromHit();
     }
 
     // Update is called once per frame
@@ -216,9 +209,6 @@ public class PlayerControl : MonoBehaviour
                 else if(gunType == 2){
                     FireLaser();
                 }
-                else if(gunType == 3){
-                    FireElectro();
-                }
             }
             if(gunFacing){
                 GunArmAim();
@@ -263,16 +253,18 @@ public class PlayerControl : MonoBehaviour
         }
     }
 
-    private void InitWeapons(){
+    public void InitWeapons(){
         gunSpriteRend = gunArm.GetComponent<SpriteRenderer>();
         drillSpriteRend = drillArm.GetComponent<SpriteRenderer>();
+
         gunMaterial = gunSpriteRend.material;
         drillMaterial = drillSpriteRend.material;
+
         if(!PlayerManager.current.hasDrill){
             drillArm.SetActive(false);
         }
         else{
-             EnableDrillArm();
+            EnableDrillArm();
         }
         if(!PlayerManager.current.hasGun){
             gunArm.SetActive(false);
@@ -302,11 +294,13 @@ public class PlayerControl : MonoBehaviour
     }
 
     public void EnableDrillArm(){
-        smokeParticles = drillSmokeObject.GetComponent<ParticleSystem>();
+        drillSpriteRend = drillArm.GetComponent<SpriteRenderer>();
+        drillDamage = weaponValues_workerDrill.damageAmount;
         drillArm.SetActive(true);
-        drillArmScript = drillArm.GetComponent<DrillArmScript>();
+        smokeParticles = drillSmokeObject.GetComponent<ParticleSystem>();
         drillAnimator = drillArm.GetComponent<Animator>();
-        StopDrill();
+        drillCollider = drillArm.GetComponent<BoxCollider>();
+        Invoke("StopDrill",0.05f);
     }
     public void DisableDrillArm(){
         if(drillArm != null){
@@ -315,29 +309,27 @@ public class PlayerControl : MonoBehaviour
     }
 
     public void EnableGunArm(){
-        if(gunType == 0){
-            gunSpriteRend.sprite = sprite_blasterGun;
-            _gunFireRate = blasterValues.gunFireRate;
-            _gunCooldownTime = blasterValues.gunCooldownTime;
+        if(PlayerManager.current.hasGun){
+            gunArm.SetActive(true);
+            gunSpriteRend = gunArm.GetComponent<SpriteRenderer>();
+
+            if(gunType == 0){
+                gunSpriteRend.sprite = sprite_blasterGun;
+                _gunFireRate = weaponValues_blaster.gunFireRate;
+                _gunCooldownTime = weaponValues_blaster.gunCooldownTime;
+            }
+            else if(gunType == 1){
+                gunSpriteRend.sprite = sprite_missileLauncher;
+                _gunFireRate = weaponValues_missile.gunFireRate;
+                _gunCooldownTime = weaponValues_missile.gunCooldownTime;
+            }
+            else if(gunType == 2){
+                gunSpriteRend.sprite = sprite_laserBeam;
+                _gunFireRate = weaponValues_energy.gunFireRate;
+                _gunCooldownTime = weaponValues_energy.gunCooldownTime;
+            }
+            _gunCooldownTime_original = _gunCooldownTime;
         }
-        else if(gunType == 1){
-            gunSpriteRend.sprite = sprite_missileLauncher;
-            _gunFireRate = missileValues.gunFireRate;
-            _gunCooldownTime = missileValues.gunCooldownTime;
-        }
-        else if(gunType == 2){
-            gunSpriteRend.sprite = sprite_laserBeam;
-            _gunFireRate = laserValues.gunFireRate;
-            _gunCooldownTime = laserValues.gunCooldownTime;
-        }
-        else if(gunType == 3){
-            gunSpriteRend.sprite = sprite_electroGrenade;
-            _gunFireRate = electroValues.gunFireRate;
-            _gunCooldownTime = electroValues.gunCooldownTime;
-        }
-        _gunCooldownTime_original = _gunCooldownTime;
-        gunArm.SetActive(true);
-        gunArmScript = gunArm.GetComponent<WeaponArmScript>();
     }
     public void DisableGunArm(){
         if(gunArm != null){
@@ -346,60 +338,46 @@ public class PlayerControl : MonoBehaviour
     }
 
 
-    private void FireBlaster(){
+    public void FireBlaster(){
             bulletSpawnPos = new Vector3(bulletOrigin.transform.position.x,bulletOrigin.transform.position.y + 0.15f, bulletOrigin.transform.position.z);
             GameObject newBullet = Instantiate(projectileObject_blaster, bulletSpawnPos, Quaternion.identity) as GameObject;
             BulletPhysics bulletScript = newBullet.GetComponent<BulletPhysics>();
             bulletScript.bulletDirection = direction;
-            _gunCooldownTime = blasterValues.gunFireRate;
-            audio.clip = clip_shoot;
-            audio.Play();
+            _gunCooldownTime = weaponValues_blaster.gunFireRate;
     }
-    private void FireMissile(){
+    public void FireMissile(){
             bulletSpawnPos = new Vector3(bulletOrigin.transform.position.x,bulletOrigin.transform.position.y + 0.15f, bulletOrigin.transform.position.z);
             GameObject newMissile = Instantiate(projectileObject_missile, bulletSpawnPos, Quaternion.identity) as GameObject;
             BulletPhysics bulletScript = newMissile.GetComponent<BulletPhysics>();
             bulletScript.bulletDirection = direction;
-            _gunCooldownTime = missileValues.gunFireRate;
-            audio.clip = clip_shootMissile;
-            audio.Play();
+            _gunCooldownTime = weaponValues_missile.gunFireRate;
     }
-    private void FireLaser(){
+    public void FireLaser(){
             bulletSpawnPos = new Vector3(bulletOrigin.transform.position.x,bulletOrigin.transform.position.y + 0.15f, bulletOrigin.transform.position.z);
             GameObject newBeam = Instantiate(projectileObject_laser, bulletSpawnPos, Quaternion.identity) as GameObject;
             BulletPhysics bulletScript = newBeam.GetComponent<BulletPhysics>();
             bulletScript.bulletDirection = direction;
-            _gunCooldownTime = blasterValues.gunFireRate;
-            audio.clip = clip_shootLaser;
-            audio.Play();
-    }
-    private void FireElectro(){
-            bulletSpawnPos = new Vector3(bulletOrigin.transform.position.x,bulletOrigin.transform.position.y + 0.15f, bulletOrigin.transform.position.z);
-            GameObject newGrenade = Instantiate(projectileObject_electro, bulletSpawnPos, Quaternion.identity) as GameObject;
-            BulletPhysics bulletScript = newGrenade.GetComponent<BulletPhysics>();
-            bulletScript.bulletDirection = direction;
-            _gunCooldownTime = electroValues.gunFireRate;
-            audio.clip = clip_shoot;
-            audio.Play();
+            _gunCooldownTime = weaponValues_blaster.gunFireRate;
     }
 
-    private void UseDrill(){
-            drillAnimator.SetBool("Active", true);
-            smokeParticles.Play();
+    public void UseDrill(){
             drillCooldownTime = 1.0f;
-            drillArmScript.Invoke("DrillOn",0.01f);
+            smokeParticles.Play();
+            DrillOn();
     }
-    private void StopDrill(){
-            drillAnimator.SetBool("Active", false);
+    public void StopDrill(){
             smokeParticles.Stop();
-            drillArmScript.Invoke("DrillOff",0.01f);
+            DrillOff();
     }
 
-    public void PlayBlasterImpact(){
-        if(PlayerManager.current.hasGun){
-            WeaponArmScript weaponScript = gunArm.GetComponent<WeaponArmScript>();
-            weaponScript.Invoke("PlayBlasterImpact",0.01f);
-        }
+    public void DrillOn(){
+        drillAnimator.SetBool("Active", true);
+        drillCollider.enabled = true;
+    }
+
+    public void DrillOff(){
+        drillAnimator.SetBool("Active", false);
+        drillCollider.enabled = false;
     }
 
     public void TakeHit(){
@@ -493,16 +471,16 @@ public class PlayerControl : MonoBehaviour
             if(!PlayerManager.current.isHit && !PlayerManager.current.isDead){
                 EnemyBulletPhysics eBulletPhysics = other.gameObject.GetComponent<EnemyBulletPhysics>();
                 if(eBulletPhysics.bulletType == 1){
-                    PlayerManager.current.Invoke("TakeHardHit",0.01f);
+                    PlayerManager.current.TakeHardHit();
                 }
                 else{
-                    PlayerManager.current.Invoke("TakeHit",0.01f);
+                    PlayerManager.current.TakeHit();
                 }
             }
         }
         if(other.gameObject.tag == "MissileAOE"){
             if(!PlayerManager.current.isHit && !PlayerManager.current.isDead){
-                PlayerManager.current.Invoke("TakeHardHit",0.01f);
+                PlayerManager.current.TakeHitLimbs();
             }
         }
 
@@ -510,8 +488,8 @@ public class PlayerControl : MonoBehaviour
             if(!PlayerManager.current.isHit && !PlayerManager.current.isDead){
                 bossScript = other.gameObject.transform.parent.gameObject.GetComponent<CyberMantisScript>();
                 bossScript.attackCollider.enabled = false;
-                bossScript.Invoke("FindPlayer", 0.01f);
-                PlayerManager.current.Invoke("TakeHit",0.01f);
+                bossScript.FindPlayer();
+                PlayerManager.current.TakeHit();
             }
         }
 
@@ -519,22 +497,22 @@ public class PlayerControl : MonoBehaviour
             GameObject blueBot = GameObject.Find("BlueBot");
             BlueBotScript blueBotScript = blueBot.GetComponent<BlueBotScript>();
 
-            blueBotScript.Invoke("ActivateDialogue", 0.01f);
+            blueBotScript.ActivateDialogue();
             Destroy(other.gameObject);
         }
     }
 
     private void OnTriggerStay(Collider other) {
         if(other.gameObject.tag == "Enemy_Hit"){
-            PlayerManager.current.Invoke("TakeHit",0.01f);
+            PlayerManager.current.TakeHit();
         }
 
         if(other.gameObject.tag == "HitCollision"){
             if(!PlayerManager.current.isHit && !PlayerManager.current.isDead){
                 enemyScript = other.gameObject.transform.parent.gameObject.GetComponent<EnemyScript>();
                 enemyScript.attackCollider.enabled = false;
-                enemyScript.Invoke("AggroReset", 0.01f);
-                PlayerManager.current.Invoke("TakeHit",0.01f);
+                enemyScript.AggroReset();
+                PlayerManager.current.TakeHit();
             }
         }
     }

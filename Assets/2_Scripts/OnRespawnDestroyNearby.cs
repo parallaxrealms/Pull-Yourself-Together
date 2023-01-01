@@ -30,7 +30,6 @@ public class OnRespawnDestroyNearby : MonoBehaviour
     private void OnTriggerEnter(Collider other) {
         if(gameObject.tag == "Player"){
             if(other.gameObject.tag == "Interactable_Bot"){
-                Debug.Log("Destroyed Bot Head");
                 destroyTimerOn = false;
                 PickUpScript pickupScript = other.gameObject.GetComponent<PickUpScript>();
                 pickupScript.Invoke("DestroySelf", 0.1f);
@@ -39,7 +38,6 @@ public class OnRespawnDestroyNearby : MonoBehaviour
         }
         else if(gameObject.tag == "Respawn"){
             if(other.gameObject.tag == "Enemy"){
-                Debug.Log("trigger2 " + other.gameObject.name);
                 destroyTimerOn = false;
                 LostBotScript lostBotScript = other.gameObject.GetComponent<LostBotScript>();
                 lostBotScript.Invoke("DestroySelf", 0.1f);

@@ -127,11 +127,13 @@ public class CrystalScript : MonoBehaviour
     }
 
     public void DisplayDamage(){
-        GameObject newDamageNum = Instantiate(damageNum, new Vector3(drillPos.x, drillPos.y + 0.5f, drillPos.z), Quaternion.identity) as GameObject;
-        GameObject canvasObject = GameObject.Find("WorldCanvas");
-        newDamageNum.transform.SetParent(canvasObject.transform);
-        DamageNum damageNumScript = newDamageNum.GetComponent<DamageNum>();
-        damageNumScript.damageNum = 1;
+        if(GameController.current.damageNumOption){
+            GameObject newDamageNum = Instantiate(damageNum, new Vector3(drillPos.x, drillPos.y + 0.5f, drillPos.z), Quaternion.identity) as GameObject;
+            GameObject canvasObject = GameObject.Find("WorldCanvas");
+            newDamageNum.transform.SetParent(canvasObject.transform);
+            DamageNum damageNumScript = newDamageNum.GetComponent<DamageNum>();
+            damageNumScript.damageNum = 1;
+        }
     }
 
     public void SetScenePos(){
@@ -153,7 +155,7 @@ public class CrystalScript : MonoBehaviour
         GameController.current.ListCrystals.Remove(gameObject);
     }
 
-    private void DestroySelf(){
+    public void DestroySelf(){
         Destroy(gameObject);
         GameController.current.ListCrystals.Remove(gameObject);
     }

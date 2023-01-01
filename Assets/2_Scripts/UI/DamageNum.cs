@@ -15,10 +15,8 @@ public class DamageNum : MonoBehaviour
     public int damageNum = 0;
 
     private float timer = 1.45f;
-
     
-    // Start is called before the first frame update
-    void Start()
+    void Awake()
     {
         numText = GetComponent<TMP_Text>();
         numText.text = damageNum.ToString();

@@ -216,8 +216,7 @@ public class EnemyScript : MonoBehaviour
         }
         if(other.gameObject.tag == "PlayerDrill"){
             if(!isHit){
-                DrillArmScript drillArmScript = other.gameObject.GetComponent<DrillArmScript>();
-                damageTaken = drillArmScript.damage;
+                damageTaken = 1;
                 TakeHit();
             }
         }
@@ -255,12 +254,14 @@ public class EnemyScript : MonoBehaviour
     }
 
     public void DisplayDamage(){
-        dmgNumPos = transform.position;
-        GameObject newDamageNum = Instantiate(damageNum, new Vector3(dmgNumPos.x, dmgNumPos.y + 0.5f, dmgNumPos.z), Quaternion.identity) as GameObject;
-        GameObject canvasObject = GameObject.Find("WorldCanvas");
-        newDamageNum.transform.SetParent(canvasObject.transform);
-        DamageNum damageNumScript = newDamageNum.GetComponent<DamageNum>();
-        damageNumScript.damageNum = Mathf.RoundToInt(damageTaken);
+        if(GameController.current.damageNumOption){
+            dmgNumPos = transform.position;
+            GameObject newDamageNum = Instantiate(damageNum, new Vector3(dmgNumPos.x, dmgNumPos.y + 0.5f, dmgNumPos.z), Quaternion.identity) as GameObject;
+            GameObject canvasObject = GameObject.Find("WorldCanvas");
+            newDamageNum.transform.SetParent(canvasObject.transform);
+            DamageNum damageNumScript = newDamageNum.GetComponent<DamageNum>();
+            damageNumScript.damageNum = Mathf.RoundToInt(damageTaken);
+        }
     }
 
     public void Death(){
