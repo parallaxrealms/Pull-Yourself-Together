@@ -41,8 +41,8 @@ public class PingUponDeath : MonoBehaviour
     }
 
     public void PingSound(){
-        audio.clip = clip_ping;
-        audio.Play();
+        AudioManager.current.currentSFXTrack = 33;
+        AudioManager.current.PlaySfx();
     }
 
     public void DestroySelf(){

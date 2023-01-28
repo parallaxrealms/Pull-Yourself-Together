@@ -16,6 +16,7 @@ public class SpawnerScript : MonoBehaviour
     public GameObject enemyToSpawn;
     public GameObject openParticles;
     public GameObject deathParticles;
+    public GameObject hangingParticles;
     public Animator anim;
 
     public SphereCollider collider;
@@ -57,6 +58,8 @@ public class SpawnerScript : MonoBehaviour
         if(spawnerType == 1){
             collider = GetComponent<SphereCollider>();
         }
+
+        activated = false;
     }
 
     // Update is called once per frame
@@ -113,6 +116,12 @@ public class SpawnerScript : MonoBehaviour
     private void SpawnEnemy(GameObject enemy){
         if(spawnerType == 1){
             DestroyEggSack();
+            AudioManager.current.currentSFXTrack = 100;
+            AudioManager.current.PlaySfx();
+        }
+        else{
+            AudioManager.current.currentSFXTrack = 104;
+            AudioManager.current.PlaySfx();
         }
         enemiesSpawned++;
         GameObject newEnemy = Instantiate(enemy, new Vector3(transform.position.x, transform.position.y, transform.position.z), Quaternion.identity);
@@ -124,15 +133,19 @@ public class SpawnerScript : MonoBehaviour
         if(other.gameObject.tag == "Player_Bullet"){
             if(!isHit){
                 BulletPhysics bulletScript = other.gameObject.GetComponent<BulletPhysics>();
-
-                TakeHit(bulletScript.damage);
+                TakeHit(PlayerManager.current.currentDamage_blaster);
             }
         }
         if(other.gameObject.tag == "MissileAOE"){
             if(!isHit){
                 MissileAOE missileAOEscript = other.gameObject.GetComponent<MissileAOE>();
-
-                TakeHit(missileAOEscript.damage);
+                TakeHit(PlayerManager.current.currentDamage_missile);
+            }
+        }
+        if(other.gameObject.tag == "Player_EnergyBeam"){
+            if(!isHit){
+                BulletPhysics bulletScript = other.gameObject.GetComponent<BulletPhysics>();
+                TakeHit(PlayerManager.current.currentDamage_energyBeam);
             }
         }
     }
@@ -140,7 +153,7 @@ public class SpawnerScript : MonoBehaviour
     private void OnTriggerStay(Collider other) {
         if(other.gameObject.tag == "PlayerDrill"){
             if(!drillCooldown){
-                TakeHit(1);
+                TakeHit(PlayerManager.current.currentDamage_workerDrill);
                 drillCooldown = true;
             }
         }
@@ -156,6 +169,8 @@ public class SpawnerScript : MonoBehaviour
                 GameObject openParticle = Instantiate(openParticles, new Vector3(transform.position.x,transform.position.y + 0.4f,transform.position.z),Quaternion.identity) as GameObject;
                 Destroy(gameObject);
                 Destroy(light);
+                AudioManager.current.currentSFXTrack = 112;
+                AudioManager.current.PlaySfx();
             }
             isDestroyed = true;
         }
@@ -163,12 +178,16 @@ public class SpawnerScript : MonoBehaviour
 
     public void DestroyEggSack(){
         if(!enemySpawned){
+            Destroy(hangingParticles);
             anim.SetBool("BreakOpen", true);
             collider.enabled = false;
             GameObject deathParticle = Instantiate(deathParticles, new Vector3(transform.position.x,transform.position.y,transform.position.z),Quaternion.identity) as GameObject;
             GameObject openParticle = Instantiate(openParticles, new Vector3(transform.position.x,transform.position.y + 0.4f,transform.position.z),Quaternion.identity) as GameObject;
             enemySpawned = true;
             Destroy(light);
+
+            AudioManager.current.currentSFXTrack = 102;
+            AudioManager.current.PlaySfx();
         }
     }
 
@@ -178,6 +197,8 @@ public class SpawnerScript : MonoBehaviour
         spriteRend.material = hitMaterial;
         damageTaken = Mathf.RoundToInt(amountOfDMG);
         DisplayDamage();
+        AudioManager.current.currentSFXTrack = 110;
+        AudioManager.current.PlaySfx();
     }
     public void RecoverFromHit(){
         isHit = false;
@@ -188,10 +209,12 @@ public class SpawnerScript : MonoBehaviour
         if(GameController.current.damageNumOption){
             dmgNumPos = transform.position;
             GameObject newDamageNum = Instantiate(damageNum, new Vector3(dmgNumPos.x, dmgNumPos.y, dmgNumPos.z), Quaternion.identity) as GameObject;
+            DamageNum damageNumScript = newDamageNum.GetComponent<DamageNum>();
+            float damageTakenFl = (float)damageTaken;
+            damageNumScript.damageNum = damageTakenFl;
             GameObject canvasObject = GameObject.Find("WorldCanvas");
             newDamageNum.transform.SetParent(canvasObject.transform);
-            DamageNum damageNumScript = newDamageNum.GetComponent<DamageNum>();
-            damageNumScript.damageNum = damageTaken;
+            damageNumScript.DamageInit();
         }
     }
 }

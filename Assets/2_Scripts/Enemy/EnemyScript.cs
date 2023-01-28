@@ -56,7 +56,8 @@ public class EnemyScript : MonoBehaviour
     public float aggroResetTimer;
     public float detectionRadius;
 
-    void Awake(){
+    void Awake()
+    {
         anim = GetComponent<Animator>();
         collider = GetComponent<BoxCollider>();
         spriteRend = GetComponent<SpriteRenderer>();
@@ -76,88 +77,100 @@ public class EnemyScript : MonoBehaviour
         //Change detection collider radius to
         triggerDetectSphere.radius = detectionRadius;
 
-        if(enemyName == "Worm" || enemyName == "Green Worm"){
+        if (enemyName == "Worm" || enemyName == "Green Worm")
+        {
             GameController.current.ListWorms.Add(gameObject);
+            AudioManager.current.currentSFXTrack = 50;
+            AudioManager.current.PlaySfx();
+
         }
-        if(enemyName == "Buzzer"  || enemyName == "Red Buzzer"){
+        if (enemyName == "Buzzer" || enemyName == "Red Buzzer")
+        {
             GameController.current.ListBuzzers.Add(gameObject);
+            AudioManager.current.currentSFXTrack = 60;
+            AudioManager.current.PlaySfx();
         }
 
-        if(PlayerManager.current.hasHead){
+        if (PlayerManager.current.hasHead)
+        {
             playerObject = PlayerManager.current.currentPlayerObject;
         }
     }
     // Start is called before the first frame update
     void Start()
-    {  
-        
+    {
+
     }
 
     // Update is called once per frame
     void Update()
     {
-        
+
     }
 
-    void FixedUpdate() {
-        if(isHit){
-            if(tintFadeSpeed > 0.0f){
+    void FixedUpdate()
+    {
+        if (isHit)
+        {
+            if (tintFadeSpeed > 0.0f)
+            {
                 tintFadeSpeed -= Time.deltaTime;
             }
-            else{
+            else
+            {
                 tintFadeSpeed = 0.3f;
                 RecoverFromHit();
             }
         }
 
-        if(isActive){
-            if(playerObject != null){
-                if(idle){
-                    
+        if (isActive)
+        {
+            if (playerObject != null)
+            {
+                if (idle)
+                {
+                    MoveTowardsPlayer(0.25f);
                 }
-                if(chasingPlayer){
-                    if(transform.position.x > playerObject.transform.position.x){
-                        transform.localScale = new Vector3(1,1,1);
-                    }
-                    else{
-                        transform.localScale = new Vector3(-1,1,1);
-                    }
+                if (chasingPlayer)
+                {
+                    MoveTowardsPlayer(1.0f);
 
-                    distanceToPlayer = Vector3.Distance(playerObject.transform.position, transform.position);
-
-                    playerPosition = playerObject.transform.position;
-
-                    transform.position = Vector3.MoveTowards(transform.position, playerPosition, speed * Time.deltaTime);
-
-                    if(distanceToPlayer < 3.0f){
+                    if (distanceToPlayer < 3.0f)
+                    {
                         anim.SetBool("isAttacking", true);
                         attackCollider.enabled = true;
                     }
-                    else{
+                    else
+                    {
                         anim.SetBool("isAttacking", false);
                         attackCollider.enabled = false;
                     }
                 }
-                if(movingAway){
-                    if(transform.position.x > playerObject.transform.position.x){
-                        transform.localScale = new Vector3(-1,1,1);
+                if (movingAway)
+                {
+                    if (transform.position.x > playerObject.transform.position.x)
+                    {
+                        transform.localScale = new Vector3(-1, 1, 1);
                     }
-                    else{
-                        transform.localScale = new Vector3(1,1,1);
+                    else
+                    {
+                        transform.localScale = new Vector3(1, 1, 1);
                     }
 
                     distanceToPlayer = Vector3.Distance(playerObject.transform.position, transform.position);
 
                     playerPosition = playerObject.transform.position;
-                    transform.position = Vector3.MoveTowards(transform.position, playerPosition,  -1 * speed * Time.deltaTime);
+                    transform.position = Vector3.MoveTowards(transform.position, playerPosition, -1 * speed * Time.deltaTime);
 
                     anim.SetBool("isAttacking", false);
                     attackCollider.enabled = false;
 
-                    if(aggroResetTimer > 0){
+                    if (aggroResetTimer > 0)
+                    {
                         aggroResetTimer -= Time.deltaTime;
                     }
-                    else{
+                    else
+                    {
                         ChasePlayer();
                         aggroResetTimer = enemyData.aggroResetTimer;
                     }
@@ -166,39 +179,66 @@ public class EnemyScript : MonoBehaviour
         }
     }
 
-    public void AggroReset(){
+    public void MoveTowardsPlayer(float speedModifier)
+    {
+        if (transform.position.x > playerObject.transform.position.x)
+        {
+            transform.localScale = new Vector3(1, 1, 1);
+        }
+        else
+        {
+            transform.localScale = new Vector3(-1, 1, 1);
+        }
+
+        distanceToPlayer = Vector3.Distance(playerObject.transform.position, transform.position);
+
+        playerPosition = playerObject.transform.position;
+
+        transform.position = Vector3.MoveTowards(transform.position, playerPosition, speed * speedModifier * Time.deltaTime);
+    }
+
+    public void AggroReset()
+    {
         FindPlayer();
         MoveAwayFromPlayer();
     }
 
-    public void FindPlayer(){
+    public void FindPlayer()
+    {
         Active();
         playerObject = PlayerManager.current.currentPlayerObject;
     }
 
     //AI States
-    public void Inactive(){
+    public void Inactive()
+    {
         isActive = false;
     }
-    public void Active(){
+    public void Active()
+    {
         isActive = true;
     }
-    public void IdleState(){
+    public void IdleState()
+    {
         idle = true;
         chasingPlayer = false;
         movingAway = false;
         speed = idleSpeed;
     }
-    public void ChasePlayer(){
-        if(PlayerManager.current.hasHead){
+    public void ChasePlayer()
+    {
+        if (PlayerManager.current.hasHead)
+        {
             idle = false;
             chasingPlayer = true;
             movingAway = false;
             speed = attackSpeed;
         }
     }
-    public void MoveAwayFromPlayer(){
-        if(PlayerManager.current.hasHead){
+    public void MoveAwayFromPlayer()
+    {
+        if (PlayerManager.current.hasHead)
+        {
             idle = false;
             chasingPlayer = false;
             movingAway = true;
@@ -206,83 +246,126 @@ public class EnemyScript : MonoBehaviour
         }
     }
 
-    private void OnTriggerEnter(Collider other) {
-        if(other.gameObject.tag == "Player_Bullet"){
-            if(!isHit){
-                BulletPhysics bulletScript = other.gameObject.GetComponent<BulletPhysics>();
-                damageTaken = bulletScript.damage;
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.gameObject.tag == "Player_Bullet")
+        {
+            if (!isHit)
+            {
+                damageTaken = PlayerManager.current.currentDamage_blaster;
                 TakeHit();
             }
         }
-        if(other.gameObject.tag == "PlayerDrill"){
-            if(!isHit){
-                damageTaken = 1;
+        if (other.gameObject.tag == "PlayerDrill")
+        {
+            if (!isHit)
+            {
+                damageTaken = PlayerManager.current.currentDamage_workerDrill;
                 TakeHit();
             }
         }
-        if(other.gameObject.tag == "Player_Electro"){
-            if(!isHit){
-                BulletPhysics bulletScript = other.gameObject.GetComponent<BulletPhysics>();
-                damageTaken = bulletScript.damage;
-                TakeHit();
-            }
-        }
-        if(other.gameObject.tag == "MissileAOE"){
-            if(!isHit){
+        if (other.gameObject.tag == "MissileAOE")
+        {
+            if (!isHit)
+            {
                 MissileAOE missileAOEscript = other.gameObject.GetComponent<MissileAOE>();
                 damageTaken = missileAOEscript.damage;
                 TakeHit();
             }
         }
+        if (other.gameObject.tag == "Player_EnergyBeam")
+        {
+            if (!isHit)
+            {
+                BulletPhysics bulletScript = other.gameObject.GetComponent<BulletPhysics>();
+                damageTaken = PlayerManager.current.currentDamage_energyBeam;
+                TakeHit();
+            }
+        }
     }
 
-    public void TakeHit(){
+    public void TakeHit()
+    {
         speed = enemyData.speed / 2;
         health -= damageTaken;
         isHit = true;
         spriteRend.material = hitMaterial;
-        if(health <= 0.0f){
+        if (health <= 0.0f)
+        {
             Death();
         }
         DisplayDamage();
+        if (enemyName == "Worm" || enemyName == "Green Worm")
+        {
+            AudioManager.current.currentSFXTrack = 53;
+            AudioManager.current.PlaySfx();
+        }
+        if (enemyName == "Buzzer" || enemyName == "Red Buzzer")
+        {
+            AudioManager.current.currentSFXTrack = 62;
+            AudioManager.current.PlaySfx();
+        }
     }
-    public void RecoverFromHit(){
+    public void RecoverFromHit()
+    {
         speed = enemyData.speed;
         isHit = false;
         spriteRend.material = spriteMaterial;
         damageTaken = 0.0f;
     }
 
-    public void DisplayDamage(){
-        if(GameController.current.damageNumOption){
+    public void DisplayDamage()
+    {
+        if (GameController.current.damageNumOption)
+        {
             dmgNumPos = transform.position;
             GameObject newDamageNum = Instantiate(damageNum, new Vector3(dmgNumPos.x, dmgNumPos.y + 0.5f, dmgNumPos.z), Quaternion.identity) as GameObject;
             GameObject canvasObject = GameObject.Find("WorldCanvas");
             newDamageNum.transform.SetParent(canvasObject.transform);
             DamageNum damageNumScript = newDamageNum.GetComponent<DamageNum>();
             damageNumScript.damageNum = Mathf.RoundToInt(damageTaken);
+            damageNumScript.DamageInit();
         }
     }
 
-    public void Death(){
+    public void Death()
+    {
         anim.SetBool("isDead", true);
         speed = 0;
         collider.enabled = false;
         attackCollider.enabled = false;
+        if (enemyName == "Worm" || enemyName == "Green Worm")
+        {
+            AudioManager.current.currentSFXTrack = 54;
+            AudioManager.current.PlaySfx();
+        }
+        if (enemyName == "Buzzer" || enemyName == "Red Buzzer")
+        {
+            AudioManager.current.currentSFXTrack = 63;
+            AudioManager.current.PlaySfx();
+        }
     }
 
-    public void HitSelf(){
+    public void HitSelf()
+    {
         anim.SetBool("isHit", true);
     }
 
-    public void DestroySelf(){
-        if(enemyName == "Worm" || enemyName == "Green Worm"){
+    public void DestroySelf()
+    {
+        if (enemyName == "Worm" || enemyName == "Green Worm")
+        {
+            AudioManager.current.currentSFXTrack = 50;
+            AudioManager.current.PlaySfx();
             GameController.current.ListWorms.Remove(gameObject);
         }
-        if(enemyName == "Buzzer" || enemyName == "Red Buzzer"){
+        if (enemyName == "Buzzer" || enemyName == "Red Buzzer")
+        {
+            AudioManager.current.currentSFXTrack = 60;
+            AudioManager.current.PlaySfx();
             GameController.current.ListBuzzers.Remove(gameObject);
         }
         Destroy(gameObject);
     }
-    
+
 }

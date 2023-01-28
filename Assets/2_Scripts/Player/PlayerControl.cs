@@ -7,14 +7,14 @@ public class PlayerControl : MonoBehaviour
 {
     public GameObject UI_CrystalManager;
     public UI_CrystalManager crystalManagerScript;
-    
+
     public GameObject spriteAnimatorObject;
+    public GameObject spriteTransformObject;
     public Animator spriteAnim;
     public SpriteAnimator spriteAnimScript;
     public GameObject playerLight0;
     public GameObject playerLight1;
     public GameObject playerLight2;
-    public GameObject playerLight3;
 
     public int lightUpgradeNum;
 
@@ -39,11 +39,15 @@ public class PlayerControl : MonoBehaviour
     public GameObject bulletOrigin;
 
     public GameObject drillArm;
+    public GameObject drillArm1;
+    public GameObject drillArm2;
+    public GameObject drillArm3;
     public SpriteRenderer drillSpriteRend;
     public Material drillMaterial;
     public PlayerWeaponScriptableObject weaponValues_workerDrill;
     public Animator drillAnimator;
     public BoxCollider drillCollider;
+    public bool drillSound;
 
     public bool drillStopped = false;
 
@@ -81,11 +85,10 @@ public class PlayerControl : MonoBehaviour
 
     public bool gunFacing = true;
 
-    public float _gunFireRate;
     public float _gunCooldownTime;
     public float _gunCooldownTime_original;
 
-    public float drillCooldownTime = 0.0f;
+    public float drillCooldownTime = 0.5f;
     public int drillType = 0;
     public float drillDamage = 1f;
 
@@ -95,7 +98,9 @@ public class PlayerControl : MonoBehaviour
     public SpriteRenderer spriteRend;
     public Material spriteMaterial;
     public Material hitMaterial;
-    public float tintFadeSpeed = 0.25f;
+    public Material shieldHitMaterial;
+    public Material currentMaterial;
+    public float tintFadeSpeed = 0.3f;
 
     public float startCooldownTimer = 1.0f;
     public bool started = false;
@@ -115,280 +120,505 @@ public class PlayerControl : MonoBehaviour
         characterControllerScript = GetComponent<GroundedCharacterController>();
 
         screenPoint = Camera.main.WorldToScreenPoint(transform.position);
-        direction = (Vector3)(Input.mousePosition-screenPoint);
+        direction = (Vector3)(Input.mousePosition - screenPoint);
         direction.Normalize();
 
-        if(PlayerManager.current.hasGun){
+        if (PlayerManager.current.hasGun)
+        {
             gunStartRotation = gunArm.transform.rotation;
             gunStartRotation *= Quaternion.Euler(Vector3.forward * -90);
-            gunStartRotationLeft = Quaternion.Euler(0,0,90);
+            gunStartRotationLeft = Quaternion.Euler(0, 0, 90);
         }
-        if(PlayerManager.current.hasDrill){
+        if (PlayerManager.current.hasDrill)
+        {
+            drillSmokeObject = GameObject.Find("PlayerDrillSmoke");
             smokeParticles = drillSmokeObject.GetComponent<ParticleSystem>();
         }
 
-        if(PlayerManager.current.hasBody){
-            InitWeapons();
-        }
         spriteRend = spriteAnimatorObject.GetComponent<SpriteRenderer>();
         spriteMaterial = spriteRend.material;
 
         UI_CrystalManager = MenuManager.current.CrystalManager;
         crystalManagerScript = UI_CrystalManager.GetComponent<UI_CrystalManager>();
         lightUpgradeNum = PlayerManager.current.head_progress1;
-        ChangeHeadVisibility();
-        RecoverFromHit();
+        ChangeHeadVisibility(lightUpgradeNum);
+
+        if (PlayerManager.current.hasBody)
+        {
+            InitWeapons();
+        }
+        Invoke("CheckMaterials", 1.0f);
     }
 
     // Update is called once per frame
     void Update()
     {
-        if(!started){
-            if(startCooldownTimer > 0f){
+        if (!started)
+        {
+            if (startCooldownTimer > 0f)
+            {
                 startCooldownTimer -= Time.deltaTime;
             }
-            else{
+            else
+            {
                 started = true;
             }
         }
-        
-        if(!isDead){
-            if(canMove){
+
+        if (!isDead)
+        {
+            if (canMove)
+            {
                 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
                 horizontalControls = Input.GetAxisRaw("Horizontal");
 
                 //Get which direction player is facing
-                if(horizontalControls == 1.0){
+                if (horizontalControls == 1.0)
+                {
                     facingRight = true;
                     facingLeft = false;
                 }
-                else if(horizontalControls == -1.0){
+                else if (horizontalControls == -1.0)
+                {
                     facingRight = false;
                     facingLeft = true;
                 }
-                if(PlayerManager.current.hasGun){
+                if (PlayerManager.current.hasGun)
+                {
                     GunControls();
                 }
-                if(PlayerManager.current.hasDrill){
+                if (PlayerManager.current.hasDrill)
+                {
                     DrillControls();
                 }
             }
         }
-        if(isHit){
-            if(tintFadeSpeed > 0){
+        if (isHit)
+        {
+            if (tintFadeSpeed > 0)
+            {
                 tintFadeSpeed -= Time.deltaTime;
             }
-            else{
+            else
+            {
                 RecoverFromHit();
-                tintFadeSpeed = 0.25f;
+                tintFadeSpeed = 0.3f;
             }
         }
     }
 
-    void FixedUpdate(){
-        if(!isDead){
-            if(PlayerManager.current.hasDrill){
+    void FixedUpdate()
+    {
+        if (!isDead)
+        {
+            if (PlayerManager.current.hasDrill)
+            {
                 CooldownTimerDrill();
             }
-            if(PlayerManager.current.hasGun){
+            if (PlayerManager.current.hasGun)
+            {
                 CooldownTimerGun();
             }
         }
     }
 
-    private void GunControls(){
-        if(!MenuManager.current.isMouseOver){
-            if(Input.GetButton("Fire1") && gunReady && started){
+    private void GunControls()
+    {
+        if (!MenuManager.current.isMouseOver)
+        {
+            if (Input.GetButton("Fire1") && gunReady && started)
+            {
                 gunReady = false;
-                if(gunType == 0){
+                if (gunType == 0)
+                {
                     FireBlaster();
                 }
-                else if(gunType == 1){
+                else if (gunType == 1)
+                {
                     FireMissile();
                 }
-                else if(gunType == 2){
+                else if (gunType == 2)
+                {
                     FireLaser();
                 }
             }
-            if(gunFacing){
+            if (gunFacing)
+            {
                 GunArmAim();
             }
-            else{
+            else
+            {
                 ResetGunAim();
             }
         }
     }
 
-    private void DrillControls(){
-        if(Input.GetButton("Fire2")){
-            if(drillReady){
+    private void DrillControls()
+    {
+        if (Input.GetButton("Fire2"))
+        {
+            if (drillReady)
+            {
                 UseDrill();
             }
         }
-        if(Input.GetButtonUp("Fire2")){
+        if (Input.GetButtonUp("Fire2"))
+        {
             StopDrill();
         }
     }
 
-    private void CooldownTimerGun(){
-        if(PlayerManager.current.hasGun){
-            if(_gunCooldownTime > 0.0f){
+    private void CooldownTimerGun()
+    {
+        if (PlayerManager.current.hasGun)
+        {
+            if (_gunCooldownTime > 0.0f)
+            {
                 _gunCooldownTime -= Time.deltaTime;
             }
-            else{
+            else
+            {
                 gunReady = true;
             }
         }
     }
 
-    private void CooldownTimerDrill(){
-        if(PlayerManager.current.hasDrill){
-            if(drillCooldownTime > 0.0f){
+    private void CooldownTimerDrill()
+    {
+        if (PlayerManager.current.hasDrill)
+        {
+            if (drillCooldownTime > 0.0f)
+            {
                 drillCooldownTime -= Time.deltaTime;
                 drillReady = false;
             }
-            else{
+            else
+            {
                 drillReady = true;
+                drillSound = false;
             }
         }
     }
 
-    public void InitWeapons(){
+    public void InitWeapons()
+    {
         gunSpriteRend = gunArm.GetComponent<SpriteRenderer>();
-        drillSpriteRend = drillArm.GetComponent<SpriteRenderer>();
-
         gunMaterial = gunSpriteRend.material;
-        drillMaterial = drillSpriteRend.material;
 
-        if(!PlayerManager.current.hasDrill){
-            drillArm.SetActive(false);
-        }
-        else{
+        if (PlayerManager.current.hasDrill)
+        {
             EnableDrillArm();
         }
-        if(!PlayerManager.current.hasGun){
+        else
+        {
+            DisableDrillArm();
+        }
+        if (!PlayerManager.current.hasGun)
+        {
             gunArm.SetActive(false);
         }
-        else{
+        else
+        {
             EnableGunArm();
         }
     }
 
-    public void GunArmAim(){
+    public void GunArmAim()
+    {
         gunArm.transform.rotation = Quaternion.LookRotation(Vector3.forward, mousePos - transform.position);
 
         screenPoint = Camera.main.WorldToScreenPoint(transform.position);
-        direction = (Vector3)(Input.mousePosition-screenPoint);
+        direction = (Vector3)(Input.mousePosition - screenPoint);
         direction.Normalize();
     }
 
-    public void ResetGunAim(){
-        if(!facingLeft){
+    public void ResetGunAim()
+    {
+        if (!facingLeft)
+        {
             gunArm.transform.rotation = gunStartRotation;
-            direction = new Vector3(1,0,0);
+            direction = new Vector3(1, 0, 0);
         }
-        else{
+        else
+        {
             gunArm.transform.rotation = gunStartRotationLeft;
-            direction = new Vector3(-1,0,0);
+            direction = new Vector3(-1, 0, 0);
         }
     }
 
-    public void EnableDrillArm(){
+    public void EnableDrillArm()
+    {
+        if (drillArm != null)
+        {
+            Destroy(drillArm);
+            drillArm = null;
+        }
+        if (PlayerManager.current.currentRange_workerDrill == 0)
+        {
+            drillArm = Instantiate(drillArm1, new Vector3(0, 0, 0), Quaternion.identity);
+            drillArm.transform.SetParent(spriteTransformObject.transform);
+            drillArm.transform.localPosition = new Vector3(0f, 0.06f, 0f);
+            if (!facingLeft)
+            {
+                drillArm.transform.localScale = new Vector3(drillArm.transform.localScale.x, drillArm.transform.localScale.y, drillArm.transform.localScale.z);
+            }
+            else
+            {
+                drillArm.transform.localScale = new Vector3(-drillArm.transform.localScale.x, drillArm.transform.localScale.y, drillArm.transform.localScale.z);
+            }
+        }
+        if (PlayerManager.current.currentRange_workerDrill == 1)
+        {
+            drillArm = Instantiate(drillArm2, new Vector3(0, 0, 0), Quaternion.identity);
+            drillArm.transform.SetParent(spriteTransformObject.transform);
+            drillArm.transform.localPosition = new Vector3(0.05f, 0.06f, 0f);
+            if (!facingLeft)
+            {
+                drillArm.transform.localScale = new Vector3(drillArm.transform.localScale.x, drillArm.transform.localScale.y, drillArm.transform.localScale.z);
+            }
+            else
+            {
+                drillArm.transform.localScale = new Vector3(-drillArm.transform.localScale.x, drillArm.transform.localScale.y, drillArm.transform.localScale.z);
+            }
+        }
+        if (PlayerManager.current.currentRange_workerDrill == 2)
+        {
+            drillArm = Instantiate(drillArm3, new Vector3(0, 0, 0), Quaternion.identity);
+            drillArm.transform.SetParent(spriteTransformObject.transform);
+            drillArm.transform.localPosition = new Vector3(0.05f, 0.06f, 0f);
+            if (!facingLeft)
+            {
+                drillArm.transform.localScale = new Vector3(drillArm.transform.localScale.x, drillArm.transform.localScale.y, drillArm.transform.localScale.z);
+            }
+            else
+            {
+                drillArm.transform.localScale = new Vector3(-drillArm.transform.localScale.x, drillArm.transform.localScale.y, drillArm.transform.localScale.z);
+            }
+        }
+        if (PlayerManager.current.hasLegs)
+        {
+            drillArm.transform.localPosition = new Vector3(0.03f, 0.375f, 0f);
+        }
+
         drillSpriteRend = drillArm.GetComponent<SpriteRenderer>();
+        drillMaterial = drillSpriteRend.material;
+
         drillDamage = weaponValues_workerDrill.damageAmount;
         drillArm.SetActive(true);
+        drillSmokeObject = GameObject.Find("PlayerDrillSmoke");
         smokeParticles = drillSmokeObject.GetComponent<ParticleSystem>();
         drillAnimator = drillArm.GetComponent<Animator>();
         drillCollider = drillArm.GetComponent<BoxCollider>();
-        Invoke("StopDrill",0.05f);
+        Invoke("StopDrill", 0.05f);
+        Invoke("CheckDrillFacingPos", 0.2f);
     }
-    public void DisableDrillArm(){
-        if(drillArm != null){
-            drillArm.SetActive(false);
+    public void DisableDrillArm()
+    {
+        if (drillArm != null)
+        {
+            Destroy(drillArm);
+            drillArm = null;
         }
     }
 
-    public void EnableGunArm(){
-        if(PlayerManager.current.hasGun){
+    public void CheckDrillFacingPos()
+    {
+        Debug.Log("CheckDrillFacingPos");
+        if (!facingLeft)
+        { //Facing Right
+            if (drillArm.transform.localScale.x == 1)
+            {
+
+            }
+            else
+            {
+                drillArm.transform.localScale = new Vector3(-drillArm.transform.localScale.x, drillArm.transform.localScale.y, drillArm.transform.localScale.z);
+            }
+        }
+        else
+        { //Facing Left
+            if (drillArm.transform.localScale.x == 1)
+            {
+                drillArm.transform.localScale = new Vector3(drillArm.transform.localScale.x, drillArm.transform.localScale.y, drillArm.transform.localScale.z);
+            }
+            else
+            {
+
+            }
+        }
+    }
+
+    public void EnableGunArm()
+    {
+        if (PlayerManager.current.hasGun)
+        {
             gunArm.SetActive(true);
             gunSpriteRend = gunArm.GetComponent<SpriteRenderer>();
 
-            if(gunType == 0){
+            gunMaterial = gunSpriteRend.material;
+
+            if (gunType == 0)
+            {
                 gunSpriteRend.sprite = sprite_blasterGun;
-                _gunFireRate = weaponValues_blaster.gunFireRate;
                 _gunCooldownTime = weaponValues_blaster.gunCooldownTime;
+
+                //Set fire rate based on Upgrades
+                if (PlayerManager.current.gun_progress2 == 0)
+                {
+                    _gunCooldownTime = 0.75f;
+                }
+                else if (PlayerManager.current.gun_progress2 == 1)
+                {
+                    _gunCooldownTime = 0.6f;
+                }
+                else if (PlayerManager.current.gun_progress2 == 2)
+                {
+                    _gunCooldownTime = 0.45f;
+                }
             }
-            else if(gunType == 1){
+            else if (gunType == 1)
+            {
                 gunSpriteRend.sprite = sprite_missileLauncher;
-                _gunFireRate = weaponValues_missile.gunFireRate;
                 _gunCooldownTime = weaponValues_missile.gunCooldownTime;
+
+                //Set fire rate based on Upgrades
+                if (PlayerManager.current.gun_progress2 == 0)
+                {
+                    _gunCooldownTime = 1.5f;
+                }
+                else if (PlayerManager.current.gun_progress2 == 1)
+                {
+                    _gunCooldownTime = 1.25f;
+                }
+                else if (PlayerManager.current.gun_progress2 == 2)
+                {
+                    _gunCooldownTime = 1.0f;
+                }
             }
-            else if(gunType == 2){
+            else if (gunType == 2)
+            {
                 gunSpriteRend.sprite = sprite_laserBeam;
-                _gunFireRate = weaponValues_energy.gunFireRate;
                 _gunCooldownTime = weaponValues_energy.gunCooldownTime;
+                //Set  beam width based on Upgrades
+                if (PlayerManager.current.gun_progress2 == 0)
+                {
+                    //beam width 0
+                }
+                else if (PlayerManager.current.gun_progress2 == 1)
+                {
+                    //beam width 1
+                }
+                else if (PlayerManager.current.gun_progress2 == 2)
+                {
+                    //beam width 2
+                }
             }
             _gunCooldownTime_original = _gunCooldownTime;
         }
     }
-    public void DisableGunArm(){
-        if(gunArm != null){
+    public void DisableGunArm()
+    {
+        if (gunArm != null)
+        {
             gunArm.SetActive(false);
         }
     }
 
 
-    public void FireBlaster(){
-            bulletSpawnPos = new Vector3(bulletOrigin.transform.position.x,bulletOrigin.transform.position.y + 0.15f, bulletOrigin.transform.position.z);
-            GameObject newBullet = Instantiate(projectileObject_blaster, bulletSpawnPos, Quaternion.identity) as GameObject;
-            BulletPhysics bulletScript = newBullet.GetComponent<BulletPhysics>();
-            bulletScript.bulletDirection = direction;
-            _gunCooldownTime = weaponValues_blaster.gunFireRate;
+    public void FireBlaster()
+    {
+        bulletSpawnPos = new Vector3(bulletOrigin.transform.position.x, bulletOrigin.transform.position.y + 0.1f, bulletOrigin.transform.position.z);
+        GameObject newBullet = Instantiate(projectileObject_blaster, bulletSpawnPos, Quaternion.identity) as GameObject;
+        BulletPhysics bulletScript = newBullet.GetComponent<BulletPhysics>();
+        bulletScript.bulletDirection = direction;
+        _gunCooldownTime = _gunCooldownTime_original;
+
+        AudioManager.current.currentSFXTrack = 13;
+        AudioManager.current.PlaySfx();
     }
-    public void FireMissile(){
-            bulletSpawnPos = new Vector3(bulletOrigin.transform.position.x,bulletOrigin.transform.position.y + 0.15f, bulletOrigin.transform.position.z);
-            GameObject newMissile = Instantiate(projectileObject_missile, bulletSpawnPos, Quaternion.identity) as GameObject;
-            BulletPhysics bulletScript = newMissile.GetComponent<BulletPhysics>();
-            bulletScript.bulletDirection = direction;
-            _gunCooldownTime = weaponValues_missile.gunFireRate;
+    public void FireMissile()
+    {
+        bulletSpawnPos = new Vector3(bulletOrigin.transform.position.x, bulletOrigin.transform.position.y + 0.1f, bulletOrigin.transform.position.z);
+        GameObject newMissile = Instantiate(projectileObject_missile, bulletSpawnPos, Quaternion.identity) as GameObject;
+        BulletPhysics bulletScript = newMissile.GetComponent<BulletPhysics>();
+        bulletScript.bulletDirection = direction;
+        _gunCooldownTime = _gunCooldownTime_original;
+
+        AudioManager.current.currentSFXTrack = 15;
+        AudioManager.current.PlaySfx();
     }
-    public void FireLaser(){
-            bulletSpawnPos = new Vector3(bulletOrigin.transform.position.x,bulletOrigin.transform.position.y + 0.15f, bulletOrigin.transform.position.z);
-            GameObject newBeam = Instantiate(projectileObject_laser, bulletSpawnPos, Quaternion.identity) as GameObject;
-            BulletPhysics bulletScript = newBeam.GetComponent<BulletPhysics>();
-            bulletScript.bulletDirection = direction;
-            _gunCooldownTime = weaponValues_blaster.gunFireRate;
+    public void FireLaser()
+    {
+        bulletSpawnPos = new Vector3(bulletOrigin.transform.position.x, bulletOrigin.transform.position.y, bulletOrigin.transform.position.z);
+        GameObject newBeam = Instantiate(projectileObject_laser, bulletSpawnPos, Quaternion.identity) as GameObject;
+        BulletPhysics bulletScript = newBeam.GetComponent<BulletPhysics>();
+        bulletScript.bulletDirection = direction;
+        _gunCooldownTime = _gunCooldownTime_original;
+
+        AudioManager.current.currentSFXTrack = 17;
+        AudioManager.current.PlaySfx();
     }
 
-    public void UseDrill(){
-            drillCooldownTime = 1.0f;
-            smokeParticles.Play();
-            DrillOn();
-    }
-    public void StopDrill(){
-            smokeParticles.Stop();
-            DrillOff();
-    }
-
-    public void DrillOn(){
+    public void UseDrill()
+    {
+        drillCooldownTime = 0.5f;
+        if (!drillSound)
+        {
+            AudioManager.current.currentSFXTrack = 11;
+            AudioManager.current.PlaySfx();
+            drillSound = true;
+        }
+        drillSmokeObject = GameObject.Find("PlayerDrillSmoke");
+        smokeParticles = drillSmokeObject.GetComponent<ParticleSystem>();
+        smokeParticles.Play();
         drillAnimator.SetBool("Active", true);
         drillCollider.enabled = true;
     }
-
-    public void DrillOff(){
+    public void StopDrill()
+    {
+        drillSmokeObject = GameObject.Find("PlayerDrillSmoke");
+        smokeParticles = drillSmokeObject.GetComponent<ParticleSystem>();
+        smokeParticles.Stop();
         drillAnimator.SetBool("Active", false);
         drillCollider.enabled = false;
     }
 
-    public void TakeHit(){
+    public void TakeShieldHit()
+    {
+        currentMaterial = shieldHitMaterial;
+
         isHit = true;
-        spriteRend.material = hitMaterial;
-        
-        if(PlayerManager.current.hasGun){
-            gunSpriteRend.material = hitMaterial;
+        spriteRend.material = currentMaterial;
+
+        if (PlayerManager.current.hasGun)
+        {
+            gunSpriteRend.material = currentMaterial;
         }
-        if(PlayerManager.current.hasDrill){
-            drillSpriteRend.material = hitMaterial;
+        if (PlayerManager.current.hasDrill)
+        {
+            drillSpriteRend.material = currentMaterial;
+        }
+    }
+
+    public void TakeHit(int damageNum)
+    {
+        currentMaterial = hitMaterial;
+
+        isHit = true;
+        spriteRend.material = currentMaterial;
+
+        if (!PlayerManager.current.hasBody)
+        {
+            PlayerManager.current.currentDurability -= damageNum;
+        }
+
+        if (PlayerManager.current.hasGun)
+        {
+            gunSpriteRend.material = currentMaterial;
+        }
+        if (PlayerManager.current.hasDrill)
+        {
+            drillSpriteRend.material = currentMaterial;
         }
 
         transform.eulerAngles = new Vector3(transform.eulerAngles.x, Random.Range(0, 360), transform.eulerAngles.z);
@@ -400,92 +630,146 @@ public class PlayerControl : MonoBehaviour
         rb.AddForce(force * speed);
         transform.eulerAngles = new Vector3(transform.eulerAngles.x, 0, transform.eulerAngles.z);
 
-        GameObject onHitParticle = Instantiate(onHitParticles, new Vector3(transform.position.x, transform.position.y, transform.position.z),Quaternion.identity) as GameObject;
+        GameObject onHitParticle = Instantiate(onHitParticles, new Vector3(transform.position.x, transform.position.y, transform.position.z), Quaternion.identity) as GameObject;
     }
 
-
-    public void RecoverFromHit(){
+    public void RecoverFromHit()
+    {
         isHit = false;
-        spriteRend.material = spriteMaterial;
-        if(PlayerManager.current.hasGun){
-            gunSpriteRend.material = gunMaterial;
+        if (spriteRend != null)
+        {
+            spriteRend.material = spriteMaterial;
         }
-        if(PlayerManager.current.hasDrill){
-            drillSpriteRend.material = drillMaterial;
+
+        if (PlayerManager.current.hasGun)
+        {
+            gunSpriteRend.material = spriteMaterial;
+        }
+        if (PlayerManager.current.hasDrill)
+        {
+            drillSpriteRend.material = spriteMaterial;
         }
     }
 
-    public void DestroySelf(){
+    public void CheckMaterials()
+    {
+        if (isHit)
+        {
+            isHit = false;
+            spriteRend.material = spriteMaterial;
+        }
+
+        if (PlayerManager.current.hasDrill)
+        {
+            drillSpriteRend.material = spriteMaterial;
+        }
+        if (PlayerManager.current.hasGun)
+        {
+            gunSpriteRend.material = spriteMaterial;
+        }
+    }
+
+    public void DestroySelf()
+    {
         Destroy(gameObject);
     }
 
-    public void PauseMovement(){
+    public void PauseMovement()
+    {
         canMove = false;
         characterControllerScript.enabled = false;
+        spriteAnim.SetBool("MovementPaused", true);
         spriteAnimScript.enabled = false;
     }
 
-    public void ResumeMovement(){
+    public void ResumeMovement()
+    {
         canMove = true;
         characterControllerScript.enabled = true;
+        spriteAnim.SetBool("MovementPaused", false);
         spriteAnimScript.enabled = true;
     }
 
-    public void ChangeScene(){
+    public void ChangeScene()
+    {
         isChangingScene = true;
         canMove = false;
         PlayerManager.current.isChangingScene = true;
         PlayerManager.current.canMove = false;
     }
 
-
-    public void ChangeHeadVisibility(){
-        if(lightUpgradeNum == 0){
+    public void ChangeHeadVisibility(int num)
+    {
+        if (num == 0)
+        {
             playerLight0.SetActive(true);
             playerLight1.SetActive(false);
             playerLight2.SetActive(false);
-            playerLight3.SetActive(false);
         }
-        else if(lightUpgradeNum == 1){
+        else if (num == 1)
+        {
             playerLight0.SetActive(false);
             playerLight1.SetActive(true);
             playerLight2.SetActive(false);
-            playerLight3.SetActive(false);
         }
-        else if(lightUpgradeNum == 2){
+        else if (num == 2)
+        {
             playerLight0.SetActive(false);
             playerLight1.SetActive(false);
             playerLight2.SetActive(true);
-            playerLight3.SetActive(false);
-        }
-        else if(lightUpgradeNum == 3){
-            playerLight0.SetActive(false);
-            playerLight1.SetActive(false);
-            playerLight2.SetActive(false);
-            playerLight3.SetActive(true);
         }
     }
 
-    private void OnTriggerEnter(Collider other) {
-        if(other.gameObject.tag == "Enemy_Bullet"){
-            if(!PlayerManager.current.isHit && !PlayerManager.current.isDead){
+    public void ChangeHeadDurability(int num)
+    {
+        if (num == 0)
+        {
+            PlayerManager.current.maxDurability = 1;
+        }
+        else if (num == 1)
+        {
+            PlayerManager.current.maxDurability = 2;
+        }
+        else if (num == 2)
+        {
+            PlayerManager.current.maxDurability = 3;
+        }
+    }
+
+    public void ChangeDrillRange()
+    {
+
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.gameObject.tag == "Enemy_Bullet")
+        {
+            if (!PlayerManager.current.isHit && !PlayerManager.current.isDead)
+            {
                 EnemyBulletPhysics eBulletPhysics = other.gameObject.GetComponent<EnemyBulletPhysics>();
-                if(eBulletPhysics.bulletType == 1){
-                    PlayerManager.current.TakeHardHit();
-                }
-                else{
-                    PlayerManager.current.TakeHit();
-                }
+                PlayerManager.current.TakeHit();
             }
         }
-        if(other.gameObject.tag == "MissileAOE"){
-            if(!PlayerManager.current.isHit && !PlayerManager.current.isDead){
+        if (other.gameObject.tag == "MissileAOE")
+        {
+            if (!PlayerManager.current.isHit && !PlayerManager.current.isDead)
+            {
                 PlayerManager.current.TakeHitLimbs();
             }
         }
+        if (other.gameObject.tag == "Enemy_EnergyBeam")
+        {
+            if (!PlayerManager.current.isHit && !PlayerManager.current.isDead)
+            {
+                PlayerManager.current.TakeHit();
+            }
+        }
 
-        if(other.gameObject.tag == "BossHitCollision"){
-            if(!PlayerManager.current.isHit && !PlayerManager.current.isDead){
+        if (other.gameObject.tag == "BossHitCollision")
+        {
+            if (!PlayerManager.current.isHit && !PlayerManager.current.isDead)
+            {
                 bossScript = other.gameObject.transform.parent.gameObject.GetComponent<CyberMantisScript>();
                 bossScript.attackCollider.enabled = false;
                 bossScript.FindPlayer();
@@ -493,7 +777,8 @@ public class PlayerControl : MonoBehaviour
             }
         }
 
-        if(other.gameObject.name == "BossTrigger"){
+        if (other.gameObject.name == "BossTrigger")
+        {
             GameObject blueBot = GameObject.Find("BlueBot");
             BlueBotScript blueBotScript = blueBot.GetComponent<BlueBotScript>();
 
@@ -502,13 +787,20 @@ public class PlayerControl : MonoBehaviour
         }
     }
 
-    private void OnTriggerStay(Collider other) {
-        if(other.gameObject.tag == "Enemy_Hit"){
-            PlayerManager.current.TakeHit();
+    private void OnTriggerStay(Collider other)
+    {
+        if (other.gameObject.tag == "Enemy_Hit")
+        {
+            if (!PlayerManager.current.isHit && !PlayerManager.current.isDead)
+            {
+                PlayerManager.current.TakeHit();
+            }
         }
 
-        if(other.gameObject.tag == "HitCollision"){
-            if(!PlayerManager.current.isHit && !PlayerManager.current.isDead){
+        if (other.gameObject.tag == "HitCollision")
+        {
+            if (!PlayerManager.current.isHit && !PlayerManager.current.isDead)
+            {
                 enemyScript = other.gameObject.transform.parent.gameObject.GetComponent<EnemyScript>();
                 enemyScript.attackCollider.enabled = false;
                 enemyScript.AggroReset();

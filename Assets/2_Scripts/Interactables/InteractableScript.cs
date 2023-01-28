@@ -15,106 +15,300 @@ public class InteractableScript : MonoBehaviour
     {
         parentObject = transform.parent.gameObject;
         pickUpScript = parentObject.GetComponent<PickUpScript>();
-
     }
 
     // Update is called once per frame
     void Update()
     {
-        
+
     }
 
-    void FixedUpdate(){
-        if(isSpawning){
-            if(spawnTimer > 0){
+    void FixedUpdate()
+    {
+        if (isSpawning)
+        {
+            if (spawnTimer > 0)
+            {
                 spawnTimer -= Time.deltaTime;
             }
-            else{
+            else
+            {
                 isSpawning = false;
                 spawnTimer = .7f;
             }
         }
     }
 
-    private void OnTriggerStay(Collider other) {
-        if(!isSpawning){
-            if(other.gameObject.tag == "Player"){
-                if(pickUpScript.pickupType == 1){ //If this pickup is Body
-                    if(PlayerManager.current.hasHead){
-                        if(!PlayerManager.current.hasBody){
-                            pickUpScript.activated = true;
-                            pickUpScript.DefaultText();
-                            pickUpScript.DrawOutline();
-                        }
-                        else{
-                            pickUpScript.EraseOutline();
-                        }
-                    }
-                }
-                else if(pickUpScript.pickupType == 2){ //If this pickup is Drill
-                    if(PlayerManager.current.hasBody){
-                        if(!PlayerManager.current.hasDrill){
-                            pickUpScript.activated = true;
-                            pickUpScript.DefaultText();
-                            pickUpScript.DrawOutline();
-                        }
-                        else{
-                            pickUpScript.EraseOutline();
-                        }
-                    }
-                }
-                else if(pickUpScript.pickupType == 3){ //If this pickup is Gun
-                    if(PlayerManager.current.hasBody){
-                        if(!PlayerManager.current.hasGun){
-                            pickUpScript.activated = true;
-                            pickUpScript.DefaultText();
-                            pickUpScript.DrawOutline();
-                        }
-                        else{
-                            if(pickUpScript.gunType != PlayerManager.current.gunType){
-                                pickUpScript.activated = true;
-                                pickUpScript.DefaultText();
-                                pickUpScript.DrawOutline();
-                            }
-                            else{
-                                pickUpScript.EraseOutline();
+    private void OnTriggerEnter(Collider other)
+    {
+        if (!isSpawning)
+        {
+            if (other.gameObject.tag == "Player")
+            {
+                if (!PlayerManager.current.playerOnPickup)
+                {
+                    if (!pickUpScript.nameActivated)
+                    {
+                        if (pickUpScript.pickupType == 1)
+                        { //If this pickup is Body
+                            if (PlayerManager.current.hasHead)
+                            {
+                                if (!PlayerManager.current.hasBody)
+                                {
+                                    pickUpScript.activated = true;
+                                    pickUpScript.DefaultText();
+                                    pickUpScript.DrawOutline();
+                                    pickUpScript.EnablePickupParticles();
+                                }
+                                else
+                                {
+                                    pickUpScript.activated = true;
+                                    pickUpScript.DefaultText();
+                                    pickUpScript.DrawOutline();
+                                    pickUpScript.DisablePickupParticles();
+                                }
                             }
                         }
-                    }
-                }
-                else if(pickUpScript.pickupType == 4){ //If this pickup is Legs
-                    if(PlayerManager.current.hasBody){
-                        if(!PlayerManager.current.hasLegs){
-                            pickUpScript.activated = true;
-                            pickUpScript.DefaultText();
-                            pickUpScript.DrawOutline();
+                        else if (pickUpScript.pickupType == 2)
+                        { //If this pickup is Drill
+                            if (PlayerManager.current.hasBody)
+                            {
+                                if (!PlayerManager.current.hasDrill)
+                                {
+                                    pickUpScript.activated = true;
+                                    pickUpScript.DefaultText();
+                                    pickUpScript.DrawOutline();
+                                    pickUpScript.EnablePickupParticles();
+                                }
+                                else
+                                {
+                                    pickUpScript.activated = true;
+                                    pickUpScript.DefaultText();
+                                    pickUpScript.DrawOutline();
+                                    pickUpScript.DisablePickupParticles();
+                                }
+                            }
                         }
-                        else{
-                            if(pickUpScript.legType != PlayerManager.current.legType){
-                                pickUpScript.activated = true;
+                        else if (pickUpScript.pickupType == 3)
+                        { //If this pickup is Gun
+                            if (PlayerManager.current.hasBody)
+                            {
+                                if (!PlayerManager.current.hasGun)
+                                {
+                                    pickUpScript.activated = true;
+                                    pickUpScript.DefaultText();
+                                    pickUpScript.DrawOutline();
+                                    pickUpScript.EnablePickupParticles();
+                                }
+                                else
+                                {
+                                    if (pickUpScript.gunType != PlayerManager.current.gunType)
+                                    {
+                                        pickUpScript.activated = true;
+                                        pickUpScript.DefaultText();
+                                        pickUpScript.DrawOutline();
+                                        pickUpScript.DisablePickupParticles();
+                                    }
+                                    else
+                                    {
+                                        pickUpScript.activated = true;
+                                        pickUpScript.DefaultText();
+                                        pickUpScript.DrawOutline();
+                                        pickUpScript.DisablePickupParticles();
+                                    }
+                                }
+                            }
+                        }
+                        else if (pickUpScript.pickupType == 4)
+                        { //If this pickup is Legs
+                            if (PlayerManager.current.hasBody)
+                            {
+                                if (!PlayerManager.current.hasLegs)
+                                {
+                                    pickUpScript.activated = true;
+                                    pickUpScript.DefaultText();
+                                    pickUpScript.DrawOutline();
+                                    pickUpScript.EnablePickupParticles();
+                                }
+                                else
+                                {
+                                    if (pickUpScript.legType != PlayerManager.current.legType)
+                                    {
+                                        pickUpScript.activated = true;
+                                        pickUpScript.DefaultText();
+                                        pickUpScript.DrawOutline();
+                                        pickUpScript.EnablePickupParticles();
+                                    }
+                                    else
+                                    {
+                                        pickUpScript.activated = true;
+                                        pickUpScript.DefaultText();
+                                        pickUpScript.DrawOutline();
+                                        pickUpScript.DisablePickupParticles();
+                                    }
+                                }
+                            }
 
-                                pickUpScript.DefaultText();
-                                pickUpScript.DrawOutline();
+                        }
+                        else if (pickUpScript.pickupType == 9)
+                        { //If this pickup is Backup
+                            if (!PlayerManager.current.backedUp)
+                            {
+                                if (!pickUpScript.isUsed)
+                                {
+                                    pickUpScript.activated = true;
+                                    pickUpScript.DefaultText();
+                                    pickUpScript.DrawOutline();
+                                    pickUpScript.EnablePickupParticles();
+                                }
+                            }
+                            else
+                            {
+                                if (!pickUpScript.isUsed)
+                                {
+                                    pickUpScript.activated = true;
+                                    pickUpScript.DefaultText();
+                                    pickUpScript.DrawOutline();
+                                    pickUpScript.DisablePickupParticles();
+                                }
+                                else
+                                {
+                                    //Show PickupBotHead Text
+                                    pickUpScript.activated = true;
+                                    pickUpScript.EraseText();
+                                    pickUpScript.DrawOutline();
+                                    pickUpScript.DisablePickupParticles();
+                                }
                             }
                         }
                     }
-                }
-                else if(pickUpScript.pickupType == 0 || pickUpScript.pickupType == 9){ //If this pickup is Backup
-                    if(PlayerManager.current.hasHead){
-                        if(!pickUpScript.isUsed){
-                            pickUpScript.activated = true;
-                            pickUpScript.DefaultText();
-                            pickUpScript.DrawOutline();
-                        }
-                    }
+                    PlayerManager.current.playerOnPickup = true;
                 }
             }
         }
     }
-    private void OnTriggerExit(Collider other) {
-        if(other.gameObject.tag == "Player"){
-            pickUpScript.activated = false;
-            pickUpScript.EraseText();
+    private void OnTriggerExit(Collider other)
+    {
+        if (other.gameObject.tag == "Player")
+        {
+            if (PlayerManager.current.playerOnPickup)
+            {
+                if (pickUpScript.nameActivated)
+                {
+                    if (pickUpScript.pickupType == 1)
+                    { //If this pickup is Body
+                        if (PlayerManager.current.hasHead)
+                        {
+                            if (!PlayerManager.current.hasBody)
+                            {
+                                pickUpScript.activated = false;
+                                pickUpScript.EraseText();
+                                pickUpScript.EnablePickupParticles();
+                            }
+                            else
+                            {
+                                pickUpScript.activated = false;
+                                pickUpScript.EraseText();
+                                pickUpScript.DisablePickupParticles();
+                                pickUpScript.DrawOutline();
+                            }
+                        }
+                    }
+                    else if (pickUpScript.pickupType == 2)
+                    { //If this pickup is Drill
+                        if (PlayerManager.current.hasBody)
+                        {
+                            if (!PlayerManager.current.hasDrill)
+                            {
+                                pickUpScript.activated = false;
+                                pickUpScript.EraseText();
+                                pickUpScript.EnablePickupParticles();
+                            }
+                            else
+                            {
+                                pickUpScript.activated = false;
+                                pickUpScript.EraseText();
+                                pickUpScript.DisablePickupParticles();
+                                pickUpScript.DrawOutline();
+                            }
+                        }
+                    }
+                    else if (pickUpScript.pickupType == 3)
+                    { //If this pickup is Gun
+                        if (PlayerManager.current.hasBody)
+                        {
+                            if (!PlayerManager.current.hasGun)
+                            {
+                                pickUpScript.activated = false;
+                                pickUpScript.EraseText();
+                                pickUpScript.EnablePickupParticles();
+                            }
+                            else
+                            {
+                                if (pickUpScript.gunType != PlayerManager.current.gunType)
+                                {
+                                    pickUpScript.activated = false;
+                                    pickUpScript.EraseText();
+                                    pickUpScript.DisablePickupParticles();
+                                    pickUpScript.DrawOutline();
+                                }
+                                else
+                                {
+                                    pickUpScript.activated = false;
+                                    pickUpScript.EraseText();
+                                    pickUpScript.DisablePickupParticles();
+                                    pickUpScript.DrawOutline();
+                                }
+                            }
+                        }
+                    }
+                    else if (pickUpScript.pickupType == 4)
+                    { //If this pickup is Legs
+                        if (PlayerManager.current.hasBody)
+                        {
+                            if (!PlayerManager.current.hasLegs)
+                            {
+                                pickUpScript.activated = false;
+                                pickUpScript.EraseText();
+                                pickUpScript.EnablePickupParticles();
+                            }
+                            else
+                            {
+                                if (pickUpScript.legType != PlayerManager.current.legType)
+                                {
+                                    pickUpScript.activated = false;
+                                    pickUpScript.EraseText();
+                                    pickUpScript.DisablePickupParticles();
+                                    pickUpScript.DrawOutline();
+                                }
+                            }
+                        }
+                    }
+                    else if (pickUpScript.pickupType == 9)
+                    { //If this pickup is Backup
+                        if (!PlayerManager.current.backedUp)
+                        {
+                            if (!pickUpScript.isUsed)
+                            {
+                                pickUpScript.activated = false;
+                                pickUpScript.EraseText();
+                                pickUpScript.EnablePickupParticles();
+                            }
+                        }
+                        else
+                        {
+                            if (!pickUpScript.isUsed)
+                            {
+                                pickUpScript.activated = false;
+                                pickUpScript.EraseText();
+                                pickUpScript.DisablePickupParticles();
+                                pickUpScript.DrawOutline();
+                            }
+                        }
+                    }
+                }
+                PlayerManager.current.playerOnPickup = false;
+            }
         }
     }
 }

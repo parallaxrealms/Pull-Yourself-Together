@@ -61,9 +61,9 @@ public class DoorTriggeredScript : MonoBehaviour
     }
 
     public void OpenDoor(){
-        audio.clip = doorOpenSound;
-        audio.Play();
         isTriggered = true;
         doorParticles.Play();
+        AudioManager.current.currentSFXTrack = 35;
+        AudioManager.current.PlaySfx();
     }
 }

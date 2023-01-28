@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class LostBotMeta : MonoBehaviour
 {
+    public int id;
+
     public bool hasHead = true;
     public bool hasBody = false;
     public bool hasDrill = false;
@@ -18,9 +20,7 @@ public class LostBotMeta : MonoBehaviour
     public GameObject currentBotObject;
     public LostBotScript lostBotScript;
 
-    // Start is called before the first frame update
-    void Start()
-    {
+    void Awake(){
         if(hasLegs){
             currentBotObject = Instantiate(lostBot2, new Vector3(transform.position.x, transform.position.y,transform.position.z), Quaternion.identity) as GameObject;
             currentBotObject.transform.parent = transform;
@@ -34,6 +34,16 @@ public class LostBotMeta : MonoBehaviour
             currentBotObject.transform.parent = transform;
         }
         lostBotScript = currentBotObject.GetComponent<LostBotScript>();
+        
+        if(PlayerManager.current.backedUp){
+            if(id == PlayerManager.current.backupBotID){
+                lostBotScript.DropPartsAndDestroySelf();
+            }
+        }
+    }
+    // Start is called before the first frame update
+    void Start()
+    {
         lostBotScript.hasHead = hasHead;
         lostBotScript.hasBody = hasBody;
         lostBotScript.hasDrill = hasDrill;
@@ -79,17 +89,17 @@ public class LostBotMeta : MonoBehaviour
     }
 
     public void LoseBody(){
-            Destroy(currentBotObject);
-            currentBotObject = Instantiate(lostBot0, new Vector3(currentBotObject.transform.position.x, currentBotObject.transform.position.y,currentBotObject.transform.position.z), Quaternion.identity) as GameObject;
-            currentBotObject.transform.parent = transform;
-            ResetBot();
+        Destroy(currentBotObject);
+        currentBotObject = Instantiate(lostBot0, new Vector3(currentBotObject.transform.position.x, currentBotObject.transform.position.y,currentBotObject.transform.position.z), Quaternion.identity) as GameObject;
+        currentBotObject.transform.parent = transform;
+        ResetBot();
     }
     
     public void LoseLegs(){
-            Destroy(currentBotObject);
-            currentBotObject = Instantiate(lostBot1, new Vector3(currentBotObject.transform.position.x, currentBotObject.transform.position.y,currentBotObject.transform.position.z), Quaternion.identity) as GameObject;
-            currentBotObject.transform.parent = transform;
-            ResetBot();
+        Destroy(currentBotObject);
+        currentBotObject = Instantiate(lostBot1, new Vector3(currentBotObject.transform.position.x, currentBotObject.transform.position.y,currentBotObject.transform.position.z), Quaternion.identity) as GameObject;
+        currentBotObject.transform.parent = transform;
+        ResetBot();
     }
 
     public void DestroySelf(){

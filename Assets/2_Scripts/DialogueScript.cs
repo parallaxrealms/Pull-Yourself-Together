@@ -17,10 +17,11 @@ public class DialogueScript : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
+
     }
 
-    public void DialogueDone(){
+    public void DialogueDone()
+    {
         parentScript.Invoke("DialogueDone", 0.01f);
     }
 }

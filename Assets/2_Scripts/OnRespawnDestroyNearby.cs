@@ -40,7 +40,7 @@ public class OnRespawnDestroyNearby : MonoBehaviour
             if(other.gameObject.tag == "Enemy"){
                 destroyTimerOn = false;
                 LostBotScript lostBotScript = other.gameObject.GetComponent<LostBotScript>();
-                lostBotScript.Invoke("DestroySelf", 0.1f);
+                lostBotScript.Invoke("DropPartsAndDestroySelf", 0.1f);
                 DestroySelf();
             }
         }

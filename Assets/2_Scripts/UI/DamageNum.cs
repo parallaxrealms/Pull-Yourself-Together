@@ -12,22 +12,19 @@ public class DamageNum : MonoBehaviour
     private Vector3 currentPos;
 
     public TMP_Text numText;
-    public int damageNum = 0;
+    public float damageNum;
 
-    private float timer = 1.45f;
+    private float timer;
     
-    void Awake()
+    void Start()
     {
-        numText = GetComponent<TMP_Text>();
-        numText.text = damageNum.ToString();
-
-        numText.GetComponent<TextMeshProUGUI>().DOFade(0, 1.45f);
+        
     }
 
     // Update is called once per frame
     void Update()
     {
-        if(timer >= 0f){
+        if(timer > 0f){
             timer -= Time.deltaTime;
 
             // move the game object up on the Y axis by its local position
@@ -36,5 +33,12 @@ public class DamageNum : MonoBehaviour
         else{
             Destroy(gameObject);
         }
+    }
+
+    public void DamageInit(){
+        numText = GetComponent<TMP_Text>();
+        numText.GetComponent<TextMeshProUGUI>().DOFade(0, 1.45f);
+        numText.text = damageNum.ToString();
+        timer = 1.45f;
     }
 }

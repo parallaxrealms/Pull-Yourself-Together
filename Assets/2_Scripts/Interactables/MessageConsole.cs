@@ -10,7 +10,11 @@ public class MessageConsole : MonoBehaviour
     public SpriteRenderer message_spriteRend;
     public Vector3 messagePos;
 
-    public bool isActive = false;
+    public GameObject ui_read_message;
+    public SpriteRenderer ui_rend;
+
+    public bool showingMessage = false;
+    public bool isActivated = false;
 
     // Start is called before the first frame update
     void Start()
@@ -23,17 +27,26 @@ public class MessageConsole : MonoBehaviour
         message_spriteRend = messagePanelObject.GetComponent<SpriteRenderer>();
 
         message_spriteRend.enabled = false;
+        ui_rend = ui_read_message.GetComponent<SpriteRenderer>();
+        ui_rend.enabled = false;
     }
 
     // Update is called once per frame
     void Update()
     {
-        
+        if(Input.GetButtonDown("Interact")){
+            if(isActivated){
+                TurnConsoleOn();
+            }
+        }
     }
 
     void TurnConsoleOn(){
         message_spriteRend.enabled = true;
         anim.SetBool("activated", true);
+
+        AudioManager.current.currentSFXTrack = 0;
+        AudioManager.current.PlaySfx();
     }
 
     void TurnConsoleOff(){
@@ -41,15 +54,25 @@ public class MessageConsole : MonoBehaviour
         anim.SetBool("activated", false);
     }
 
+    void ActivateConsole(){
+        ui_rend.enabled = true;
+        isActivated = true;
+    }
+    void DeActivateConsole(){
+        ui_rend.enabled = false;
+        isActivated = false;
+        TurnConsoleOff();
+    }
+
     private void OnTriggerEnter(Collider other) {
         if(other.gameObject.tag == "Player"){
-            TurnConsoleOn();
+            ActivateConsole();
         }
     }
 
     private void OnTriggerExit(Collider other){
         if(other.gameObject.tag =="Player"){
-            TurnConsoleOff();
+            DeActivateConsole();
         }
     }
 }

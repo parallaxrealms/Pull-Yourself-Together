@@ -8,6 +8,7 @@ public class DebugManager : MonoBehaviour
 
     public bool enableDebugMode;
     public bool musicPlaying;
+    public bool sfxPlaying;
 
     public bool testingMode = false;
 

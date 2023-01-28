@@ -4,7 +4,6 @@ using UnityEngine;
 
 public class UI_HealthManager : MonoBehaviour
 {
-
     public GameObject UI_head;
     public GameObject UI_body;
     public GameObject UI_drillArm;
@@ -17,6 +16,16 @@ public class UI_HealthManager : MonoBehaviour
     public UI_Part_Health partScript_gunArm;
     public UI_Part_Health partScript_legs;
 
+    public GameObject backedUp_UI;
+    public SpriteRenderer backedUpSpriteRend;
+    public Sprite sprite_BackedUp_No;
+    public Sprite sprite_BackedUp_Yes;
+
+    public GameObject shield_UI;
+    public SpriteRenderer shieldSpriteRend;
+    public Sprite sprite_shield_No;
+    public Sprite sprite_shield_Yes;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -26,75 +35,114 @@ public class UI_HealthManager : MonoBehaviour
         partScript_gunArm = UI_gunArm.GetComponent<UI_Part_Health>();
         partScript_legs = UI_legs.GetComponent<UI_Part_Health>();
 
+        backedUpSpriteRend = backedUp_UI.GetComponent<SpriteRenderer>();
+        shieldSpriteRend = shield_UI.GetComponent<SpriteRenderer>();
+
     }
 
     // Update is called once per frame
     void Update()
     {
-        
+
     }
 
-    public void GainHead(){
+    public void GainHead()
+    {
         partScript_head.Invoke("GainWorkerHead", 0.1f);
     }
-    public void LoseHead(){
+    public void LoseHead()
+    {
         partScript_head.Invoke("PartEmpty", 0.1f);
     }
 
-    public void GainBody(){
+    public void GainBody()
+    {
         partScript_body.Invoke("GainWorkerBody", 0.1f);
     }
-    public void LoseBody(){
+    public void LoseBody()
+    {
         partScript_body.Invoke("PartEmpty", 0.1f);
     }
 
-    public void GainDrillArm(){
+    public void GainDrillArm()
+    {
         partScript_drillArm.Invoke("GainWorkerDrill", 0.1f);
     }
-    public void LoseDrillArm(){
+    public void LoseDrillArm()
+    {
         partScript_drillArm.Invoke("PartEmpty", 0.1f);
     }
 
-    public void GainBlasterGun(){
+    public void GainBlasterGun()
+    {
         partScript_gunArm.Invoke("GainBlasterGun", 0.1f);
     }
-    public void LoseBlasterGun(){
+    public void LoseBlasterGun()
+    {
         partScript_gunArm.Invoke("PartEmpty", 0.1f);
     }
 
-    public void GainMissileLauncher(){
+    public void GainMissileLauncher()
+    {
         partScript_gunArm.Invoke("GainMissileLauncher", 0.1f);
     }
-    public void LoseMissileLauncher(){
+    public void LoseMissileLauncher()
+    {
         partScript_gunArm.Invoke("PartEmpty", 0.1f);
     }
 
-    public void GainLaserBeam(){
+    public void GainLaserBeam()
+    {
         partScript_gunArm.Invoke("GainLaserBeam", 0.1f);
     }
-    public void LoseLaserBeam(){
+    public void LoseLaserBeam()
+    {
         partScript_gunArm.Invoke("PartEmpty", 0.1f);
     }
 
-    public void GainAutoBlaster(){
+    public void GainAutoBlaster()
+    {
         partScript_gunArm.Invoke("GainAutoBlaster", 0.1f);
     }
-    public void LoseAutoBlaster(){
+    public void LoseAutoBlaster()
+    {
         partScript_gunArm.Invoke("PartEmpty", 0.1f);
     }
 
-    public void GainWorkerBoots(){
+    public void GainWorkerBoots()
+    {
         partScript_legs.Invoke("GainWorkerBoots", 0.1f);
     }
-    public void LoseWorkerBoots(){
+    public void LoseWorkerBoots()
+    {
         partScript_legs.Invoke("PartEmpty", 0.1f);
     }
 
-    public void GainJumpBoots(){
+    public void GainJumpBoots()
+    {
         partScript_legs.Invoke("GainJumpBoots", 0.1f);
     }
-    public void LoseJumpBoots(){
+    public void LoseJumpBoots()
+    {
         partScript_legs.Invoke("PartEmpty", 0.1f);
+    }
+
+    public void BackedUp()
+    {
+        backedUpSpriteRend.sprite = sprite_BackedUp_Yes;
+    }
+    public void NotBackedUp()
+    {
+        backedUpSpriteRend.sprite = sprite_BackedUp_No;
+    }
+
+    public void ShieldActive()
+    {
+        shieldSpriteRend.sprite = sprite_shield_Yes;
+    }
+    public void ShieldInactive()
+    {
+        shieldSpriteRend.sprite = sprite_shield_No;
     }
 
 }

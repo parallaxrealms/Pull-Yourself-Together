@@ -11,12 +11,6 @@ public class CyberMantisScript : MonoBehaviour
     private DamageNum damageNumScript;
     private Vector3 dmgNumPos;
 
-    private AudioSource audio;
-    public AudioClip fallingClip;
-    public AudioClip activateClip;
-    public AudioClip deathClip;
-    public AudioClip explodeClip;
-
     public GameObject currentBossObject;
     public GameObject cyberMantis_full;
     public GameObject cyberMantis_body;
@@ -31,7 +25,7 @@ public class CyberMantisScript : MonoBehaviour
     public float health;
     public float damageTaken;
     public float speed;
-    
+
     public bool idle;
     public bool isActive;
     public bool isDead;
@@ -53,16 +47,25 @@ public class CyberMantisScript : MonoBehaviour
     public Vector3 playerPosition;
     public float distanceToPlayer = 0.0f;
 
+    public GameObject deadObject;
+
     public GameObject attackColliderObject;
     public BoxCollider attackCollider;
 
     public bool legsBroken = false;
 
+    public bool hasFallen = false;
 
+    public Vector3 lastPos;
+
+    void Awake()
+    {
+        DontDestroyOnLoad(gameObject);
+        name = "CyberMantis";
+    }
     // Start is called before the first frame update
     void Start()
     {
-        audio = GetComponent<AudioSource>();
         anim = cyberMantis_full.GetComponent<Animator>();
         rb = GetComponent<Rigidbody>();
 
@@ -85,177 +88,277 @@ public class CyberMantisScript : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
+
     }
 
-    void FixedUpdate() {
-        if(isHit){
-            if(tintFadeSpeed > 0.0f){
+    void FixedUpdate()
+    {
+        if (isHit)
+        {
+            if (tintFadeSpeed > 0.0f)
+            {
                 tintFadeSpeed -= Time.deltaTime;
             }
-            else{
+            else
+            {
                 tintFadeSpeed = 0.3f;
                 RecoverFromHit();
             }
         }
 
-        if(isActive){
-            if(idle){
-                if(transform.position.x > playerObject.transform.position.x){
-                    transform.localScale = new Vector3(1,1,1);
+        if (isActive)
+        {
+            if (!isDead)
+            {
+                if (idle)
+                {
+                    if (transform.position.x > playerObject.transform.position.x)
+                    {
+                        transform.localScale = new Vector3(1, 1, 1);
+                    }
+                    else
+                    {
+                        transform.localScale = new Vector3(-1, 1, 1);
+                    }
+
+                    distanceToPlayer = Vector3.Distance(playerObject.transform.position, transform.position);
+
+                    playerPosition = playerObject.transform.position;
+
+                    transform.position = Vector3.MoveTowards(transform.position, playerPosition, speed * Time.deltaTime);
                 }
-                else{
-                    transform.localScale = new Vector3(-1,1,1);
-                }
+                if (chasingPlayer)
+                {
+                    if (transform.position.x > playerObject.transform.position.x)
+                    {
+                        transform.localScale = new Vector3(1, 1, 1);
+                    }
+                    else
+                    {
+                        transform.localScale = new Vector3(-1, 1, 1);
+                    }
 
-                distanceToPlayer = Vector3.Distance(playerObject.transform.position, transform.position);
+                    distanceToPlayer = Vector3.Distance(playerObject.transform.position, transform.position);
 
-                playerPosition = playerObject.transform.position;
+                    playerPosition = playerObject.transform.position;
 
-                transform.position = Vector3.MoveTowards(transform.position, playerPosition, speed * Time.deltaTime);
-            }
-            if(chasingPlayer){
-                if(transform.position.x > playerObject.transform.position.x){
-                    transform.localScale = new Vector3(1,1,1);
-                }
-                else{
-                    transform.localScale = new Vector3(-1,1,1);
-                }
+                    transform.position = Vector3.MoveTowards(transform.position, playerPosition, speed * Time.deltaTime);
 
-                distanceToPlayer = Vector3.Distance(playerObject.transform.position, transform.position);
-
-                playerPosition = playerObject.transform.position;
-
-                transform.position = Vector3.MoveTowards(transform.position, playerPosition, speed * Time.deltaTime);
-
-                if(distanceToPlayer < 2.2f){
-                    AttackPlayer();
-                    speed = bossData.attackSpeed;
-                }
-                else if(distanceToPlayer > 6.0f){
-                    ChasePlayer();
-                    speed = bossData.attackSpeed * 2;
-                }
-                else{
-                    ChasePlayer();
+                    if (distanceToPlayer <= 3.2f)
+                    {
+                        AttackPlayer();
+                        speed = bossData.attackSpeed * 1.0f;
+                    }
+                    else if (distanceToPlayer >= 3.21f)
+                    {
+                        ChasePlayer();
+                        speed = bossData.attackSpeed * 1.5f;
+                    }
+                    else
+                    {
+                        ChasePlayer();
+                        speed = bossData.attackSpeed * 1.25f;
+                    }
                 }
             }
         }
     }
 
-    public void FindPlayer(){
+    public void FindPlayer()
+    {
         playerObject = PlayerManager.current.currentPlayerObject;
         transform.position = new Vector3(transform.position.x, transform.position.y, 0f);
     }
 
-    public void IdleState(){
+    public void Spawn()
+    {
+
+    }
+
+    public void SetLastPos()
+    {
+        lastPos = transform.position;
+
+        transform.position = new Vector3(5500f, 5500f, 5500f);
+        rb.useGravity = false;
+        IdleState();
+        Inactive();
+    }
+
+    public void Respawn()
+    {
+        transform.position = lastPos;
+        if (hasFallen)
+        {
+            rb.useGravity = true;
+            Active();
+            IdleState();
+        }
+    }
+
+    public void IdleState()
+    {
+        FindPlayer();
         idle = true;
         chasingPlayer = false;
         anim.SetBool("isIdle", true);
         anim.SetBool("isWalking", false);
+        anim.SetBool("isAttacking", false);
     }
-    public void ChasePlayer(){
+    public void ChasePlayer()
+    {
         FindPlayer();
         idle = false;
         chasingPlayer = true;
         anim.SetBool("isIdle", false);
         anim.SetBool("isWalking", true);
     }
-    public void AttackPlayer(){
+    public void AttackPlayer()
+    {
+        FindPlayer();
         anim.SetBool("isAttacking", true);
     }
-    public void BreakLegs(){
-        audio.clip = explodeClip;
-        audio.Play();
+    public void BreakLegs()
+    {
+        isActive = false;
+        explodeParticles = Instantiate(explodeParticlesObject, new Vector3(transform.position.x, transform.position.y, transform.position.z), Quaternion.identity) as GameObject;
         anim.SetBool("isIdle", false);
         anim.SetBool("isWalking", false);
         anim.SetBool("isAttacking", false);
         anim.SetBool("legsBreak", true);
+        ActivateBodyPhase();
+
+        AudioManager.current.currentSFXTrack = 18;
+        AudioManager.current.PlaySfx();
+    }
+
+    public void ActivateBodyPhase()
+    {
         cyberMantis_body.SetActive(true);
         currentBossObject = cyberMantis_body;
         anim = cyberMantis_body.GetComponent<Animator>();
 
         attackCollider.center = new Vector3(-0.75f, -1f, 0f);
-
-        explodeParticles = Instantiate(explodeParticlesObject, new Vector3(transform.position.x,transform.position.y, transform.position.z), Quaternion.identity) as GameObject;
-
         spriteRend = cyberMantis_body.GetComponent<SpriteRenderer>();
         spriteMaterial = spriteRend.material;
         FindPlayer();
+        isActive = true;
     }
 
-    public void DestroyOldSelf(){
-        
-    }
-
-    public void BeginFalling(){
+    public void BeginFalling()
+    {
         rb.useGravity = true;
-        audio.clip = fallingClip;
-        audio.Play();
+        hasFallen = true;
+
+        AudioManager.current.currentSFXTrack = 122;
+        AudioManager.current.PlaySfx();
     }
 
-    public void DoneFalling(){
+    public void DoneFalling()
+    {
         anim.SetBool("doneFalling", true);
-        audio.clip = activateClip;
-        audio.Play();
+
+        AudioManager.current.currentSFXTrack = 120;
+        AudioManager.current.PlaySfx();
     }
-    public void Active(){
+    public void Active()
+    {
+        FindPlayer();
         isActive = true;
         GameController.current.Invoke("BossFightStarted", 0.1f);
         PlayerManager.current.Invoke("ResumeMovement", 0.01f);
     }
-    public void Inactive(){
+    public void Inactive()
+    {
         isActive = false;
+        anim.SetBool("isAttacking", false);
+        anim.SetBool("isIdle", true);
     }
 
-    public void EnableAttackCollider(){
-        attackCollider = attackColliderObject.GetComponent<BoxCollider>();
-        attackCollider.enabled = true;
+    public void EnableAttackCollider()
+    {
+        if (!isDead)
+        {
+            attackCollider = attackColliderObject.GetComponent<BoxCollider>();
+            attackCollider.enabled = true;
+        }
     }
-    public void DisableAttackCollider(){
-        attackCollider = attackColliderObject.GetComponent<BoxCollider>();
-        attackCollider.enabled = false;
+    public void DisableAttackCollider()
+    {
+        if (!isDead)
+        {
+            attackCollider = attackColliderObject.GetComponent<BoxCollider>();
+            attackCollider.enabled = false;
+        }
     }
 
 
-    public void TakeHit(){
-        speed = bossData.speed / 2;
-        health -= damageTaken;
-        isHit = true;
-        spriteRend.material = hitMaterial;
-        if(health <= bossData.health / 2){
-            if(!legsBroken){
-                health += 30.0f;
-                BreakLegs();
-                legsBroken = true;
+    public void TakeHit()
+    {
+        if (!isDead)
+        {
+            speed = bossData.speed / 1.5f;
+            health -= damageTaken;
+            isHit = true;
+            spriteRend.material = hitMaterial;
+            if (health <= bossData.health / 2)
+            {
+                if (!legsBroken)
+                {
+                    BreakLegs();
+                    legsBroken = true;
+                }
+
+                AudioManager.current.currentSFXTrack = 125;
+                AudioManager.current.PlaySfx();
+            }
+            if (health <= 0.0f)
+            {
+                Death();
             }
         }
-        if(health <= 0.0f){
-            Death();
-        }
     }
-    public void RecoverFromHit(){
+    public void RecoverFromHit()
+    {
         speed = bossData.speed;
         isHit = false;
         spriteRend.material = spriteMaterial;
         damageTaken = 0.0f;
     }
 
-    public void DisplayDamage(){
-        GameObject newDamageNum = Instantiate(damageNum, new Vector3(dmgNumPos.x, dmgNumPos.y + 0.5f, dmgNumPos.z), Quaternion.identity) as GameObject;
-        GameObject canvasObject = GameObject.Find("WorldCanvas");
-        newDamageNum.transform.SetParent(canvasObject.transform);
-        DamageNum damageNumScript = newDamageNum.GetComponent<DamageNum>();
-        damageNumScript.damageNum = 1;
+    public void DisplayDamage()
+    {
+        if (GameController.current.damageNumOption)
+        {
+            dmgNumPos = transform.position;
+            GameObject newDamageNum = Instantiate(damageNum, new Vector3(dmgNumPos.x, dmgNumPos.y + 0.75f, dmgNumPos.z), Quaternion.identity) as GameObject;
+            GameObject canvasObject = GameObject.Find("WorldCanvas");
+            newDamageNum.transform.SetParent(canvasObject.transform);
+            DamageNum damageNumScript = newDamageNum.GetComponent<DamageNum>();
+            damageNumScript.damageNum = Mathf.RoundToInt(damageTaken);
+            damageNumScript.DamageInit();
+        }
+
     }
 
-    public void Death(){
-        audio.clip = deathClip;
-        audio.Play();
-        explodeParticles = Instantiate(explodeParticlesObject, new Vector3(transform.position.x,transform.position.y, transform.position.z), Quaternion.identity) as GameObject;
+    public void Death()
+    {
+        isDead = true;
+        explodeParticles = Instantiate(explodeParticlesObject, new Vector3(transform.position.x, transform.position.y, transform.position.z), Quaternion.identity) as GameObject;
         speed = 0;
         anim.SetBool("isDead", true);
-        Destroy(detectionTrigger);
-        Destroy(attackColliderObject);
+        Invoke("DestroySelf", 1.0f);
+
+        Time.timeScale = .5f;
+
+        AudioManager.current.currentSFXTrack = 126;
+        AudioManager.current.PlaySfx();
+    }
+    public void DestroySelf()
+    {
+        GameObject deadMantis = Instantiate(deadObject, new Vector3(transform.position.x, transform.position.y, transform.position.z), Quaternion.identity) as GameObject;
+
+        Destroy(gameObject);
+        MenuManager.current.CreditsScene();
     }
 }

@@ -13,7 +13,7 @@ public class UI_Part_Window_Tab : MonoBehaviour
     public Sprite sprite_inactive;
     public Sprite sprite_active;
     public Sprite sprite_inactiveHover;
-    
+
     public bool isActive;
     public bool isHovering;
 
@@ -23,7 +23,8 @@ public class UI_Part_Window_Tab : MonoBehaviour
         parentObject = transform.parent.gameObject;
         parentScript = parentObject.GetComponent<UI_Window_Part>();
         spriteRend = GetComponent<SpriteRenderer>();
-        if(tabNum == 0){
+        if (tabNum == 0)
+        {
             isActive = true;
         }
     }
@@ -31,38 +32,58 @@ public class UI_Part_Window_Tab : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
+
     }
 
-    public void OpenTab(){
+    public void OpenTab()
+    {
         spriteRend.sprite = sprite_active;
         isActive = true;
     }
 
-    public void CloseTab(){
+    public void CloseTab()
+    {
         spriteRend.sprite = sprite_inactive;
         isActive = false;
     }
 
-    void OnMouseOver(){
-        if(!isActive){
+    void OnMouseOver()
+    {
+        if (!isActive)
+        {
             spriteRend.sprite = sprite_inactiveHover;
             isHovering = true;
         }
         MenuManager.current.isMouseOver = true;
+        GameController.current.ChangeMouseCursorDefault();
+
+        if (!AudioManager.current.UIHover)
+        {
+            AudioManager.current.currentSFXTrack = 3;
+            AudioManager.current.PlaySfx();
+            AudioManager.current.UIHover = true;
+        }
     }
 
-    void OnMouseExit(){
-        if(!isActive){
+    void OnMouseExit()
+    {
+        if (!isActive)
+        {
             spriteRend.sprite = sprite_inactive;
             isHovering = false;
         }
         MenuManager.current.isMouseOver = false;
+        GameController.current.ChangeMouseCursorBack();
+        AudioManager.current.UIHover = false;
     }
 
-    public void OnMouseDown(){
-        if(!isActive){
-            parentScript.Invoke("SwitchTabs",0.01f);
+    public void OnMouseDown()
+    {
+        if (!isActive)
+        {
+            parentScript.Invoke("SwitchTabs", 0.01f);
+            AudioManager.current.currentSFXTrack = 0;
+            AudioManager.current.PlaySfx();
         }
     }
 }

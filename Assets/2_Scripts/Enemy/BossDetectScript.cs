@@ -23,13 +23,7 @@ public class BossDetectScript : MonoBehaviour
     {
         
     }
-
-    private void OnTriggerEnter(Collider other) {
-        if(other.gameObject.tag == "Player"){
-            parentScript.Invoke("ChasePlayer",0.1f);
-        }
-    }
-
+    
     private void OnTriggerExit(Collider other) {
         if(!parentScript.idle){
             if(other.gameObject.tag == "Player"){

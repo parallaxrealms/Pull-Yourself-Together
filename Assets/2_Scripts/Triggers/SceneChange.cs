@@ -20,27 +20,39 @@ public class SceneChange : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
+
     }
 
-    private void OnTriggerEnter(Collider other) {
-        if(other.gameObject.tag == "Player"){
-            if(!triggered){
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.gameObject.tag == "Player")
+        {
+            if (!triggered)
+            {
+                if (triggerName == "Top_To_Abyss_1")
+                {
+                    if (GameObject.Find("CyberMantis") != null)
+                    {
+                        GameObject cyberMantis = GameObject.Find("CyberMantis");
+                        CyberMantisScript bossScript = cyberMantis.GetComponent<CyberMantisScript>();
+                        bossScript.SetLastPos();
+                    }
+                }
                 PlayerManager.current.sceneDirection = playerWalkDirection;
                 GameController.current.sceneChangeName = sceneToName;
                 GameController.current.triggerSpawnName = triggerConnectionName;
-                
-                PersistentGameObjects.current.TransferPersistentObjects();
-
+                GameController.current.sceneChanging = true;
                 MenuManager.current.ChangeSceneTo();
                 triggered = true;
             }
         }
     }
 
-    private void OnTriggerExit(Collider other) {
-        if(other.gameObject.tag == "Player"){
-            
+    private void OnTriggerExit(Collider other)
+    {
+        if (other.gameObject.tag == "Player")
+        {
+
         }
     }
 }

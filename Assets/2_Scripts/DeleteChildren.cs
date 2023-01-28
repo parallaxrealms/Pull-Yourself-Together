@@ -23,7 +23,6 @@ public class DeleteChildren : MonoBehaviour
             // Make sure the script component is not null before accessing it
             if (childScript != null)
             {
-                Debug.Log(childScript.id);
                 childScript.DestroySelf();
             }
         }

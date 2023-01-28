@@ -18,7 +18,7 @@ public class PickUpScript : MonoBehaviour
     public string sceneName;
     public int id;
 
-    public bool alreadySpawned;
+    public int backupID; //for head backup points only
 
     public SpriteRenderer spriteRend;
 
@@ -66,13 +66,20 @@ public class PickUpScript : MonoBehaviour
 
     public bool isUsed = false;
 
-    public GameObject prevBotOwner;
+    public bool originalParentSet = false;
 
-    void Awake(){
+    public bool nameActivated = false;
+
+    public GameObject prevBotOwner;
+    public GameObject backupObjectsContainer;
+
+    void Awake()
+    {
         sceneInitObject = GameObject.Find("SceneInit");
         sceneInitScript = sceneInitObject.GetComponent<SceneInit>();
 
-        if(transform.parent != null){
+        if (transform.parent != null)
+        {
             originalParent = transform.parent.gameObject;
         }
 
@@ -81,176 +88,296 @@ public class PickUpScript : MonoBehaviour
         defaultSpriteMat = spriteRend.material;
 
         UISpriteRend = UI_PickUp.GetComponent<SpriteRenderer>();
+        if (GameObject.Find("GameController") != null)
+        {
 
-        AddToList();
+            backupObjectsContainer = PersistentGameObjects.current.backupObjectsContainer;
+
+            AddToList();
+        }
     }
 
     // Start is called before the first frame update
     void Start()
     {
-        if(pickupType == 0 || pickupType == 9){ //Head Backup Point
-            pingAnim = pingObject.GetComponent<Animator>();
-            pingObject.SetActive(false);
-            respawnCircle = Instantiate(respawnCircleObject, new Vector3(0,0,0), Quaternion.identity) as GameObject;
-            respawnCircle.transform.parent = transform;
-            respawnCircle.transform.localPosition = new Vector3(0,0,0);
-        }
-        if(pickupType == 3){ //If pickup is a gun
-            if(gunType == 0){
+        if (pickupType == 3)
+        { //If pickup is a gun
+            if (gunType == 0)
+            {
                 spriteRend.sprite = sprite_blaster;
             }
-            else if(gunType == 1){
+            else if (gunType == 1)
+            {
                 spriteRend.sprite = sprite_missile;
             }
-            else if(gunType == 2){
+            else if (gunType == 2)
+            {
                 spriteRend.sprite = sprite_laser;
             }
-            else if(gunType == 3){
+            else if (gunType == 3)
+            {
                 spriteRend.sprite = sprite_electro;
             }
         }
 
-        if(pickupType == 4){ //If pickup is legs
-            if(legType == 0){
+        if (pickupType == 4)
+        { //If pickup is legs
+            if (legType == 0)
+            {
                 spriteRend.sprite = sprite_workerBoots;
             }
-            else if(legType == 1){
+            else if (legType == 1)
+            {
                 spriteRend.sprite = sprite_jumpBoots;
             }
+        }
+        if (pickupType == 9)
+        { //Head Backup Point
+            pingAnim = pingObject.GetComponent<Animator>();
+            pingObject.SetActive(false);
+
+            Invoke("CheckBackUpID", 0.1f);
         }
 
         particlePickup.SetActive(false);
 
-        EraseOutline();
         EraseText();
+        DrawOutline();
         TransferUpgradeProperties();
     }
 
     // Update is called once per frame
     void Update()
     {
-        if(activated){
-            if(Input.GetButtonDown("Interact")){
+        if (activated)
+        {
+            if (Input.GetButtonDown("Interact"))
+            {
                 TransferUpgradeProperties();
-                if(pickupType == 0){
-                    if(!isUsed){
-                        PlayerManager.current.backupSpawnPos = new Vector3(transform.position.x, transform.position.y,transform.position.z);
-                        PlayerManager.current.backupObject = gameObject;
-                        PlayerManager.current.SetBackupPoint();
-                        pingObject.SetActive(true);
-                        pingAnim.SetBool("hidden", false);
-                        isUsed = true;
-                        
-                        GameController.current.prevBotOwner = null;
+                if (pickupType == 1)
+                {
+                    PlayerManager.current.currentPickup_progress1 = progress1;
+                    PlayerManager.current.currentPickup_progress2 = progress2;
+
+                    if (!PlayerManager.current.hasBody)
+                    {
+                        PlayerManager.current.PickupBody(0);
+                    }
+                    DestroySelf();
+                }
+                else if (pickupType == 2)
+                {
+                    PlayerManager.current.currentPickup_progress1 = progress1;
+                    PlayerManager.current.currentPickup_progress2 = progress2;
+
+                    if (PlayerManager.current.hasDrill)
+                    {
+                        if (PlayerManager.current.currentUpgrade_extraSlots == 1)
+                        {
+                            if (!PlayerManager.current.hasStorage1)
+                            {
+                                PlayerManager.current.PickupDrill(1);
+                            }
+                        }
+                        if (PlayerManager.current.currentUpgrade_extraSlots == 2)
+                        {
+                            if (!PlayerManager.current.hasStorage1)
+                            {
+                                PlayerManager.current.PickupDrill(1);
+                            }
+                            else if (!PlayerManager.current.hasStorage2)
+                            {
+                                PlayerManager.current.PickupDrill(2);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        PlayerManager.current.PickupDrill(0);
+                    }
+                    DestroySelf();
+                }
+                else if (pickupType == 3)
+                { //Guns
+                    PlayerManager.current.currentPickup_progress1 = progress1;
+                    PlayerManager.current.currentPickup_progress2 = progress2;
+
+                    if (PlayerManager.current.hasGun)
+                    {
+                        if (gunType == 0)
+                        {   //Blaster
+                            PlayerManager.current.SwitchToBlaster();
+                        }
+                        else if (gunType == 1)
+                        {   //Missile
+                            PlayerManager.current.SwitchToMissile();
+                        }
+                        else if (gunType == 2)
+                        {   //EnergyBeam
+                            PlayerManager.current.SwitchToLaser();
+                        }
+                        DestroySelf();
+                    }
+                    else
+                    {
+                        if (gunType == 0)
+                        {
+                            PlayerManager.current.PickupBlaster(0);
+                        }
+                        else if (gunType == 1)
+                        {
+                            PlayerManager.current.PickupMissile(0);
+                        }
+                        else if (gunType == 2)
+                        {
+                            PlayerManager.current.PickupLaser(0);
+                        }
+                        DestroySelf();
                     }
                 }
-                if(pickupType == 1){
-                    if(!PlayerManager.current.hasBody){
-                        PlayerManager.current.PickupBody();
-                        DestroySelf();
-                    }
-                    else{
-                        
-                    }
-                }
-                else if(pickupType == 2){
-                    if(!PlayerManager.current.hasDrill){
-                        PlayerManager.current.PickupDrill();
-                        DestroySelf();
-                    }
-                    else{
-                        
-                    }
-                }
-                else if(pickupType == 3){ //Guns
-                    if(PlayerManager.current.hasGun){
-                        PlayerManager.current.currentPickup_progress1 = progress1;
-                        PlayerManager.current.currentPickup_progress2 = progress2;
-                        if(gunType == 0){   //Blaster
-                            if(PlayerManager.current.gunType == 0){
-                                //Repair Gun
-                            }
-                            else{
-                                PlayerManager.current.SwitchToBlaster();
-                            }
+                else if (pickupType == 4)
+                {
+                    PlayerManager.current.currentPickup_progress1 = progress1;
+                    PlayerManager.current.currentPickup_progress2 = progress2;
+
+                    if (!PlayerManager.current.hasLegs)
+                    {
+                        if (legType == 0)
+                        {
+                            PlayerManager.current.PickupWorkerBoots(0);
                         }
-                        else if(gunType == 1){   //Missile
-                            if(PlayerManager.current.gunType == 1){
-                                //Repair Gun
-                            }
-                            else{
-                                PlayerManager.current.SwitchToMissile();
-                            }
-                        }
-                        else if(gunType == 2){   //Laser
-                            if(PlayerManager.current.gunType == 2){
-                                //Repair Gun
-                            }
-                            else{
-                                PlayerManager.current.SwitchToLaser();
-                            }
+                        else if (legType == 1)
+                        {
+                            PlayerManager.current.PickupJumpBoots(0);
                         }
                         DestroySelf();
                     }
-                    else{
-                        PlayerManager.current.currentPickup_progress1 = progress1;
-                        PlayerManager.current.currentPickup_progress2 = progress2;
-                        if(gunType == 0){  
-                            PlayerManager.current.PickupBlaster();
-                        }
-                        else if(gunType == 1){  
-                            PlayerManager.current.PickupMissile();
-                        }
-                        else if(gunType == 2){
-                            PlayerManager.current.PickupLaser();
-                        }
-                        DestroySelf();
-                    }
-                }
-                else if(pickupType == 4){
-                    if(!PlayerManager.current.hasLegs){
-                        DestroySelf();
-                        if(legType == 0){
-                            PlayerManager.current.PickupWorkerBoots();
-                        }
-                        else if(legType == 1){
-                            PlayerManager.current.PickupJumpBoots();
-                        }
-                    }
-                    else{
-                        DestroySelf();
-                        if(legType == 0){
+                    else
+                    {
+                        if (legType == 0)
+                        {
                             PlayerManager.current.SwitchToWorkerBoots();
                         }
-                        else if(legType == 1){
+                        else if (legType == 1)
+                        {
                             PlayerManager.current.SwitchToJumpBoots();
                         }
+                        DestroySelf();
                     }
                 }
-                else if(pickupType == 9){
-                    if(!isUsed){
-                        PlayerManager.current.backupSpawnPos = new Vector3(transform.position.x, transform.position.y,transform.position.z);
-                        PlayerManager.current.backupObject = gameObject;
-                        PlayerManager.current.SetBackupPoint();
+                else if (pickupType == 9)
+                {
+                    if (!isUsed)
+                    {
+                        PlayerManager.current.backupSpawnPos = new Vector3(transform.position.x, transform.position.y, transform.position.z);
+                        PlayerManager.current.backupBotID = backupID;
+                        PlayerManager.current.lastBackupBotID = backupID;
+
+                        PlayerManager.current.SetBackupPoint(gameObject);
+
+                        PersistentGameObjects.current.RemoveGameObject(id);
+
                         pingObject.SetActive(true);
                         pingAnim.SetBool("hidden", false);
 
                         DisablePickupParticles();
-                        
+                        EraseOutline();
+                        EraseText();
+
                         GameController.current.prevBotOwner = prevBotOwner;
+
+                        transform.SetParent(backupObjectsContainer.transform);
+
                         isUsed = true;
                     }
                 }
-            }    
+                GameController.current.Invoke("HighlightPickups", 0.25f);
+            }
+            if (Input.GetButtonDown("Interact2"))
+            {
+                TransferUpgradeProperties();
+                if (pickupType == 1)
+                {
+                    PlayerManager.current.currentPickup_progress1 = progress1;
+                    PlayerManager.current.currentPickup_progress2 = progress2;
+
+                    if (PlayerManager.current.hasBody)
+                    {
+                        if (PlayerManager.current.currentUpgrade_extraSlots == 1)
+                        {
+                            if (!PlayerManager.current.hasStorage1)
+                            {
+                                PlayerManager.current.PickupBody(1);
+                            }
+                        }
+                        if (PlayerManager.current.currentUpgrade_extraSlots == 2)
+                        {
+                            if (!PlayerManager.current.hasStorage1)
+                            {
+                                PlayerManager.current.PickupBody(1);
+                            }
+                            else if (!PlayerManager.current.hasStorage2)
+                            {
+                                PlayerManager.current.PickupBody(2);
+                            }
+                        }
+                    }
+                    DestroySelf();
+                }
+                else if (pickupType == 2)
+                {
+                    PlayerManager.current.currentPickup_progress1 = progress1;
+                    PlayerManager.current.currentPickup_progress2 = progress2;
+
+                    if (PlayerManager.current.hasDrill)
+                    {
+                        if (PlayerManager.current.currentUpgrade_extraSlots == 1)
+                        {
+                            if (!PlayerManager.current.hasStorage1)
+                            {
+                                PlayerManager.current.PickupDrill(1);
+                            }
+                        }
+                        if (PlayerManager.current.currentUpgrade_extraSlots == 2)
+                        {
+                            if (!PlayerManager.current.hasStorage1)
+                            {
+                                PlayerManager.current.PickupDrill(1);
+                            }
+                            else if (!PlayerManager.current.hasStorage2)
+                            {
+                                PlayerManager.current.PickupDrill(2);
+                            }
+                        }
+                    }
+                    DestroySelf();
+                }
+                else if (pickupType == 3)
+                {
+                }
+                else if (pickupType == 4)
+                {
+
+                }
+                else if (pickupType == 9)
+                {
+
+                }
+                GameController.current.Invoke("HighlightPickups", 0.25f);
+            }
         }
     }
 
-    public void FixedUpdate(){
-        if(isSpawning){
-            if(tintFadeTimer > 0){
+    public void FixedUpdate()
+    {
+        if (isSpawning)
+        {
+            if (tintFadeTimer > 0)
+            {
                 tintFadeTimer -= Time.deltaTime;
             }
-            else{
+            else
+            {
                 isSpawning = false;
                 tintFadeTimer = 0.5f;
                 spriteRend.material = defaultSpriteMat;
@@ -258,28 +385,51 @@ public class PickUpScript : MonoBehaviour
         }
     }
 
-    public void DrawOutline(){
+    public void ResetPickup()
+    {
+        isUsed = false;
+        activated = false;
+        // transform.SetParent(originalParent.transform);
+        Debug.Log("Reseted: " + id);
+        Debug.Log("originalParent: " + originalParent);
+
+        pingAnim.SetBool("hidden", true);
+        pingObject.SetActive(false);
+
+
+        DrawOutline();
+        EraseText();
+        AddToList();
+    }
+    public void DrawOutline()
+    {
         spriteRend.material = outlineSpriteMat;
     }
 
-    public void EraseOutline(){
+    public void EraseOutline()
+    {
         spriteRend.material = defaultSpriteMat;
     }
 
-    public void DrawText(){
+    public void DrawText()
+    {
         UI_PickUp.SetActive(true);
+        nameActivated = true;
     }
 
-    public void EraseText(){
+    public void EraseText()
+    {
         UI_PickUp.SetActive(false);
+        nameActivated = false;
     }
 
-    public void SetScenePos(){
-        Debug.Log("SetScenePos : " + scenePos);
+    public void SetScenePos()
+    {
         scenePos = transform.position;
     }
 
-    public void DropNewPickup(){
+    public void DropNewPickup()
+    {
         id = PersistentGameObjects.current.nextID;
         PersistentGameObjects.current.nextID++;
 
@@ -297,83 +447,113 @@ public class PickUpScript : MonoBehaviour
         transform.eulerAngles = new Vector3(transform.eulerAngles.x, 0, transform.eulerAngles.z);
         UI_PickUp.SetActive(false);
 
-        GameController.current.HighlightPickups();
         TransferUpgradeProperties();
+        GameController.current.Invoke("HighlightPickups", 0.25f);
     }
 
-    public void TransferUpgradeProperties(){
+    public void CheckBackUpID()
+    {
+        if (id == PlayerManager.current.lastBackupBotID)
+        {
+            DestroySelf();
+            PlayerManager.current.lastBackupBotID = 0;
+        }
+    }
+
+    public void TransferUpgradeProperties()
+    {
         progressNum = progress1 + progress2;
 
-        if(progressNum == 0){
+        if (progressNum == 0)
+        {
             UISpriteRend.sprite = sprite_pickup_0;
         }
-        else if(progressNum == 1){
+        else if (progressNum == 1)
+        {
             UISpriteRend.sprite = sprite_pickup_1;
         }
-        else if(progressNum == 2){
+        else if (progressNum == 2)
+        {
             UISpriteRend.sprite = sprite_pickup_2;
         }
-        else if(progressNum == 3){
+        else if (progressNum == 3)
+        {
             UISpriteRend.sprite = sprite_pickup_3;
         }
-        else if(progressNum == 4){
+        else if (progressNum == 4)
+        {
             UISpriteRend.sprite = sprite_pickup_4;
         }
-        else if(progressNum == 5){
+        else if (progressNum == 5)
+        {
             UISpriteRend.sprite = sprite_pickup_5;
         }
-        else if(progressNum == 6){
+        else if (progressNum == 6)
+        {
             UISpriteRend.sprite = sprite_pickup_6;
         }
 
         //rename gameobject
-        if(pickupType == 0){
+        if (pickupType == 9)
+        {
             gameObject.name = "BotHead " + id.ToString();
         }
-        else if(pickupType == 1){
+        else if (pickupType == 1)
+        {
             gameObject.name = "WorkerBody " + id.ToString();
         }
-        else if(pickupType == 2){
+        else if (pickupType == 2)
+        {
             gameObject.name = "WorkerDrill " + id.ToString();
         }
-        else if(pickupType == 3){
-            if(gunType == 0){
+        else if (pickupType == 3)
+        {
+            if (gunType == 0)
+            {
                 gameObject.name = "BlasterGun " + id.ToString();
             }
-            else if(gunType == 1){
+            else if (gunType == 1)
+            {
                 gameObject.name = "MissileLauncher " + id.ToString();
             }
-            else if(gunType == 2){
+            else if (gunType == 2)
+            {
                 gameObject.name = "EnergyBeam " + id.ToString();
             }
-            else if(gunType == 3){
+            else if (gunType == 3)
+            {
                 gameObject.name = "ElectroGun " + id.ToString();
             }
         }
-        else if(pickupType == 4){
-            if(legType == 0){
+        else if (pickupType == 4)
+        {
+            if (legType == 0)
+            {
                 gameObject.name = "WorkerLegs " + id.ToString();
             }
-            else if(legType == 1){
+            else if (legType == 1)
+            {
                 gameObject.name = "WorkerLegs " + id.ToString();
             }
         }
     }
 
-    public void EnablePickupParticles(){
+    public void EnablePickupParticles()
+    {
         particlePickup.SetActive(true);
-        DrawOutline();
     }
-    public void DisablePickupParticles(){
+    public void DisablePickupParticles()
+    {
         particlePickup.SetActive(false);
-        EraseOutline();
     }
 
-    public void DefaultText(){
+    public void DefaultText()
+    {
         DrawText();
     }
 
-    public void AddToList(){
+    public void AddToList()
+    {
         Scene scene = SceneManager.GetActiveScene();
         sceneName = scene.name;
 
@@ -381,24 +561,38 @@ public class PickUpScript : MonoBehaviour
         PersistentGameObjects.current.AddGameObject(gameObject, sceneName);
     }
 
-    public void RemoveFromList(){
+    public void SetOriginalParent()
+    {
+        if (!originalParentSet)
+        {
+            originalParent = transform.parent.gameObject;
+            originalParentSet = true;
+        }
+    }
+
+    public void RemoveFromList()
+    {
         GameController.current.ListPickups.Remove(gameObject);
         PersistentGameObjects.current.RemoveGameObject(id);
     }
 
-    public void Active(){
-        RemoveFromList();
+    public void Active()
+    {
+        GameController.current.ListPickups.Add(gameObject);
         transform.position = scenePos;
         rb.useGravity = true;
         rb.constraints = RigidbodyConstraints.FreezePositionZ | RigidbodyConstraints.FreezeRotation;
     }
-    public void Inactive(){
+    public void Inactive()
+    {
+        GameController.current.ListPickups.Remove(gameObject);
         rb.useGravity = false;
         rb.constraints = RigidbodyConstraints.FreezeAll;
-        transform.position = new Vector3(9000f,9000f,9000f);
+        transform.position = new Vector3(9000f, 9000f, 9000f);
     }
 
-    public void DestroySelf(){
+    public void DestroySelf()
+    {
         GameController.current.ListPickups.Remove(gameObject);
         PersistentGameObjects.current.RemoveGameObject(id);
         Destroy(gameObject);

@@ -15,14 +15,18 @@ public class TriggerFalling : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
+
     }
 
-    private void OnTriggerEnter(Collider other) {
-        if(other.gameObject.tag == "Player"){
-            if(!entered){
-                PlayerManager.current.Invoke("TakeHardHit",0.01f);
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.gameObject.tag == "Player")
+        {
+            if (!entered)
+            {
+                PlayerManager.current.Invoke("TakeHardHit", 0.01f);
                 GameController.current.playerFellAbyss = true;
+                entered = true;
             }
         }
     }

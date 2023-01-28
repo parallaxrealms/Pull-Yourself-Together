@@ -4,17 +4,13 @@ using UnityEngine;
 
 public class CyberMantisAnim : MonoBehaviour
 {
-    private AudioSource audio;
-    public AudioClip crashSound;
-    public AudioClip attackSound;
-    
+
     public GameObject parentObject;
     public CyberMantisScript parentScript;
 
     // Start is called before the first frame update
     void Start()
     {
-        audio = GetComponent<AudioSource>();
         parentObject = transform.parent.gameObject;
         parentScript = parentObject.GetComponent<CyberMantisScript>();
     }
@@ -22,54 +18,90 @@ public class CyberMantisAnim : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
+
     }
 
-    public void Active(){
-        parentScript.Invoke("Active",0.1f);
+    public void Active()
+    {
+        parentScript.Active();
     }
 
-    public void CrashSound(){
-        audio.clip = crashSound;
-        audio.Play();
+    public void CrashSound()
+    {
+        AudioManager.current.currentSFXTrack = 123;
+        AudioManager.current.PlaySfx();
     }
 
-    public void EnableAttackCollider(){
-        audio.clip = attackSound;
-        audio.Play();
-        parentScript.Invoke("EnableAttackCollider",0.1f);
+    public void EnableAttackCollider()
+    {
+        parentScript.EnableAttackCollider();
+        AudioManager.current.currentSFXTrack = 121;
+        AudioManager.current.PlaySfx();
     }
-    public void DisableAttackCollider(){
-        parentScript.Invoke("DisableAttackCollider",0.1f);
+    public void DisableAttackCollider()
+    {
+        parentScript.DisableAttackCollider();
     }
 
-    private void OnTriggerEnter(Collider other) {
-        if(other.gameObject.tag == "Player_Bullet"){
-            if(!parentScript.isHit){
-                if(!parentScript.isDead){
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.gameObject.tag == "Player_Bullet")
+        {
+            if (!parentScript.isHit)
+            {
+                if (!parentScript.isDead)
+                {
                     BulletPhysics bulletScript = other.gameObject.GetComponent<BulletPhysics>();
-                    parentScript.damageTaken = bulletScript.damage;
-                    parentScript.Invoke("TakeHit", 0.1f);
+                    parentScript.damageTaken = PlayerManager.current.currentDamage_blaster;
+                    parentScript.TakeHit();
+                }
+            }
+        }
+        if (other.gameObject.tag == "MissileAOE")
+        {
+            if (!parentScript.isHit)
+            {
+                if (!parentScript.isDead)
+                {
+                    MissileAOE missileAOEscript = other.gameObject.GetComponent<MissileAOE>();
+                    parentScript.damageTaken = missileAOEscript.damage;
+                    parentScript.TakeHit();
+                }
+            }
+        }
+        if (other.gameObject.tag == "Player_EnergyBeam")
+        {
+            if (!parentScript.isHit)
+            {
+                if (!parentScript.isDead)
+                {
+                    BulletPhysics bulletScript = other.gameObject.GetComponent<BulletPhysics>();
+                    parentScript.damageTaken = PlayerManager.current.currentDamage_energyBeam;
+                    parentScript.TakeHit();
                 }
             }
         }
     }
 
 
-    private void OnTriggerStay(Collider other) {
-        if(other.gameObject.tag == "PlayerDrill"){
-            if(!parentScript.isHit){
-                if(!parentScript.isDead){
-                    DrillArmScript drillArmScript = other.gameObject.GetComponent<DrillArmScript>();
-                    parentScript.damageTaken = drillArmScript.damage;
-                    parentScript.Invoke("TakeHit", 0.1f);
+    private void OnTriggerStay(Collider other)
+    {
+        if (other.gameObject.tag == "PlayerDrill")
+        {
+            if (!parentScript.isHit)
+            {
+                if (!parentScript.isDead)
+                {
+                    parentScript.damageTaken = PlayerManager.current.currentDamage_workerDrill;
+                    parentScript.TakeHit();
                 }
             }
         }
     }
 
 
-    public void DestroySelf(){
+    public void DestroySelf()
+    {
         Destroy(gameObject);
     }
 }

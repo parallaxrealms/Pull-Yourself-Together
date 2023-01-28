@@ -88,6 +88,22 @@ public class DoorHitTrigger : MonoBehaviour
                 triggerLight.SetActive(false);
             }
         }
+        if(other.gameObject.tag == "Player_EnergyBeam"){
+        BulletPhysics bulletScript = other.gameObject.GetComponent<BulletPhysics>();
+
+            if(parentScript.doorType == 0){
+                parentScript.Invoke("OpenDoor", 0.01f);
+                OpenDoor();
+                collider.enabled = false;
+                triggerLight.SetActive(false);
+            }
+            else if(parentScript.doorType == bulletScript.bulletType){
+                parentScript.Invoke("OpenDoor", 0.01f);
+                OpenDoor();
+                collider.enabled = false;
+                triggerLight.SetActive(false);
+            }
+        }
     }
 
     private void OpenDoor(){

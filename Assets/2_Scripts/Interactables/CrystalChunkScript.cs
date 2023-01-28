@@ -57,8 +57,6 @@ public class CrystalChunkScript : MonoBehaviour
         crystalManagerScript.Invoke("ShowCrystalUITemp",0.01f);
         anim.SetBool("Pickup", true);
         pickedUp = true;
-        audio.clip = clip_pickup;
-        audio.Play();
 
         if(typeOfCrystal == "Corite"){
             crystalManagerScript.Invoke("GainCorite", 0.01f);
@@ -72,6 +70,9 @@ public class CrystalChunkScript : MonoBehaviour
         if(typeOfCrystal == "Zyrite"){
             crystalManagerScript.Invoke("GainZyrite", 0.01f);
         }
+
+        AudioManager.current.currentSFXTrack = 22;
+        AudioManager.current.PlaySfx();
     }
 
     void DestroySelf(){

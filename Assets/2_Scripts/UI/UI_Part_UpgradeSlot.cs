@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class UI_Part_UpgradeSlot : MonoBehaviour
-{ 
+{
     public GameObject UI_CrystalManager;
     public UI_CrystalManager crystalManagerScript;
 
@@ -43,78 +43,107 @@ public class UI_Part_UpgradeSlot : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
+
     }
 
-    void OnMouseOver(){
-        if(!isActivated){
+    void OnMouseOver()
+    {
+        if (!isActivated)
+        {
             hoverWhite.SetActive(true);
         }
         MenuManager.current.isMouseOver = true;
+        if (!AudioManager.current.UIHover)
+        {
+            AudioManager.current.currentSFXTrack = 3;
+            AudioManager.current.PlaySfx();
+            AudioManager.current.UIHover = true;
+        }
     }
 
-    void OnMouseExit(){
-        if(!isActivated){
+    void OnMouseExit()
+    {
+        if (!isActivated)
+        {
             hoverWhite.SetActive(false);
         }
         MenuManager.current.isMouseOver = false;
+        AudioManager.current.UIHover = false;
     }
 
-    void OnMouseDown(){
-        if(!isActivated){
-            if(PlayerManager.current.numOfCorite >= req_corite && PlayerManager.current.numOfVelrite >= req_velrite && PlayerManager.current.numOfNymrite >= req_nymrite && PlayerManager.current.numOfZyrite >= req_zyrite){
-                if(slotNum == 0 || slotNum == 2){
+    void OnMouseDown()
+    {
+        if (!isActivated)
+        {
+            if (PlayerManager.current.numOfCorite >= req_corite && PlayerManager.current.numOfVelrite >= req_velrite && PlayerManager.current.numOfNymrite >= req_nymrite && PlayerManager.current.numOfZyrite >= req_zyrite)
+            {
+                if (slotNum == 0 || slotNum == 2)
+                {
                     ActivateSlot();
                 }
-                else{
-                    if(slotNum == 1){
-                        if(parentScript.upgrade1Progress == 1){
+                else
+                {
+                    if (slotNum == 1)
+                    {
+                        if (parentScript.upgrade1Progress == 1)
+                        {
                             ActivateSlot();
                         }
-                        else{
-                            //play deny sound
+                        else
+                        {
+                            AudioManager.current.currentSFXTrack = 1;
+                            AudioManager.current.PlaySfx();
                         }
                     }
-                    if(slotNum == 3){
-                        if(parentScript.upgrade2Progress == 1){
+                    if (slotNum == 3)
+                    {
+                        if (parentScript.upgrade2Progress == 1)
+                        {
                             ActivateSlot();
                         }
-                        else{
-                            //play deny sound
+                        else
+                        {
+                            AudioManager.current.currentSFXTrack = 1;
+                            AudioManager.current.PlaySfx();
                         }
                     }
                 }
             }
-            else{
-                //play deny sound
+            else
+            {
+                AudioManager.current.currentSFXTrack = 1;
+                AudioManager.current.PlaySfx();
             }
         }
     }
-     
-    private void ActivateSlot(){
+
+    private void ActivateSlot()
+    {
         spriteRend.sprite = greenFill;
         hoverWhite.SetActive(false);
-        //play upgrade sound
+
         crystalManagerScript.temp_corite = req_corite;
         crystalManagerScript.temp_velrite = req_velrite;
         crystalManagerScript.temp_nymrite = req_nymrite;
         crystalManagerScript.temp_zyrite = req_zyrite;
-        crystalManagerScript.Invoke("SubtractFromUpgrading", 0.01f);
+        crystalManagerScript.SubtractFromUpgrading();
 
         parentScript.currentSlotUpgrading = gameObject;
-        parentScript.Invoke("IncreaseUpgradeNum",0.01f);
+        parentScript.Invoke("IncreaseUpgradeNum", 0.01f);
         isActivated = true;
 
-        AudioManager.current.currentSFXTrack = 4;
+        AudioManager.current.currentSFXTrack = 2;
         AudioManager.current.PlaySfx();
     }
 
-    public void ResetSlot(){
+    public void ResetSlot()
+    {
         spriteRend.sprite = null;
         isActivated = false;
     }
 
-    public void FillSlot(){
+    public void FillSlot()
+    {
         spriteRend.sprite = greenFill;
         hoverWhite.SetActive(false);
         isActivated = true;

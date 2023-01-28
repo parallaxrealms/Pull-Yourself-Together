@@ -5,8 +5,10 @@ using UnityEngine.SceneManagement;
 
 public class TeleportToBossRoom : MonoBehaviour
 {
-    public GameObject playerObject;  
-      
+    public GameObject playerObject;
+
+    private bool triggered;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -16,14 +18,21 @@ public class TeleportToBossRoom : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
+
     }
 
-    private void OnTriggerEnter(Collider other){
-        if(other.gameObject.tag == "Player"){
-            GameController.current.Invoke("DestroyAllEnemyObjects", 0.1f);
-            PlayerManager.current.Invoke("TransferPlayerProperties", 0.01f);
-            SceneManager.LoadScene("BossFight");
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.gameObject.tag == "Player")
+        {
+            if (!triggered)
+            {
+                PlayerManager.current.sceneDirection = "Right";
+                GameController.current.sceneChangeName = "CoL_2";
+                GameController.current.triggerSpawnName = "Top_To_CoL_0";
+                MenuManager.current.ChangeSceneTo();
+                triggered = true;
+            }
         }
     }
 }
