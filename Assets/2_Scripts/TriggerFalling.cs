@@ -5,29 +5,29 @@ using UnityEngine;
 public class TriggerFalling : MonoBehaviour
 {
 
-    private bool entered;
-    // Start is called before the first frame update
-    void Start()
-    {
-        entered = GameController.current.playerFellAbyss;
-    }
+  private bool entered;
+  // Start is called before the first frame update
+  void Start()
+  {
+    entered = GameController.current.playerFellAbyss;
+  }
 
-    // Update is called once per frame
-    void Update()
-    {
+  // Update is called once per frame
+  void Update()
+  {
 
-    }
+  }
 
-    private void OnTriggerEnter(Collider other)
+  private void OnTriggerEnter(Collider other)
+  {
+    if (other.gameObject.tag == "Player")
     {
-        if (other.gameObject.tag == "Player")
-        {
-            if (!entered)
-            {
-                PlayerManager.current.Invoke("TakeHardHit", 0.01f);
-                GameController.current.playerFellAbyss = true;
-                entered = true;
-            }
-        }
+      if (!entered)
+      {
+        PlayerManager.current.Invoke("TakeHitFallDamage", 0.01f);
+        GameController.current.playerFellAbyss = true;
+        entered = true;
+      }
     }
+  }
 }

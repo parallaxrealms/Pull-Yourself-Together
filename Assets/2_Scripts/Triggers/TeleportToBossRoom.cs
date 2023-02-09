@@ -28,8 +28,8 @@ public class TeleportToBossRoom : MonoBehaviour
             if (!triggered)
             {
                 PlayerManager.current.sceneDirection = "Right";
-                GameController.current.sceneChangeName = "CoL_2";
-                GameController.current.triggerSpawnName = "Top_To_CoL_0";
+                GameController.current.sceneChangeName = "Abyss_Boss";
+                GameController.current.triggerSpawnName = "Top_To_Abyss_1";
                 MenuManager.current.ChangeSceneTo();
                 triggered = true;
             }

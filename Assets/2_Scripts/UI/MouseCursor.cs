@@ -6,16 +6,12 @@ public class MouseCursor : MonoBehaviour
     [SerializeField] private Texture2D currentMouseCursor;
     [SerializeField] private Texture2D crosshairs1;
     [SerializeField] private Texture2D mouseDefault;
+    [SerializeField] private Texture2D partAdd;
 
-    [SerializeField] public Texture2D cursor_HeadObject;
-    [SerializeField] public Texture2D cursor_BodyObject;
-    [SerializeField] public Texture2D cursor_DrillObject;
-    [SerializeField] public Texture2D cursor_BlasterObject;
-    [SerializeField] public Texture2D cursor_MissileObject;
-    [SerializeField] public Texture2D cursor_LaserObject;
-    [SerializeField] public Texture2D cursor_LegsObject;
-    [SerializeField] public Texture2D cursor_LegsJumpObject;
-
+    public GameObject fullScreenObject;
+    public FullscreenTrigger fullscreenTriggerScript;
+    public GameObject mouseCursor;
+    public StickToMouse mouseCursorScript;
 
     [SerializeField] private CursorMode cursorMode = CursorMode.Auto;
 
@@ -25,7 +21,9 @@ public class MouseCursor : MonoBehaviour
     {
         currentMouseCursor = mouseDefault;
         Cursor.SetCursor(currentMouseCursor, hotSpot, cursorMode);
+        mouseCursorScript = mouseCursor.GetComponent<StickToMouse>();
 
+        fullscreenTriggerScript = fullScreenObject.GetComponent<FullscreenTrigger>();
     }
 
     private void Update()
@@ -39,6 +37,8 @@ public class MouseCursor : MonoBehaviour
         {
             currentMouseCursor = crosshairs1;
             Cursor.SetCursor(currentMouseCursor, hotSpot, cursorMode);
+            mouseCursorScript.HideCursorObject();
+            fullscreenTriggerScript.DisableCollider();
         }
     }
     public void ChangeCursorToDefault()
@@ -47,42 +47,25 @@ public class MouseCursor : MonoBehaviour
         {
             currentMouseCursor = mouseDefault;
             Cursor.SetCursor(currentMouseCursor, hotSpot, cursorMode);
+            mouseCursorScript.HideCursorObject();
+            fullscreenTriggerScript.DisableCollider();
         }
     }
     public void ChangeCursorToSelectedPart(int partNum)
     {
-        if (partNum == 0) //Worker Head
-        {
-            currentMouseCursor = cursor_HeadObject;
-        }
-        if (partNum == 1) //Worker Body
-        {
-            currentMouseCursor = cursor_BodyObject;
-        }
-        if (partNum == 2) //Worker Drill
-        {
-            currentMouseCursor = cursor_DrillObject;
-        }
-        if (partNum == 3) //Blaster Gun
-        {
-            currentMouseCursor = cursor_BlasterObject;
-        }
-        if (partNum == 4) //Missile Launcher
-        {
-            currentMouseCursor = cursor_MissileObject;
-        }
-        if (partNum == 5) //Energy Beam
-        {
-            currentMouseCursor = cursor_LaserObject;
-        }
-        if (partNum == 6) //Worker Legs
-        {
-            currentMouseCursor = cursor_LegsJumpObject;
-        }
-        if (partNum == 7) //Jump Legs
-        {
-            currentMouseCursor = cursor_LegsObject;
-        }
+        currentMouseCursor = partAdd;
+        mouseCursorScript.ChangeCursorTo(partNum);
         Cursor.SetCursor(currentMouseCursor, hotSpot, cursorMode);
+        fullscreenTriggerScript.EnableCollider();
+    }
+    public void HideCursorSelectedPart()
+    {
+        if (!PlayerManager.current.playerHoldingPart)
+        {
+            if (mouseCursorScript.isActive)
+            {
+                mouseCursorScript.HideCursorObject();
+            }
+        }
     }
 }

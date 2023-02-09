@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class BlueBotScript : MonoBehaviour
 {
+    public bool endMode;
     public Animator anim;
 
     public GameObject dialogueBubble;
@@ -19,19 +20,31 @@ public class BlueBotScript : MonoBehaviour
 
     public GameObject cyberMantis;
     public CyberMantisScript cyberMantisScript;
+
+    public bool endingMovement = false;
     // Start is called before the first frame update
     void Start()
     {
         anim = GetComponent<Animator>();
         dialogueAnim = dialogueBubble.GetComponent<Animator>();
 
-        dialogueBubble.SetActive(false);
+        if (endMode)
+        {
+
+        }
+        else
+        {
+
+        }
     }
 
     // Update is called once per frame
     void Update()
     {
-
+        if (endingMovement)
+        {
+            transform.position += new Vector3(1.0f * Time.deltaTime, 0, 0);
+        }
     }
 
     private void OnTriggerEnter(Collider other)
@@ -42,15 +55,29 @@ public class BlueBotScript : MonoBehaviour
         }
     }
 
+    public void ActivateEndingWalk()
+    {
+        transform.localScale = new Vector3(1, 1, 1);
+        anim.SetBool("isWalking", true);
+        PlayerManager.current.WalkEndingMovement();
+        endingMovement = true;
+    }
+
     public void ActivateDialogue()
     {
-        cyberMantisScript = GameObject.Find("CyberMantis").GetComponent<CyberMantisScript>();
+        if (!endMode)
+        {
+            cyberMantisScript = GameObject.Find("CyberMantis").GetComponent<CyberMantisScript>();
 
-        PlayerManager.current.Invoke("PauseMovement", 0.01f);
-        dialogueBubble.SetActive(true);
-        dialogueAnim.SetBool("activated", true);
-
-        GameController.current.playerMetBlueBot = true;
+            PlayerManager.current.Invoke("PauseMovement", 0.01f);
+            GameController.current.playerMetBlueBot = true;
+            dialogueBubble.SetActive(true);
+            dialogueAnim.SetBool("activated", true);
+        }
+        else
+        {
+            dialogueBubble.SetActive(true);
+        }
 
         AudioManager.current.currentSFXTrack = 0;
         AudioManager.current.PlaySfx();
@@ -64,6 +91,10 @@ public class BlueBotScript : MonoBehaviour
 
     public void Explode()
     {
+        AudioManager.current.currentSFXTrack = 120;
+        AudioManager.current.PlaySfx();
+
+
         anim.SetBool("explode", true);
         explodeParticles = Instantiate(explodeParticlesObject, new Vector3(transform.position.x, transform.position.y, transform.position.z), Quaternion.identity) as GameObject;
 
@@ -90,7 +121,7 @@ public class BlueBotScript : MonoBehaviour
 
     public void DestroySelf()
     {
-        cyberMantisScript.Invoke("DoneFalling", 0.1f);
+        cyberMantisScript.DoneFalling();
         Destroy(gameObject);
     }
     public void RemoveSelf()

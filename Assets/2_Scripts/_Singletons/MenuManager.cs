@@ -18,6 +18,14 @@ public class MenuManager : MonoBehaviour
     public GameObject forewordScreen;
     public GameObject pauseMenuScreen;
     public GameObject pressAnyKeyText;
+    public GameObject introDialogueScreen;
+    public GameObject dialogueDone;
+    public GameObject creditRollScreen;
+    public MoveUpSlowly creditRollScript;
+
+    public Sprite[] introDialogueSprites;
+    private int dialogueSprite = 0;
+    public SpriteRenderer dialogueSpriteRend;
 
     public GameObject controlsScreen;
     public bool controlsMenu;
@@ -38,20 +46,26 @@ public class MenuManager : MonoBehaviour
     public Color aColorValue;
     public Color TempC;
 
+    private float startAlpha;
+
     public bool sceneChanging = false;
 
     public bool fadeTitleStarted = false;
 
     public bool fadeFromBlackStarted = false;
     public bool fadeToBlackStarted = false;
+    public float extraSlowFade = 0.1f;
     public float slowFade = 0.25f;
     public float speedFade = 0.3f;
-    private float devFade = 1.0f;
+    private float devFade = 2.0f;
 
     public float titleStayTimer = 3f;
 
-    public float creditsTimer = 5f;
+    public float creditsTimer = 8f;
     public bool creditsStart = false;
+
+    public float endingTimer = 10f;
+    public bool endingStarted;
 
     public GameObject PartsUI;
     public UI_Parts UIPartsScript;
@@ -91,10 +105,15 @@ public class MenuManager : MonoBehaviour
             slowFade = devFade;
         }
 
+        dialogueSpriteRend = introDialogueScreen.GetComponent<SpriteRenderer>();
+        dialogueSpriteRend.sprite = introDialogueSprites[dialogueSprite];
+        dialogueDone.SetActive(false);
+
         blackScreenSprite = blackScreen.GetComponent<SpriteRenderer>();
         aColorValue = blackScreenSprite.color;
         originalColorValue = aColorValue;
         TempC = aColorValue;
+        startAlpha = 0f;
 
         titleSpriteRend = titleCard.GetComponent<SpriteRenderer>();
         titleSpriteRend.enabled = false;
@@ -119,11 +138,25 @@ public class MenuManager : MonoBehaviour
                     {
                         if (DebugManager.current.testingMode)
                         {
-                            GameController.current.NewGame();
+                            if (!GameController.current.introDialogue)
+                            {
+                                IntroDialogue();
+                            }
+                            else
+                            {
+                                GameController.current.NewGame();
+                            }
                         }
                         else
                         {
-                            GameController.current.NewGame();
+                            if (!GameController.current.introDialogue)
+                            {
+                                IntroDialogue();
+                            }
+                            else
+                            {
+                                GameController.current.NewGame();
+                            }
                         }
                     }
                 }
@@ -135,6 +168,38 @@ public class MenuManager : MonoBehaviour
                     if (!fadeFromBlackStarted)
                     {
                         MainMenu();
+                    }
+                }
+            }
+
+            if (menuState == 4)
+            {
+                if (!fadeFromBlackStarted)
+                {
+                    if (Input.anyKeyDown)
+                    {
+                        dialogueSprite++;
+                        FadeFromBlack();
+                        if (dialogueSprite < 5)
+                        {
+                            if (dialogueSprite >= introDialogueSprites.Length)
+                            {
+                                dialogueSprite = 0;
+                            }
+                            dialogueSpriteRend.sprite = introDialogueSprites[dialogueSprite];
+                        }
+                        else
+                        {
+                            GameController.current.NewGame();
+                            if (!GameController.current.introDialogue)
+                            {
+                                GameController.current.introDialogue = true;
+                            }
+                        }
+                        dialogueDone.SetActive(false);
+
+                        AudioManager.current.currentTrackNum = 3;
+                        AudioManager.current.PlaySfx();
                     }
                 }
             }
@@ -151,10 +216,14 @@ public class MenuManager : MonoBehaviour
                 else
                 {
                     ClosePartsUI();
+                    if (PlayerManager.current.playerHoldingPart)
+                    {
+                        PlayerManager.current.DropHeldObject(PlayerManager.current.holdingPartNum);
+                    }
                 }
             }
 
-            if (Input.GetButtonDown("Q"))
+            if (Input.GetButtonDown("Shift"))
             {
                 if (!pickupNamesEnabled)
                 {
@@ -162,7 +231,7 @@ public class MenuManager : MonoBehaviour
                     pickupNamesEnabled = true;
                 }
             }
-            if (Input.GetButtonUp("Q"))
+            if (Input.GetButtonUp("Shift"))
             {
                 if (pickupNamesEnabled)
                 {
@@ -205,6 +274,23 @@ public class MenuManager : MonoBehaviour
                 TempC = aColorValue;
                 blackScreen.SetActive(false);
                 fadeFromBlackStarted = false;
+                if (menuState == 4)
+                {
+                    dialogueDone.SetActive(true);
+                }
+            }
+        }
+        if (fadeToBlackStarted)
+        {
+            if (aColorValue.a < 1.0f)
+            {
+                TempC.a += (slowFade * Time.deltaTime);
+                aColorValue = TempC;
+                blackScreenSprite.color = aColorValue;
+            }
+            else
+            {
+                fadeToBlackStarted = false;
             }
         }
 
@@ -242,9 +328,21 @@ public class MenuManager : MonoBehaviour
             {
                 creditsStart = false;
                 creditsTimer = 5f;
-                CreditsScene();
+                GameController.current.StartEndingScene();
+                UIPartsScript.CloseAllWindows();
+                ClosePartsUI();
             }
         }
+    }
+
+    public void RollCredits()
+    {
+        GameObject credits = Instantiate(creditRollScreen, new Vector3(0f, 0f, 0f), Quaternion.identity) as GameObject;
+        creditRollScript = credits.GetComponent<MoveUpSlowly>();
+        GameObject player = PlayerManager.current.currentPlayerObject;
+        Vector3 playerPos = player.transform.position;
+        credits.transform.position = new Vector3(playerPos.x, playerPos.y - 13f, playerPos.z);
+        creditRollScript.moving = true;
     }
 
     public void ResetTitleCard()
@@ -280,10 +378,19 @@ public class MenuManager : MonoBehaviour
         blackScreen.SetActive(true);
         fadeFromBlackStarted = true;
     }
+    public void FadeToBlack()
+    {
+        blackScreen.SetActive(true);
+        aColorValue.a = 1f;
+        TempC.a = 1f;
+        blackScreenSprite.color = aColorValue;
+        fadeToBlackStarted = true;
+    }
 
     public void Foreword()
     {
         FadeFromBlack();
+        introDialogueScreen.SetActive(false);
         forewordScreen.SetActive(true);
         mainMenuScreen.SetActive(false);
         gameOverScreen.SetActive(false);
@@ -292,6 +399,7 @@ public class MenuManager : MonoBehaviour
     public void MainMenu()
     {
         FadeFromBlack();
+        introDialogueScreen.SetActive(false);
         forewordScreen.SetActive(false);
         mainMenuScreen.SetActive(true);
         gameOverScreen.SetActive(false);
@@ -303,6 +411,7 @@ public class MenuManager : MonoBehaviour
     public void GameOver()
     {
         FadeFromBlack();
+        introDialogueScreen.SetActive(false);
         mainMenuScreen.SetActive(false);
         gameOverScreen.SetActive(true);
         menuState = 3;
@@ -313,27 +422,38 @@ public class MenuManager : MonoBehaviour
     public void NewGame()
     {
         FadeFromBlack();
+        introDialogueScreen.SetActive(false);
         mainMenuScreen.SetActive(false);
         gameOverScreen.SetActive(false);
         pressAnyKeyText.SetActive(false);
         menuState = 2;
         ClosePartsUI();
     }
-    public void StartCreditsTimer()
+    public void IntroDialogue()
     {
         FadeFromBlack();
+        introDialogueScreen.SetActive(true);
+        mainMenuScreen.SetActive(false);
+        gameOverScreen.SetActive(false);
+        pressAnyKeyText.SetActive(false);
+        menuState = 4;
+        AudioManager.current.currentTrackNum = 9;
+        AudioManager.current.PlayMusicTrack();
+    }
+    public void StartCreditsTimer()
+    {
         creditsStart = true;
     }
     public void CreditsScene()
     {
-        Debug.Log("CREDITS!");
         Time.timeScale = 1;
+        StartCreditsTimer();
     }
     public void ChangeSceneTo()
     {
         PersistentGameObjects.current.TransferPersistentObjects();
-        GameController.current.ChangeSceneTo();
-        FadeFromBlack();
+        GameController.current.Invoke("ChangeSceneTo", 2.0f);
+        FadeToBlack();
     }
     public void ChangeSceneAndReboot()
     {

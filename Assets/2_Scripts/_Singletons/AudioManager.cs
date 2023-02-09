@@ -11,7 +11,7 @@ public class AudioManager : MonoBehaviour
     private bool audioPlaying;
     private bool sfxPlaying;
     public bool musicTimerOn;
-    public float trackTimer = 400f;
+    public float trackTimer = 500f;
 
     public int currentTrackNum = 0; //0 = menu
 
@@ -24,6 +24,7 @@ public class AudioManager : MonoBehaviour
     [SerializeField] private AudioClip time_is_ticking;//6
     [SerializeField] private AudioClip day_dreams;//7
     [SerializeField] private AudioClip pluto;//8
+    [SerializeField] private AudioClip lost_in_the_city;//9
 
     public int currentSFXTrack = 0;
 
@@ -115,7 +116,7 @@ public class AudioManager : MonoBehaviour
             else
             {
                 musicTimerOn = false;
-                trackTimer = 400f;
+                trackTimer = 500f;
             }
         }
         else
@@ -180,6 +181,12 @@ public class AudioManager : MonoBehaviour
             {
                 musicSource.Stop();
                 musicSource.clip = pluto;
+                musicSource.Play();
+            }
+            else if (currentTrackNum == 9)
+            {
+                musicSource.Stop();
+                musicSource.clip = lost_in_the_city;
                 musicSource.Play();
             }
         }

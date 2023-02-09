@@ -146,6 +146,11 @@ public class SceneInit : MonoBehaviour
         {
             playerSpawnPoint = GameObject.Find(triggerSpawnName);
 
+            if (PlayerManager.current.sceneDirection == "None")
+            {
+                PlayerManager.current.spawnPosition = new Vector3(playerSpawnPoint.transform.position.x, playerSpawnPoint.transform.position.y, playerSpawnPoint.transform.position.z);
+                PlayerManager.current.Invoke("PauseMovement", 0.2f);
+            }
             if (PlayerManager.current.sceneDirection == "Left")
             {
                 PlayerManager.current.spawnPosition = new Vector3(playerSpawnPoint.transform.position.x - 15.0f, playerSpawnPoint.transform.position.y, playerSpawnPoint.transform.position.z);
@@ -165,7 +170,7 @@ public class SceneInit : MonoBehaviour
             PlayerManager.current.RebootNewMap();
             GameController.current.sceneChanging = false;
         }
-
+        MenuManager.current.Invoke("FadeFromBlack", 0.5f);
         MenuManager.current.ResetTitleCard();
         GameController.current.Invoke("HighlightPickups", 0.25f);
     }

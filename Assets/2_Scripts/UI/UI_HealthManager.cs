@@ -22,6 +22,7 @@ public class UI_HealthManager : MonoBehaviour
     public Sprite sprite_BackedUp_Yes;
 
     public GameObject shield_UI;
+    private Animator anim_shield;
     public SpriteRenderer shieldSpriteRend;
     public Sprite sprite_shield_No;
     public Sprite sprite_shield_Yes;
@@ -38,6 +39,10 @@ public class UI_HealthManager : MonoBehaviour
         backedUpSpriteRend = backedUp_UI.GetComponent<SpriteRenderer>();
         shieldSpriteRend = shield_UI.GetComponent<SpriteRenderer>();
 
+        anim_shield = shield_UI.GetComponent<Animator>();
+        anim_shield.SetBool("active", false);
+        anim_shield.SetBool("isFilling", false);
+        anim_shield.SetBool("inactive", true);
     }
 
     // Update is called once per frame
@@ -136,13 +141,26 @@ public class UI_HealthManager : MonoBehaviour
         backedUpSpriteRend.sprite = sprite_BackedUp_No;
     }
 
+    public void ShieldStartFill()
+    {
+        anim_shield.SetBool("active", false);
+        anim_shield.SetBool("isFilling", true);
+        anim_shield.SetBool("inactive", false);
+    }
     public void ShieldActive()
     {
         shieldSpriteRend.sprite = sprite_shield_Yes;
+        anim_shield.SetBool("active", true);
+        anim_shield.SetBool("isFilling", false);
+        anim_shield.SetBool("inactive", false);
+
     }
     public void ShieldInactive()
     {
         shieldSpriteRend.sprite = sprite_shield_No;
+        anim_shield.SetBool("active", false);
+        anim_shield.SetBool("isFilling", false);
+        anim_shield.SetBool("inactive", true);
     }
 
 }
