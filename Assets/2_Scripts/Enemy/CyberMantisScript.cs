@@ -178,19 +178,16 @@ public class CyberMantisScript : MonoBehaviour
   public void SetLastPos()
   {
     lastPos = transform.position;
-
-    transform.position = new Vector3(5500f, 5500f, 5500f);
-    rb.useGravity = false;
+    transform.position = new Vector3(2000f, 2000f, 100f);
     IdleState();
     Inactive();
   }
 
   public void Respawn()
   {
-    transform.position = lastPos;
+    transform.position = new Vector3(0, 0, 0);
     if (hasFallen)
     {
-      rb.useGravity = true;
       Active();
       IdleState();
     }
@@ -257,17 +254,24 @@ public class CyberMantisScript : MonoBehaviour
   public void DoneFalling()
   {
     anim.SetBool("doneFalling", true);
+
+    AudioManager.current.currentSFXTrack = 124;
+    AudioManager.current.PlaySfx();
   }
   public void Active()
   {
     FindPlayer();
     isActive = true;
+    rb.useGravity = true;
+    rb.constraints = RigidbodyConstraints.None;
     GameController.current.Invoke("BossFightStarted", 0.1f);
     PlayerManager.current.Invoke("ResumeMovement", 0.01f);
   }
   public void Inactive()
   {
     isActive = false;
+    rb.useGravity = false;
+    rb.constraints = RigidbodyConstraints.FreezeAll;
     anim.SetBool("isAttacking", false);
     anim.SetBool("isIdle", true);
   }

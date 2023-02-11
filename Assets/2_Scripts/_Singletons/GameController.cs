@@ -15,6 +15,7 @@ public class GameController : MonoBehaviour
   private UI_CrystalManager crystalManagerScript;
 
   public GameObject gameCamera;
+  public BasicCameraTracker camScript;
   private Vector3 camOriginalPos;
 
   public string sceneChangeName;
@@ -60,6 +61,7 @@ public class GameController : MonoBehaviour
     Screen.fullScreenMode = FullScreenMode.ExclusiveFullScreen;
 
     gameCamera = GameObject.Find("Camera");
+    camScript = gameCamera.GetComponent<BasicCameraTracker>();
     camOriginalPos = new Vector3(0f, 0f, -100f);
 
     crystalManager = GameObject.Find("CrystalManager");
@@ -118,6 +120,7 @@ public class GameController : MonoBehaviour
       SceneManager.LoadScene("CoL_0");
       gameStarted = true;
       Invoke("HighlightPickups", .5f);
+      camScript.isTrackingPlayer = true;
     }
   }
 
@@ -133,13 +136,28 @@ public class GameController : MonoBehaviour
 
   public void GameOver()
   {
-    gameCamera.transform.position = camOriginalPos;
+    camScript.isTrackingPlayer = false;
     gameStarted = false;
     playerSpawned = false;
     DestroyAllEnemyObjects();
     PersistentGameObjects.current.ResetPersistentGameObjects();
     SceneManager.LoadScene("MainMenu");
     MenuManager.current.GameOver();
+    gameCamera.transform.position = new Vector3(0f, 0f, -1f);
+  }
+
+  public void RestartGame()
+  {
+    gameCamera.transform.position = camOriginalPos;
+    gameStarted = false;
+    playerSpawned = false;
+    DestroyAllEnemyObjects();
+    ResetGameController();
+    PersistentGameObjects.current.ResetPersistentGameObjects();
+    AudioManager.current.currentTrackNum = 0;
+    AudioManager.current.PlayMusicTrack();
+    MenuManager.current.GameOver();
+    SceneManager.LoadScene("MainMenu");
   }
 
   public void CheckCursor()

@@ -4,26 +4,41 @@ using UnityEngine;
 
 public class PartButtonScript : MonoBehaviour
 {
-  public int buttonType; //0 = drop/self-destruct, 1 = repair
+  public int buttonType; //0 = self-destruct, 1 = repair, 2= drop part, 3 = confirm yes, 4 = confirm yes 
   public Sprite spriteInactive;
   public Sprite spriteActive;
 
   private SpriteRenderer spriteRend;
 
   public UI_Part_Select parentScript;
+  public ConfirmSelfDestruct parent2Script;
 
   public UI_CrystalManager crystalManagerScript;
   // Start is called before the first frame update
   void Start()
   {
     spriteRend = GetComponent<SpriteRenderer>();
-
-    parentScript = transform.parent.GetComponent<UI_Part_Select>();
     spriteRend.sprite = spriteInactive;
+
+    if (buttonType == 0)
+    {
+      parentScript = transform.parent.GetComponent<UI_Part_Select>();
+    }
 
     if (buttonType == 1)
     {
+      parentScript = transform.parent.GetComponent<UI_Part_Select>();
       crystalManagerScript = GameObject.Find("CrystalManager").GetComponent<UI_CrystalManager>();
+    }
+
+    if (buttonType == 2)
+    {
+      parentScript = transform.parent.GetComponent<UI_Part_Select>();
+    }
+
+    if (buttonType == 3 || buttonType == 4)
+    {
+      parent2Script = transform.parent.GetComponent<ConfirmSelfDestruct>();
     }
   }
 
@@ -31,6 +46,11 @@ public class PartButtonScript : MonoBehaviour
   void Update()
   {
 
+  }
+
+  public void Reset()
+  {
+    spriteRend.sprite = spriteInactive;
   }
 
   void OnMouseOver()
@@ -66,7 +86,7 @@ public class PartButtonScript : MonoBehaviour
     {
       if (buttonType == 0)
       {
-        parentScript.Invoke("DropPart", 0.01f);
+        parentScript.OpenConfirmation();
         MenuManager.current.isMouseOver = false;
 
         AudioManager.current.currentSFXTrack = 0;
@@ -103,6 +123,23 @@ public class PartButtonScript : MonoBehaviour
           AudioManager.current.currentSFXTrack = 1;
           AudioManager.current.PlaySfx();
         }
+      }
+      else if (buttonType == 2)
+      {
+        parentScript.DropPart();
+        MenuManager.current.isMouseOver = false;
+
+        AudioManager.current.currentSFXTrack = 0;
+        AudioManager.current.PlaySfx();
+      }
+      else if (buttonType == 3)
+      {
+        parent2Script.SelfDestruct();
+        parent2Script.ConfirmClosed();
+      }
+      else if (buttonType == 4)
+      {
+        parent2Script.ConfirmClosed();
       }
     }
   }

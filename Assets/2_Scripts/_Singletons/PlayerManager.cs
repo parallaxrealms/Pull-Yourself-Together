@@ -312,7 +312,7 @@ public class PlayerManager : MonoBehaviour
     cameraScript.m_Target = currentPlayerObject;
     controlScript = currentPlayerObject.GetComponent<PlayerControl>();
     playerHealthManager.GainHead();
-    partsUIScript.GainWorkerHead(0);
+    partsUIScript.GainWorkerHead(0, false);
     hasHead = true;
 
     partsUIScript.Invoke("CloseAllWindows", 0.1f);
@@ -359,7 +359,7 @@ public class PlayerManager : MonoBehaviour
     cameraScript.m_Target = currentPlayerObject;
     controlScript = currentPlayerObject.GetComponent<PlayerControl>();
     playerHealthManager.GainHead();
-    partsUIScript.GainWorkerHead(0);
+    partsUIScript.GainWorkerHead(0, false);
     hasHead = true;
 
     partsUIScript.Invoke("CloseAllWindows", 0.1f);
@@ -398,7 +398,7 @@ public class PlayerManager : MonoBehaviour
       partsUIScript.temp_progress1 = currentPickup_progress1;
       partsUIScript.temp_progress2 = currentPickup_progress2;
       partsUIScript.temp_progressNum = currentPickup_progress1 + currentPickup_progress2;
-      partsUIScript.GainWorkerHead(0);
+      partsUIScript.GainWorkerHead(0, true);
 
       CheckAndRefreshUpgrades("Head");
     }
@@ -415,7 +415,7 @@ public class PlayerManager : MonoBehaviour
       partsUIScript.temp_progress1 = currentPickup_progress1;
       partsUIScript.temp_progress2 = currentPickup_progress2;
       partsUIScript.temp_progressNum = currentPickup_progress1 + currentPickup_progress2;
-      partsUIScript.GainWorkerBody(0);
+      partsUIScript.GainWorkerBody(0, true);
 
       CheckAndRefreshUpgrades("Body");
       if (!hasLegs)
@@ -456,7 +456,7 @@ public class PlayerManager : MonoBehaviour
       partsUIScript.temp_progress2 = currentPickup_progress2;
       partsUIScript.temp_progressNum = currentPickup_progress1 + currentPickup_progress2;
 
-      partsUIScript.GainWorkerDrill(0);
+      partsUIScript.GainWorkerDrill(0, true);
       CheckAndRefreshUpgrades("RightArm");
     }
 
@@ -479,7 +479,7 @@ public class PlayerManager : MonoBehaviour
       partsUIScript.temp_progress2 = currentPickup_progress2;
       partsUIScript.temp_progressNum = currentPickup_progress1 + currentPickup_progress2;
 
-      partsUIScript.GainBlaster(0);
+      partsUIScript.GainBlaster(0, true);
       CheckAndRefreshUpgrades("LeftArm");
     }
     if (partToAttach == "MissileLauncher")
@@ -501,7 +501,7 @@ public class PlayerManager : MonoBehaviour
       partsUIScript.temp_progress2 = currentPickup_progress2;
       partsUIScript.temp_progressNum = currentPickup_progress1 + currentPickup_progress2;
 
-      partsUIScript.GainMissileLauncher(0);
+      partsUIScript.GainMissileLauncher(0, true);
       CheckAndRefreshUpgrades("LeftArm");
 
       GameController.current.CheckCursor();
@@ -523,7 +523,7 @@ public class PlayerManager : MonoBehaviour
       partsUIScript.temp_progress2 = currentPickup_progress2;
       partsUIScript.temp_progressNum = currentPickup_progress1 + currentPickup_progress2;
 
-      partsUIScript.GainLaserBeam(0);
+      partsUIScript.GainLaserBeam(0, true);
       CheckAndRefreshUpgrades("LeftArm");
 
       GameController.current.CheckCursor();
@@ -567,7 +567,7 @@ public class PlayerManager : MonoBehaviour
       partsUIScript.temp_progress1 = currentPickup_progress1;
       partsUIScript.temp_progress2 = currentPickup_progress2;
       partsUIScript.temp_progressNum = currentPickup_progress1 + currentPickup_progress2;
-      partsUIScript.GainWorkerBoots(0);
+      partsUIScript.GainWorkerBoots(0, true);
       CheckAndRefreshUpgrades("Legs");
 
       GetColliderHeights();
@@ -620,7 +620,7 @@ public class PlayerManager : MonoBehaviour
       partsUIScript.temp_progress1 = currentPickup_progress1;
       partsUIScript.temp_progress2 = currentPickup_progress2;
       partsUIScript.temp_progressNum = currentPickup_progress1 + currentPickup_progress2;
-      partsUIScript.GainJumpBoots(0);
+      partsUIScript.GainJumpBoots(0, true);
       CheckAndRefreshUpgrades("Legs");
 
       GetColliderHeights();
@@ -678,7 +678,7 @@ public class PlayerManager : MonoBehaviour
       currentPickup_progress1 = swap_gun_progress1;
       currentPickup_progress2 = swap_gun_progress2;
 
-      partsUIScript.GainBlaster(0);
+      partsUIScript.GainBlaster(0, false);
       CheckAndRefreshUpgrades("LeftArm");
     }
     if (partToAttach == "MissileLauncher")
@@ -718,7 +718,7 @@ public class PlayerManager : MonoBehaviour
       currentPickup_progress1 = swap_gun_progress1;
       currentPickup_progress2 = swap_gun_progress2;
 
-      partsUIScript.GainMissileLauncher(0);
+      partsUIScript.GainMissileLauncher(0, false);
       CheckAndRefreshUpgrades("LeftArm");
 
       GameController.current.CheckCursor();
@@ -760,7 +760,7 @@ public class PlayerManager : MonoBehaviour
       currentPickup_progress1 = swap_gun_progress1;
       currentPickup_progress2 = swap_gun_progress2;
 
-      partsUIScript.GainLaserBeam(0);
+      partsUIScript.GainLaserBeam(0, false);
       CheckAndRefreshUpgrades("LeftArm");
 
       GameController.current.CheckCursor();
@@ -786,7 +786,7 @@ public class PlayerManager : MonoBehaviour
         currentPickup_activated = false;
       }
 
-      partsUIScript.GainWorkerHead(1);
+      partsUIScript.GainWorkerHead(1, false);
     }
     if (partToAttach == "WorkerBody")
     {
@@ -800,7 +800,7 @@ public class PlayerManager : MonoBehaviour
       partsUIScript.temp_progress2 = currentPickup_progress2;
       partsUIScript.temp_progressNum = currentPickup_progress1 + currentPickup_progress2;
 
-      partsUIScript.GainWorkerBody(1);
+      partsUIScript.GainWorkerBody(1, false);
     }
     if (partToAttach == "WorkerDrill")
     {
@@ -814,7 +814,7 @@ public class PlayerManager : MonoBehaviour
       partsUIScript.temp_progress2 = currentPickup_progress2;
       partsUIScript.temp_progressNum = currentPickup_progress1 + currentPickup_progress2;
 
-      partsUIScript.GainWorkerDrill(1);
+      partsUIScript.GainWorkerDrill(1, false);
     }
 
     if (partToAttach == "BlasterGun")
@@ -829,7 +829,7 @@ public class PlayerManager : MonoBehaviour
       partsUIScript.temp_progress2 = currentPickup_progress2;
       partsUIScript.temp_progressNum = currentPickup_progress1 + currentPickup_progress2;
 
-      partsUIScript.GainBlaster(1);
+      partsUIScript.GainBlaster(1, false);
     }
     if (partToAttach == "MissileLauncher")
     {
@@ -843,7 +843,7 @@ public class PlayerManager : MonoBehaviour
       partsUIScript.temp_progress2 = currentPickup_progress2;
       partsUIScript.temp_progressNum = currentPickup_progress1 + currentPickup_progress2;
 
-      partsUIScript.GainMissileLauncher(1);
+      partsUIScript.GainMissileLauncher(1, false);
     }
     if (partToAttach == "EnergyBeam")
     {
@@ -857,7 +857,7 @@ public class PlayerManager : MonoBehaviour
       partsUIScript.temp_progress2 = currentPickup_progress2;
       partsUIScript.temp_progressNum = currentPickup_progress1 + currentPickup_progress2;
 
-      partsUIScript.GainLaserBeam(1);
+      partsUIScript.GainLaserBeam(1, false);
     }
 
     if (partToAttach == "WorkerLegs")
@@ -872,7 +872,7 @@ public class PlayerManager : MonoBehaviour
       partsUIScript.temp_progress2 = currentPickup_progress2;
       partsUIScript.temp_progressNum = currentPickup_progress1 + currentPickup_progress2;
 
-      partsUIScript.GainWorkerBoots(1);
+      partsUIScript.GainWorkerBoots(1, false);
     }
     if (partToAttach == "JumpLegs")
     {
@@ -886,7 +886,7 @@ public class PlayerManager : MonoBehaviour
       partsUIScript.temp_progress2 = currentPickup_progress2;
       partsUIScript.temp_progressNum = currentPickup_progress1 + currentPickup_progress2;
 
-      partsUIScript.GainJumpBoots(1);
+      partsUIScript.GainJumpBoots(1, false);
     }
   }
   public void AttachStorage2(string partToAttach)
@@ -909,7 +909,7 @@ public class PlayerManager : MonoBehaviour
         currentPickup_activated = false;
       }
 
-      partsUIScript.GainWorkerHead(2);
+      partsUIScript.GainWorkerHead(2, false);
     }
     if (partToAttach == "WorkerBody")
     {
@@ -923,7 +923,7 @@ public class PlayerManager : MonoBehaviour
       partsUIScript.temp_progress2 = currentPickup_progress2;
       partsUIScript.temp_progressNum = currentPickup_progress1 + currentPickup_progress2;
 
-      partsUIScript.GainJumpBoots(2);
+      partsUIScript.GainJumpBoots(2, false);
     }
     if (partToAttach == "WorkerDrill")
     {
@@ -937,7 +937,7 @@ public class PlayerManager : MonoBehaviour
       partsUIScript.temp_progress2 = currentPickup_progress2;
       partsUIScript.temp_progressNum = currentPickup_progress1 + currentPickup_progress2;
 
-      partsUIScript.GainWorkerDrill(2);
+      partsUIScript.GainWorkerDrill(2, false);
     }
 
     if (partToAttach == "BlasterGun")
@@ -952,7 +952,7 @@ public class PlayerManager : MonoBehaviour
       partsUIScript.temp_progress2 = currentPickup_progress2;
       partsUIScript.temp_progressNum = currentPickup_progress1 + currentPickup_progress2;
 
-      partsUIScript.GainBlaster(2);
+      partsUIScript.GainBlaster(2, false);
     }
     if (partToAttach == "MissileLauncher")
     {
@@ -966,7 +966,7 @@ public class PlayerManager : MonoBehaviour
       partsUIScript.temp_progress2 = currentPickup_progress2;
       partsUIScript.temp_progressNum = currentPickup_progress1 + currentPickup_progress2;
 
-      partsUIScript.GainMissileLauncher(2);
+      partsUIScript.GainMissileLauncher(2, false);
     }
     if (partToAttach == "EnergyBeam")
     {
@@ -980,7 +980,7 @@ public class PlayerManager : MonoBehaviour
       partsUIScript.temp_progress2 = currentPickup_progress2;
       partsUIScript.temp_progressNum = currentPickup_progress1 + currentPickup_progress2;
 
-      partsUIScript.GainLaserBeam(2);
+      partsUIScript.GainLaserBeam(2, false);
     }
 
     if (partToAttach == "WorkerLegs")
@@ -995,7 +995,7 @@ public class PlayerManager : MonoBehaviour
       partsUIScript.temp_progress2 = currentPickup_progress2;
       partsUIScript.temp_progressNum = currentPickup_progress1 + currentPickup_progress2;
 
-      partsUIScript.GainWorkerBoots(2);
+      partsUIScript.GainWorkerBoots(2, false);
     }
     if (partToAttach == "JumpLegs")
     {
@@ -1009,7 +1009,7 @@ public class PlayerManager : MonoBehaviour
       partsUIScript.temp_progress2 = currentPickup_progress2;
       partsUIScript.temp_progressNum = currentPickup_progress1 + currentPickup_progress2;
 
-      partsUIScript.GainJumpBoots(2);
+      partsUIScript.GainJumpBoots(2, false);
     }
   }
 
@@ -1834,6 +1834,8 @@ public class PlayerManager : MonoBehaviour
     {
       AttachStorage1("EnergyBeam");
     }
+    AudioManager.current.currentSFXTrack = 3;
+    AudioManager.current.PlaySfx();
   }
   public void SwapStorage2(int currentGunType, int switchToGunType)
   {
@@ -1862,6 +1864,8 @@ public class PlayerManager : MonoBehaviour
     {
       AttachStorage2("EnergyBeam");
     }
+    AudioManager.current.currentSFXTrack = 3;
+    AudioManager.current.PlaySfx();
   }
   //Losing Parts When Hit
   public void DropAllParts()
@@ -2478,6 +2482,11 @@ public class PlayerManager : MonoBehaviour
   //Getting Hit and Death
   public void Death()
   {
+    if (playerHoldingPart)
+    {
+      DropHeldObject(holdingPartNum);
+    }
+
     string currentSceneName = SceneManager.GetActiveScene().name;
 
     if (currentSceneName == "Abyss_Boss")

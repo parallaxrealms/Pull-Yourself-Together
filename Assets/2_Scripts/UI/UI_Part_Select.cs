@@ -79,6 +79,10 @@ public class UI_Part_Select : MonoBehaviour
   public GameObject repairCorite;
   public bool showRepair = false;
 
+  public GameObject confirmSelfD;
+  public ConfirmSelfDestruct confirmSelfDScript;
+  public bool confirmWindowOpen = false;
+
   // Start is called before the first frame update
   void Start()
   {
@@ -117,6 +121,10 @@ public class UI_Part_Select : MonoBehaviour
       button2Collider.enabled = false;
       repairNum.SetActive(false);
       repairCorite.SetActive(false);
+
+      confirmSelfDScript = confirmSelfD.GetComponent<ConfirmSelfDestruct>();
+      confirmSelfD.SetActive(false);
+
     }
     else if (partType == 1)
     {
@@ -512,6 +520,10 @@ public class UI_Part_Select : MonoBehaviour
       {
         CloseWindow();
       }
+      if (confirmWindowOpen)
+      {
+        CloseConfirmation();
+      }
     }
   }
   public void HideRepairButton()
@@ -656,6 +668,19 @@ public class UI_Part_Select : MonoBehaviour
   {
     PlayerManager.current.RepairSelf();
   }
+
+  public void OpenConfirmation()
+  {
+    confirmSelfD.SetActive(true);
+    confirmSelfDScript.OpenConfirmation();
+    confirmWindowOpen = true;
+  }
+  public void CloseConfirmation()
+  {
+    confirmSelfD.SetActive(false);
+    confirmWindowOpen = false;
+  }
+
   public void TransferPartProperties()
   {
     progressNum = progress1 + progress2;
@@ -684,6 +709,8 @@ public class UI_Part_Select : MonoBehaviour
       PlayerManager.current.temp_legs_progressNum = progressNum;
     }
   }
+
+
 
   public void GainWorkerHead()
   {

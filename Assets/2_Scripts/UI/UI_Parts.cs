@@ -645,7 +645,7 @@ public class UI_Parts : MonoBehaviour
     }
   }
 
-  public void GainWorkerHead(int attatchStyle)
+  public void GainWorkerHead(int attatchStyle, bool openWindow)
   {
     if (attatchStyle == 0)
     {
@@ -653,7 +653,10 @@ public class UI_Parts : MonoBehaviour
       headPartScript.progress2 = temp_progress2;
       headPartScript.progressNum = temp_progressNum;
       headPartScript.GainWorkerHead();
-      headPartScript.OpenWindow();
+      if (openWindow)
+      {
+        headPartScript.OpenWindow();
+      }
     }
     else if (attatchStyle == 1)
     {
@@ -661,7 +664,10 @@ public class UI_Parts : MonoBehaviour
       storage1Script.progress2 = temp_progress2;
       storage1Script.progressNum = temp_progressNum;
       storage1Script.GainWorkerHead();
-      storage1Script.OpenWindow();
+      if (openWindow)
+      {
+        storage1Script.OpenWindow();
+      }
     }
     else if (attatchStyle == 2)
     {
@@ -669,10 +675,13 @@ public class UI_Parts : MonoBehaviour
       storage2Script.progress2 = temp_progress2;
       storage2Script.progressNum = temp_progressNum;
       storage2Script.GainWorkerHead();
-      storage2Script.OpenWindow();
+      if (openWindow)
+      {
+        storage2Script.OpenWindow();
+      }
     }
   }
-  public void GainWorkerBody(int attatchStyle)
+  public void GainWorkerBody(int attatchStyle, bool openWindow)
   {
     if (attatchStyle == 0)
     {
@@ -680,7 +689,10 @@ public class UI_Parts : MonoBehaviour
       bodyPartScript.progress2 = temp_progress2;
       bodyPartScript.progressNum = temp_progressNum;
       bodyPartScript.GainWorkerBody();
-      bodyPartScript.OpenWindow();
+      if (openWindow)
+      {
+        bodyPartScript.OpenWindow();
+      }
     }
     else if (attatchStyle == 1)
     {
@@ -688,7 +700,10 @@ public class UI_Parts : MonoBehaviour
       storage1Script.progress2 = temp_progress2;
       storage1Script.progressNum = temp_progressNum;
       storage1Script.GainWorkerBody();
-      storage1Script.OpenWindow();
+      if (openWindow)
+      {
+        storage1Script.OpenWindow();
+      }
     }
     else if (attatchStyle == 2)
     {
@@ -696,10 +711,13 @@ public class UI_Parts : MonoBehaviour
       storage2Script.progress2 = temp_progress2;
       storage2Script.progressNum = temp_progressNum;
       storage2Script.GainWorkerBody();
-      storage2Script.OpenWindow();
+      if (openWindow)
+      {
+        storage2Script.OpenWindow();
+      }
     }
   }
-  public void GainWorkerDrill(int attatchStyle)
+  public void GainWorkerDrill(int attatchStyle, bool openWindow)
   {
     if (attatchStyle == 0)
     {
@@ -707,7 +725,10 @@ public class UI_Parts : MonoBehaviour
       rightArmScript.progress2 = temp_progress2;
       rightArmScript.progressNum = temp_progressNum;
       rightArmScript.GainWorkerDrill();
-      rightArmScript.OpenWindow();
+      if (openWindow)
+      {
+        rightArmScript.OpenWindow();
+      }
     }
     else if (attatchStyle == 1)
     {
@@ -715,7 +736,10 @@ public class UI_Parts : MonoBehaviour
       storage1Script.progress2 = temp_progress2;
       storage1Script.progressNum = temp_progressNum;
       storage1Script.GainWorkerDrill();
-      storage1Script.OpenWindow();
+      if (openWindow)
+      {
+        storage1Script.OpenWindow();
+      }
     }
     else if (attatchStyle == 2)
     {
@@ -723,10 +747,13 @@ public class UI_Parts : MonoBehaviour
       storage2Script.progress2 = temp_progress2;
       storage2Script.progressNum = temp_progressNum;
       storage2Script.GainWorkerDrill();
-      storage2Script.OpenWindow();
+      if (openWindow)
+      {
+        storage2Script.OpenWindow();
+      }
     }
   }
-  public void GainBlaster(int attatchStyle)
+  public void GainBlaster(int attatchStyle, bool openWindow)
   {
     if (attatchStyle == 0)
     {
@@ -734,7 +761,10 @@ public class UI_Parts : MonoBehaviour
       leftArmScript.progress2 = temp_progress2;
       leftArmScript.progressNum = temp_progressNum;
       leftArmScript.GainBlaster();
-      leftArmScript.OpenWindow();
+      if (openWindow)
+      {
+        leftArmScript.OpenWindow();
+      }
     }
     else if (attatchStyle == 1)
     {
@@ -742,7 +772,10 @@ public class UI_Parts : MonoBehaviour
       storage1Script.progress2 = temp_progress2;
       storage1Script.progressNum = temp_progressNum;
       storage1Script.GainBlaster();
-      storage1Script.OpenWindow();
+      if (openWindow)
+      {
+        storage1Script.OpenWindow();
+      }
     }
     else if (attatchStyle == 2)
     {
@@ -750,10 +783,13 @@ public class UI_Parts : MonoBehaviour
       storage2Script.progress2 = temp_progress2;
       storage2Script.progressNum = temp_progressNum;
       storage2Script.GainBlaster();
-      storage2Script.OpenWindow();
+      if (openWindow)
+      {
+        storage2Script.OpenWindow();
+      }
     }
   }
-  public void GainMissileLauncher(int attatchStyle)
+  public void GainMissileLauncher(int attatchStyle, bool openWindow)
   {
     if (attatchStyle == 0)
     {
@@ -761,7 +797,10 @@ public class UI_Parts : MonoBehaviour
       leftArmScript.progress2 = temp_progress2;
       leftArmScript.progressNum = temp_progressNum;
       leftArmScript.GainMissileLauncher();
-      leftArmScript.OpenWindow();
+      if (openWindow)
+      {
+        leftArmScript.OpenWindow();
+      }
     }
     else if (attatchStyle == 1)
     {
@@ -769,7 +808,10 @@ public class UI_Parts : MonoBehaviour
       storage1Script.progress2 = temp_progress2;
       storage1Script.progressNum = temp_progressNum;
       storage1Script.GainMissileLauncher();
-      storage1Script.OpenWindow();
+      if (openWindow)
+      {
+        storage1Script.OpenWindow();
+      }
     }
     else if (attatchStyle == 2)
     {
@@ -777,10 +819,13 @@ public class UI_Parts : MonoBehaviour
       storage2Script.progress2 = temp_progress2;
       storage2Script.progressNum = temp_progressNum;
       storage2Script.GainMissileLauncher();
-      storage2Script.OpenWindow();
+      if (openWindow)
+      {
+        storage2Script.OpenWindow();
+      }
     }
   }
-  public void GainLaserBeam(int attatchStyle)
+  public void GainLaserBeam(int attatchStyle, bool openWindow)
   {
     if (attatchStyle == 0)
     {
@@ -788,7 +833,10 @@ public class UI_Parts : MonoBehaviour
       leftArmScript.progress2 = temp_progress2;
       leftArmScript.progressNum = temp_progressNum;
       leftArmScript.GainLaserBeam();
-      leftArmScript.OpenWindow();
+      if (openWindow)
+      {
+        leftArmScript.OpenWindow();
+      }
     }
     else if (attatchStyle == 1)
     {
@@ -796,7 +844,10 @@ public class UI_Parts : MonoBehaviour
       storage1Script.progress2 = temp_progress2;
       storage1Script.progressNum = temp_progressNum;
       storage1Script.GainLaserBeam();
-      storage1Script.OpenWindow();
+      if (openWindow)
+      {
+        storage1Script.OpenWindow();
+      }
     }
     else if (attatchStyle == 2)
     {
@@ -804,10 +855,13 @@ public class UI_Parts : MonoBehaviour
       storage2Script.progress2 = temp_progress2;
       storage2Script.progressNum = temp_progressNum;
       storage2Script.GainLaserBeam();
-      storage2Script.OpenWindow();
+      if (openWindow)
+      {
+        storage2Script.OpenWindow();
+      }
     }
   }
-  public void GainWorkerBoots(int attatchStyle)
+  public void GainWorkerBoots(int attatchStyle, bool openWindow)
   {
     if (attatchStyle == 0)
     {
@@ -815,7 +869,10 @@ public class UI_Parts : MonoBehaviour
       legsPartScript.progress2 = temp_progress2;
       legsPartScript.progressNum = temp_progressNum;
       legsPartScript.GainWorkerBoots();
-      legsPartScript.OpenWindow();
+      if (openWindow)
+      {
+        legsPartScript.OpenWindow();
+      }
     }
     else if (attatchStyle == 1)
     {
@@ -823,7 +880,10 @@ public class UI_Parts : MonoBehaviour
       storage1Script.progress2 = temp_progress2;
       storage1Script.progressNum = temp_progressNum;
       storage1Script.GainWorkerBoots();
-      storage1Script.OpenWindow();
+      if (openWindow)
+      {
+        storage1Script.OpenWindow();
+      }
     }
     else if (attatchStyle == 2)
     {
@@ -831,10 +891,13 @@ public class UI_Parts : MonoBehaviour
       storage2Script.progress2 = temp_progress2;
       storage2Script.progressNum = temp_progressNum;
       storage2Script.GainWorkerBoots();
-      storage2Script.OpenWindow();
+      if (openWindow)
+      {
+        storage2Script.OpenWindow();
+      }
     }
   }
-  public void GainJumpBoots(int attatchStyle)
+  public void GainJumpBoots(int attatchStyle, bool openWindow)
   {
     if (attatchStyle == 0)
     {
@@ -842,7 +905,10 @@ public class UI_Parts : MonoBehaviour
       legsPartScript.progress2 = temp_progress2;
       legsPartScript.progressNum = temp_progressNum;
       legsPartScript.GainJumpBoots();
-      legsPartScript.OpenWindow();
+      if (openWindow)
+      {
+        legsPartScript.OpenWindow();
+      }
     }
     else if (attatchStyle == 1)
     {
@@ -850,7 +916,10 @@ public class UI_Parts : MonoBehaviour
       storage1Script.progress2 = temp_progress2;
       storage1Script.progressNum = temp_progressNum;
       storage1Script.GainJumpBoots();
-      storage1Script.OpenWindow();
+      if (openWindow)
+      {
+        storage1Script.OpenWindow();
+      }
     }
     else if (attatchStyle == 2)
     {
@@ -858,7 +927,10 @@ public class UI_Parts : MonoBehaviour
       storage2Script.progress2 = temp_progress2;
       storage2Script.progressNum = temp_progressNum;
       storage2Script.GainJumpBoots();
-      storage2Script.OpenWindow();
+      if (openWindow)
+      {
+        storage2Script.OpenWindow();
+      }
     }
   }
 }

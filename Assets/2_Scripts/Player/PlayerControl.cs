@@ -697,11 +697,17 @@ public class PlayerControl : MonoBehaviour
   }
   public void EndingMovementWalkRight()
   {
-    characterControllerScript.enabled = true;
-    spriteAnimScript.enabled = true;
-    spriteAnim.SetBool("MovementPaused", false);
-    spriteAnim.SetBool("EndingWalkRight", true);
-    endingMovement = true;
+    if (!endingMovement)
+    {
+      transform.localScale = new Vector3(1f, transform.localScale.y, transform.localScale.z);
+      facingRight = true;
+
+      characterControllerScript.enabled = false;
+      spriteAnimScript.enabled = true;
+      spriteAnim.SetBool("MovementPaused", false);
+      spriteAnim.SetBool("EndingWalkRight", true);
+      endingMovement = true;
+    }
   }
 
   public void ChangeScene()
