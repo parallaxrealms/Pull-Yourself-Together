@@ -108,6 +108,8 @@ public class PlayerManager : MonoBehaviour
   public GameObject pickup_LegsObject;
   public GameObject pickup_LegsJumpObject;
 
+  public bool pickupSelectableActive;
+
   public bool playerPartDropped = false;
 
   private ControlledCapsuleCollider playerCollider;
@@ -318,6 +320,7 @@ public class PlayerManager : MonoBehaviour
     partsUIScript.Invoke("CloseAllWindows", 0.1f);
 
     controlScript.ChangeHeadDurability(0);
+    ResetUpgrade(0);
 
     GetColliderHeights();
     ChangeShieldProperties();
@@ -2501,7 +2504,6 @@ public class PlayerManager : MonoBehaviour
     if (backedUp)
     {
       RebootBackup();
-
     }
     else
     {
@@ -2565,6 +2567,10 @@ public class PlayerManager : MonoBehaviour
           if (currentDurability <= 0)
           {
             Death();
+          }
+          else
+          {
+            partsUIScript.TakeHitHead();
           }
         }
 
@@ -2684,6 +2690,10 @@ public class PlayerManager : MonoBehaviour
 
     //And set backupObject to the new one
     backupObject = backupObj;
+    PickUpScript p2Script = backupObject.GetComponent<PickUpScript>();
+
+    p2Script.EraseText();
+    p2Script.activated = false;
 
     backedUp = true;
     playerHealthManager.BackedUp();
@@ -2741,7 +2751,8 @@ public class PlayerManager : MonoBehaviour
       currentDefenseShield = 2;
       maxDefenseShield = 2;
       partsUIScript.ShowShieldDefense();
-      playerHealthManager.ShieldActive(); shieldActive = true;
+      playerHealthManager.ShieldActive();
+      shieldActive = true;
     }
   }
   public void setShieldActiveUI()
@@ -2798,14 +2809,20 @@ public class PlayerManager : MonoBehaviour
       if (currentJump_workerLegs == 0)
       {
         groundedCharSript.m_JumpVelocity = 14.0f;
+        groundedCharSript.m_JumpCutVelocity = 6.0f;
+        groundedCharSript.m_MinAllowedJumpCutVelocity = 10f;
       }
       if (currentJump_workerLegs == 1)
       {
         groundedCharSript.m_JumpVelocity = 16.0f;
+        groundedCharSript.m_JumpCutVelocity = 7.0f;
+        groundedCharSript.m_MinAllowedJumpCutVelocity = 12f;
       }
       if (currentJump_workerLegs == 2)
       {
         groundedCharSript.m_JumpVelocity = 18.0f;
+        groundedCharSript.m_JumpCutVelocity = 8.0f;
+        groundedCharSript.m_MinAllowedJumpCutVelocity = 14f;
       }
     }
     else if (legType == 1) //Jump Legs
@@ -3135,6 +3152,10 @@ public class PlayerManager : MonoBehaviour
       temp_head_progress1 = 0;
       temp_head_progress2 = 0;
       temp_head_progressNum = 0;
+
+      currentDurability = 1;
+      maxDurability = 1;
+      controlScript.ChangeHeadVisibility(0);
 
       CheckAndRefreshUpgrades("Head");
     }

@@ -31,6 +31,7 @@ public class CyberMantisScript : MonoBehaviour
   public bool isDead;
   public bool isAttacking;
   public bool chasingPlayer;
+  public bool isLunging;
 
   private float tintFadeSpeed = 0.3f;
   public bool isHit = false;
@@ -57,6 +58,9 @@ public class CyberMantisScript : MonoBehaviour
   public bool hasFallen = false;
 
   public Vector3 lastPos;
+
+  public float lungeTimer = 10.0f;
+  public bool lungeStarted = false;
 
   void Awake()
   {
@@ -110,56 +114,105 @@ public class CyberMantisScript : MonoBehaviour
     {
       if (!isDead)
       {
-        if (idle)
+        if (!legsBroken)
         {
-          if (transform.position.x > playerObject.transform.position.x)
+          if (!lungeStarted)
           {
-            transform.localScale = new Vector3(1, 1, 1);
+            if (lungeTimer > 0.0f)
+            {
+              lungeTimer -= Time.deltaTime;
+            }
+            else
+            {
+              lungeStarted = true;
+              lungeTimer = 10.0f;
+              LungeStart();
+            }
           }
-          else
-          {
-            transform.localScale = new Vector3(-1, 1, 1);
-          }
+        }
+      }
+    }
 
+    if (isActive)
+    {
+      if (!isDead)
+      {
+        if (!lungeStarted)
+        {
+          if (idle)
+          {
+            if (transform.position.x > playerObject.transform.position.x)
+            {
+              transform.localScale = new Vector3(1, 1, 1);
+            }
+            else
+            {
+              transform.localScale = new Vector3(-1, 1, 1);
+            }
+
+            distanceToPlayer = Vector3.Distance(playerObject.transform.position, transform.position);
+
+            playerPosition = new Vector3(playerObject.transform.position.x, playerObject.transform.position.y + 0.01f, playerObject.transform.position.z);
+
+            transform.position = Vector3.MoveTowards(transform.position, playerPosition, speed * Time.deltaTime);
+          }
+          if (chasingPlayer)
+          {
+            if (transform.position.x > playerObject.transform.position.x)
+            {
+              transform.localScale = new Vector3(1, 1, 1);
+            }
+            else
+            {
+              transform.localScale = new Vector3(-1, 1, 1);
+            }
+
+            distanceToPlayer = Vector3.Distance(playerObject.transform.position, transform.position);
+
+            playerPosition = new Vector3(playerObject.transform.position.x, playerObject.transform.position.y + 0.01f, playerObject.transform.position.z);
+
+            transform.position = Vector3.MoveTowards(transform.position, playerPosition, speed * Time.deltaTime);
+
+            if (distanceToPlayer <= 3.2f)
+            {
+              AttackPlayer();
+              if (!legsBroken)
+              {
+                speed = bossData.attackSpeed * 1.1f;
+              }
+              else
+              {
+                speed = bossData.attackSpeed * 1.2f;
+              }
+            }
+            else
+            {
+              ChasePlayer();
+              if (!legsBroken)
+              {
+                speed = bossData.attackSpeed * 1.4f;
+              }
+              else
+              {
+                speed = bossData.attackSpeed * 1.5f;
+              }
+            }
+          }
+        }
+
+        if (isLunging)
+        {
           distanceToPlayer = Vector3.Distance(playerObject.transform.position, transform.position);
 
           playerPosition = playerObject.transform.position;
+          Vector3 jumpPos = new Vector3(transform.position.x, transform.position.y + 0.25f, transform.position.z);
 
-          transform.position = Vector3.MoveTowards(transform.position, playerPosition, speed * Time.deltaTime);
+          speed = bossData.attackSpeed * 2.5f;
+
+          transform.position = Vector3.MoveTowards(jumpPos, playerPosition, speed * Time.deltaTime);
         }
-        if (chasingPlayer)
-        {
-          if (transform.position.x > playerObject.transform.position.x)
-          {
-            transform.localScale = new Vector3(1, 1, 1);
-          }
-          else
-          {
-            transform.localScale = new Vector3(-1, 1, 1);
-          }
 
-          distanceToPlayer = Vector3.Distance(playerObject.transform.position, transform.position);
 
-          playerPosition = playerObject.transform.position;
-
-          transform.position = Vector3.MoveTowards(transform.position, playerPosition, speed * Time.deltaTime);
-
-          if (distanceToPlayer <= 3.2f)
-          {
-            AttackPlayer();
-            speed = bossData.attackSpeed * 1.0f;
-          }
-          else if (distanceToPlayer >= 3.21f)
-          {
-            ChasePlayer();
-            speed = bossData.attackSpeed * 1.5f;
-          }
-          else
-          {
-            ChasePlayer();
-            speed = bossData.attackSpeed * 1.25f;
-          }
-        }
       }
     }
   }
@@ -179,7 +232,6 @@ public class CyberMantisScript : MonoBehaviour
   {
     lastPos = transform.position;
     transform.position = new Vector3(2000f, 2000f, 100f);
-    IdleState();
     Inactive();
   }
 
@@ -189,7 +241,6 @@ public class CyberMantisScript : MonoBehaviour
     if (hasFallen)
     {
       Active();
-      IdleState();
     }
   }
 
@@ -215,9 +266,34 @@ public class CyberMantisScript : MonoBehaviour
     FindPlayer();
     anim.SetBool("isAttacking", true);
   }
+  public void LungeStart()
+  {
+    FindPlayer();
+    anim.SetBool("isIdle", false);
+    anim.SetBool("isWalking", false);
+    anim.SetBool("isAttacking", false);
+    anim.SetBool("lunge", true);
+
+    AudioManager.current.currentSFXTrack = 127;
+    AudioManager.current.PlaySfx();
+  }
+  public void Lunging()
+  {
+    isLunging = true;
+  }
+  public void LungeEnd()
+  {
+    FindPlayer();
+    anim.SetBool("lunge", false);
+    isLunging = false;
+    lungeStarted = false;
+    ChasePlayer();
+  }
+
   public void BreakLegs()
   {
     isActive = false;
+    lungeStarted = false;
     explodeParticles = Instantiate(explodeParticlesObject, new Vector3(currentBossObject.transform.position.x, currentBossObject.transform.position.y, currentBossObject.transform.position.z), Quaternion.identity) as GameObject;
     anim.SetBool("isIdle", false);
     anim.SetBool("isWalking", false);
@@ -263,7 +339,10 @@ public class CyberMantisScript : MonoBehaviour
     FindPlayer();
     isActive = true;
     rb.useGravity = true;
-    rb.constraints = RigidbodyConstraints.None;
+    rb.constraints = RigidbodyConstraints.FreezeRotation;
+    rb.constraints |= RigidbodyConstraints.FreezePositionZ;
+    anim.enabled = true;
+    IdleState();
     GameController.current.Invoke("BossFightStarted", 0.1f);
     PlayerManager.current.Invoke("ResumeMovement", 0.01f);
   }
@@ -272,8 +351,7 @@ public class CyberMantisScript : MonoBehaviour
     isActive = false;
     rb.useGravity = false;
     rb.constraints = RigidbodyConstraints.FreezeAll;
-    anim.SetBool("isAttacking", false);
-    anim.SetBool("isIdle", true);
+    anim.enabled = false;
   }
 
   public void EnableAttackCollider()
@@ -300,25 +378,35 @@ public class CyberMantisScript : MonoBehaviour
     {
       speed = bossData.speed / 1.5f;
       health -= damageTaken;
-      isHit = true;
-      DisplayDamage();
 
-      spriteRend.material = hitMaterial;
-      if (health <= bossData.health / 2)
-      {
-        if (!legsBroken)
-        {
-          BreakLegs();
-          legsBroken = true;
-        }
-
-        AudioManager.current.currentSFXTrack = 125;
-        AudioManager.current.PlaySfx();
-      }
       if (health <= 0.0f)
       {
         Death();
         speed = 0;
+      }
+      if (health <= bossData.health / 2)
+      {
+        if (!legsBroken)
+        {
+          RecoverFromHit();
+          BreakLegs();
+          legsBroken = true;
+        }
+        else
+        {
+          isHit = true;
+          DisplayDamage();
+          spriteRend.material = hitMaterial;
+        }
+        AudioManager.current.currentSFXTrack = 125;
+        AudioManager.current.PlaySfx();
+      }
+      else
+      {
+        isHit = true;
+        DisplayDamage();
+
+        spriteRend.material = hitMaterial;
       }
     }
   }

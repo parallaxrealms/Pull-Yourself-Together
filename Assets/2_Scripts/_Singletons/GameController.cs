@@ -156,7 +156,7 @@ public class GameController : MonoBehaviour
     PersistentGameObjects.current.ResetPersistentGameObjects();
     AudioManager.current.currentTrackNum = 0;
     AudioManager.current.PlayMusicTrack();
-    MenuManager.current.GameOver();
+
     SceneManager.LoadScene("MainMenu");
   }
 

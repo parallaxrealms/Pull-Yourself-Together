@@ -418,6 +418,11 @@ public class PlayerControl : MonoBehaviour
     drillCollider = drillArm.GetComponent<BoxCollider>();
     Invoke("StopDrill", 0.05f);
     Invoke("CheckDrillFacingPos", 0.2f);
+    Invoke("SetDrillStraight", 0.5f);
+  }
+  public void SetDrillStraight()
+  {
+    transform.rotation = Quaternion.identity;
   }
   public void DisableDrillArm()
   {
@@ -475,11 +480,11 @@ public class PlayerControl : MonoBehaviour
         }
         else if (PlayerManager.current.gun_progress2 == 1)
         {
-          _gunCooldownTime = 0.6f;
+          _gunCooldownTime = 0.62f;
         }
         else if (PlayerManager.current.gun_progress2 == 2)
         {
-          _gunCooldownTime = 0.45f;
+          _gunCooldownTime = 0.48f;
         }
       }
       else if (gunType == 1)
@@ -494,11 +499,11 @@ public class PlayerControl : MonoBehaviour
         }
         else if (PlayerManager.current.gun_progress2 == 1)
         {
-          _gunCooldownTime = 1.25f;
+          _gunCooldownTime = 1.2f;
         }
         else if (PlayerManager.current.gun_progress2 == 2)
         {
-          _gunCooldownTime = 1.0f;
+          _gunCooldownTime = 0.8f;
         }
       }
       else if (gunType == 2)
@@ -699,6 +704,7 @@ public class PlayerControl : MonoBehaviour
   {
     if (!endingMovement)
     {
+      canMove = false;
       transform.localScale = new Vector3(1f, transform.localScale.y, transform.localScale.z);
       facingRight = true;
 

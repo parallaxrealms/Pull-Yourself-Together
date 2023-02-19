@@ -12,6 +12,11 @@ public class UI_Part_Select : MonoBehaviour
   public int partSubType;
   public int storagePartNum;
 
+  public GameObject upgradeSlots_progress1;
+  public GameObject upgradeSlots_progress2;
+  public UI_Parts_UpgradeSlots slot_progress1Script;
+  public UI_Parts_UpgradeSlots slot_progress2Script;
+
   public int progress1;
   public int progress2;
   public int progressNum;
@@ -79,6 +84,9 @@ public class UI_Part_Select : MonoBehaviour
   public GameObject repairCorite;
   public bool showRepair = false;
 
+  public GameObject durabilityStatus;
+  public UI_Part_Select_Durability durabilityStatusScript;
+
   public GameObject confirmSelfD;
   public ConfirmSelfDestruct confirmSelfDScript;
   public bool confirmWindowOpen = false;
@@ -98,7 +106,7 @@ public class UI_Part_Select : MonoBehaviour
     windowClosedPos = new Vector3(0, -100f, 0);
 
     windowInfo = Instantiate(windowInfoObject, new Vector3(0, 0, 0), Quaternion.identity) as GameObject;
-    windowPos = new Vector3(14f, 0f, -1f);
+    windowPos = new Vector3(13.5f, 0f, -1f);
     windowInfo.transform.parent = transform;
     windowInfo.transform.localPosition = windowPos;
     windowInfoScript = windowInfo.GetComponent<UI_Window_Part>();
@@ -124,6 +132,8 @@ public class UI_Part_Select : MonoBehaviour
 
       confirmSelfDScript = confirmSelfD.GetComponent<ConfirmSelfDestruct>();
       confirmSelfD.SetActive(false);
+
+      durabilityStatusScript = durabilityStatus.GetComponent<UI_Part_Select_Durability>();
 
     }
     else if (partType == 1)
@@ -168,6 +178,13 @@ public class UI_Part_Select : MonoBehaviour
 
     healthManagerUI = PlayerManager.current.healthManagerUI;
     healthManagerScript = healthManagerUI.GetComponent<UI_HealthManager>();
+
+
+    if (partType < 5)
+    {
+      slot_progress1Script = upgradeSlots_progress1.GetComponent<UI_Parts_UpgradeSlots>();
+      slot_progress2Script = upgradeSlots_progress2.GetComponent<UI_Parts_UpgradeSlots>();
+    }
   }
 
   // Update is called once per frame
@@ -303,7 +320,7 @@ public class UI_Part_Select : MonoBehaviour
     }
 
     windowInfo = Instantiate(windowInfoObject, new Vector3(0, 0, 0), Quaternion.identity) as GameObject;
-    windowPos = new Vector3(14f, 0f, -1f);
+    windowPos = new Vector3(13f, 0f, -1f);
     windowInfo.transform.parent = transform;
     windowInfo.transform.localPosition = windowClosedPos;
     windowInfoScript = windowInfo.GetComponent<UI_Window_Part>();
@@ -483,6 +500,17 @@ public class UI_Part_Select : MonoBehaviour
           defenseShield2Script.ShowUI();
         }
       }
+      if (partType == 0)
+      {
+        durabilityStatus.SetActive(true);
+      }
+      if (partType < 5)
+      {
+        upgradeSlots_progress1.SetActive(true);
+        upgradeSlots_progress2.SetActive(true);
+        slot_progress1Script.CheckCurrentUpgrades();
+        slot_progress2Script.CheckCurrentUpgrades();
+      }
     }
     EnableSelectionWhenHoldingPart();
   }
@@ -523,6 +551,24 @@ public class UI_Part_Select : MonoBehaviour
       if (confirmWindowOpen)
       {
         CloseConfirmation();
+      }
+    }
+    if (partType == 0)
+    {
+      if (durabilityStatus != null)
+      {
+        durabilityStatus.SetActive(false);
+      }
+    }
+    if (partType < 5)
+    {
+      if (upgradeSlots_progress1 != null)
+      {
+        upgradeSlots_progress1.SetActive(false);
+      }
+      if (upgradeSlots_progress2 != null)
+      {
+        upgradeSlots_progress2.SetActive(false);
       }
     }
   }
@@ -603,9 +649,18 @@ public class UI_Part_Select : MonoBehaviour
   public void CheckUpgrades()
   {
     parentScript.CheckStorageSlots();
+    if (partType == 0)
+    {
+      durabilityStatusScript.ChangeStatusOnUpgrade();
+    }
     if (partType == 1)
     {
       CheckShieldUpgrade();
+    }
+    if (partType < 5)
+    {
+      slot_progress1Script.CheckCurrentUpgrades();
+      slot_progress2Script.CheckCurrentUpgrades();
     }
   }
   public void DropPart()
@@ -642,6 +697,7 @@ public class UI_Part_Select : MonoBehaviour
     {//Gun
       PlayerManager.current.DropGun();
       parentScript.DisablePartsUI();
+      Debug.Log("PlayerManager.current.DropGun()");
     }
     else if (partType == 4)
     {//Legs
@@ -672,7 +728,7 @@ public class UI_Part_Select : MonoBehaviour
   public void OpenConfirmation()
   {
     confirmSelfD.SetActive(true);
-    confirmSelfDScript.OpenConfirmation();
+    confirmSelfDScript.Invoke("OpenConfirmation", 0.1f);
     confirmWindowOpen = true;
   }
   public void CloseConfirmation()
@@ -710,7 +766,10 @@ public class UI_Part_Select : MonoBehaviour
     }
   }
 
-
+  public void TakeDurabilityHit()
+  {
+    durabilityStatusScript.ChangeStatusOnHit();
+  }
 
   public void GainWorkerHead()
   {

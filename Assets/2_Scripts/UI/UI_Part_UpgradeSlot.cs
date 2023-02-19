@@ -18,7 +18,9 @@ public class UI_Part_UpgradeSlot : MonoBehaviour
   private SpriteRenderer hoverRend;
 
   private SpriteRenderer spriteRend;
-  private Sprite greenFill;
+  private Sprite whiteFill;
+  public Sprite greenFill;
+  public Sprite redFill;
 
   public int req_corite;
   public int req_velrite;
@@ -35,9 +37,11 @@ public class UI_Part_UpgradeSlot : MonoBehaviour
     UI_CrystalManager = GameObject.Find("CrystalManager");
     crystalManagerScript = UI_CrystalManager.GetComponent<UI_CrystalManager>();
 
+    hoverRend = hoverWhite.GetComponent<SpriteRenderer>();
+
     hoverWhite.SetActive(false);
     spriteRend = GetComponent<SpriteRenderer>();
-    greenFill = spriteRend.sprite;
+    whiteFill = spriteRend.sprite;
     spriteRend.sprite = null;
   }
 
@@ -55,7 +59,7 @@ public class UI_Part_UpgradeSlot : MonoBehaviour
       {
         if (!isActivated)
         {
-          spriteRend.sprite = greenFill;
+          spriteRend.sprite = whiteFill;
         }
         if (!AudioManager.current.UIHover)
         {
@@ -146,12 +150,39 @@ public class UI_Part_UpgradeSlot : MonoBehaviour
         {
           if (PlayerManager.current.numOfCorite >= req_corite && PlayerManager.current.numOfVelrite >= req_velrite && PlayerManager.current.numOfNymrite >= req_nymrite && PlayerManager.current.numOfZyrite >= req_zyrite)
           {
-            isHighlighted = true;
-            hoverWhite.SetActive(true);
-            parentScript.ShowUpgradeAlert();
+            if (slotNum == 0 || slotNum == 2)
+            {
+              isHighlighted = true;
+              hoverRend.sprite = greenFill;
+              hoverWhite.SetActive(true);
+              parentScript.ShowUpgradeAlert();
+            }
+            else if (slotNum == 1)
+            {
+              if (parentScript.upgrade1Progress == 1)
+              {
+                isHighlighted = true;
+                hoverRend.sprite = greenFill;
+                hoverWhite.SetActive(true);
+                parentScript.ShowUpgradeAlert();
+              }
+            }
+            else if (slotNum == 3)
+            {
+              if (parentScript.upgrade2Progress == 1)
+              {
+                isHighlighted = true;
+                hoverRend.sprite = greenFill;
+                hoverWhite.SetActive(true);
+                parentScript.ShowUpgradeAlert();
+              }
+            }
           }
           else
           {
+            isHighlighted = false;
+            hoverRend.sprite = redFill;
+            hoverWhite.SetActive(true);
             parentScript.HideUpgradeAlert();
           }
         }
@@ -174,7 +205,7 @@ public class UI_Part_UpgradeSlot : MonoBehaviour
   }
   private void ActivateSlot()
   {
-    spriteRend.sprite = greenFill;
+    spriteRend.sprite = whiteFill;
     hoverWhite.SetActive(false);
 
     crystalManagerScript.temp_corite = req_corite;
@@ -195,16 +226,14 @@ public class UI_Part_UpgradeSlot : MonoBehaviour
   {
     if (parentObject != null)
     {
-
       spriteRend.sprite = null;
       isActivated = false;
-      DisableHighlight();
     }
   }
 
   public void FillSlot()
   {
-    spriteRend.sprite = greenFill;
+    spriteRend.sprite = whiteFill;
     hoverWhite.SetActive(false);
     isHighlighted = false;
     isActivated = true;

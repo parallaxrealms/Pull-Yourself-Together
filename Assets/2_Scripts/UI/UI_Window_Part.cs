@@ -25,23 +25,9 @@ public class UI_Window_Part : MonoBehaviour
   public Sprite sprite_num_4;
 
   public SpriteRenderer spriteRend;
-  public Sprite sprite_info;
-  public Sprite sprite_upgrade;
-
-  public GameObject infoTab;
-  public UI_Part_Window_Tab infoTabScript;
-
-  public GameObject upgradeNums;
 
   public GameObject info_upgradeNum;
   public SpriteRenderer totalNum_spriteRend;
-  public GameObject info_upgrade1Num;
-  public SpriteRenderer upgrade1Num_spriteRend;
-  public GameObject info_upgrade2Num;
-  public SpriteRenderer upgrade2Num_spriteRend;
-
-  public GameObject upgradeTab;
-  public UI_Part_Window_Tab upgradeTabScript;
 
   public GameObject upgradeAlert;
   public SpriteRenderer spriteRend_UpgradeAlert;
@@ -88,23 +74,15 @@ public class UI_Window_Part : MonoBehaviour
   public void Reset()
   {
     spriteRend = GetComponent<SpriteRenderer>();
-    upgradeSlots.SetActive(false);
 
     spriteRend_UpgradeAlert = upgradeAlert.GetComponent<SpriteRenderer>();
     spriteRend_UpgradeAlert.enabled = false;
 
     xButtonScript = xButton.GetComponent<OnClickExitWindow>();
 
-    infoTabScript = infoTab.GetComponent<UI_Part_Window_Tab>();
-    upgradeTabScript = upgradeTab.GetComponent<UI_Part_Window_Tab>();
-
     totalNum_spriteRend = info_upgradeNum.GetComponent<SpriteRenderer>();
-    upgrade1Num_spriteRend = info_upgrade1Num.GetComponent<SpriteRenderer>();
-    upgrade2Num_spriteRend = info_upgrade2Num.GetComponent<SpriteRenderer>();
 
     transform.localScale = new Vector3(1, 1, 1);
-
-    OpenUpgrades();
 
     ugpradeSlot1Script = upgradeSlot1.GetComponent<UI_Part_UpgradeSlot>();
     ugpradeSlot2Script = upgradeSlot2.GetComponent<UI_Part_UpgradeSlot>();
@@ -133,28 +111,25 @@ public class UI_Window_Part : MonoBehaviour
 
   public void CheckUpgradeSlotsToShow()
   {
-    if (currentTab == 1)
+    ugpradeSlot1Script = upgradeSlot1.GetComponent<UI_Part_UpgradeSlot>();
+    ugpradeSlot2Script = upgradeSlot2.GetComponent<UI_Part_UpgradeSlot>();
+    ugpradeSlot3Script = upgradeSlot3.GetComponent<UI_Part_UpgradeSlot>();
+    ugpradeSlot4Script = upgradeSlot4.GetComponent<UI_Part_UpgradeSlot>();
+    if (!ugpradeSlot1Script.isActivated)
     {
-      ugpradeSlot1Script = upgradeSlot1.GetComponent<UI_Part_UpgradeSlot>();
-      ugpradeSlot2Script = upgradeSlot2.GetComponent<UI_Part_UpgradeSlot>();
-      ugpradeSlot3Script = upgradeSlot3.GetComponent<UI_Part_UpgradeSlot>();
-      ugpradeSlot4Script = upgradeSlot4.GetComponent<UI_Part_UpgradeSlot>();
-      if (!ugpradeSlot1Script.isActivated)
-      {
-        ugpradeSlot1Script.HighlightSlot();
-      }
-      if (!ugpradeSlot2Script.isActivated)
-      {
-        ugpradeSlot2Script.HighlightSlot();
-      }
-      if (!ugpradeSlot3Script.isActivated)
-      {
-        ugpradeSlot3Script.HighlightSlot();
-      }
-      if (!ugpradeSlot4Script.isActivated)
-      {
-        ugpradeSlot4Script.HighlightSlot();
-      }
+      ugpradeSlot1Script.HighlightSlot();
+    }
+    if (!ugpradeSlot2Script.isActivated)
+    {
+      ugpradeSlot2Script.HighlightSlot();
+    }
+    if (!ugpradeSlot3Script.isActivated)
+    {
+      ugpradeSlot3Script.HighlightSlot();
+    }
+    if (!ugpradeSlot4Script.isActivated)
+    {
+      ugpradeSlot4Script.HighlightSlot();
     }
   }
 
@@ -264,6 +239,7 @@ public class UI_Window_Part : MonoBehaviour
 
     SetCurrentPartProperties();
     parentScript.CheckUpgrades();
+    CheckUpgradeSlotsToShow();
   }
 
   public void RefreshUpgradeSlotNum()
@@ -288,78 +264,49 @@ public class UI_Window_Part : MonoBehaviour
     {
       totalNum_spriteRend.sprite = sprite_num_4;
     }
-
-    if (upgrade1Progress == 0)
-    {
-      upgrade1Num_spriteRend.sprite = sprite_num_0;
-    }
-    else if (upgrade1Progress == 1)
-    {
-      upgrade1Num_spriteRend.sprite = sprite_num_1;
-    }
-    else if (upgrade1Progress == 2)
-    {
-      upgrade1Num_spriteRend.sprite = sprite_num_2;
-    }
-
-    if (upgrade2Progress == 0)
-    {
-      upgrade2Num_spriteRend.sprite = sprite_num_0;
-    }
-    else if (upgrade2Progress == 1)
-    {
-      upgrade2Num_spriteRend.sprite = sprite_num_1;
-    }
-    else if (upgrade2Progress == 2)
-    {
-      upgrade2Num_spriteRend.sprite = sprite_num_2;
-    }
   }
 
   public void RefreshUpgrades()
   {
     RefreshUpgradeSlotNum();
-    if (currentTab == 1)
+    if (upgrade1Progress == 0)
     {
-      if (upgrade1Progress == 0)
-      {
-        upgrade1 = false;
-        upgrade2 = false;
-        ugpradeSlot1Script.Invoke("ResetSlot", 0.01f);
-        ugpradeSlot2Script.Invoke("ResetSlot", 0.01f);
-      }
-      else if (upgrade1Progress == 1)
-      {
-        upgrade1 = true;
-        ugpradeSlot1Script.Invoke("FillSlot", 0.01f);
-        ugpradeSlot2Script.Invoke("ResetSlot", 0.01f);
-      }
-      else if (upgrade1Progress == 2)
-      {
-        upgrade2 = true;
-        ugpradeSlot1Script.Invoke("FillSlot", 0.01f);
-        ugpradeSlot2Script.Invoke("FillSlot", 0.01f);
-      }
+      upgrade1 = false;
+      upgrade2 = false;
+      ugpradeSlot1Script.Invoke("ResetSlot", 0.01f);
+      ugpradeSlot2Script.Invoke("ResetSlot", 0.01f);
+    }
+    else if (upgrade1Progress == 1)
+    {
+      upgrade1 = true;
+      ugpradeSlot1Script.Invoke("FillSlot", 0.01f);
+      ugpradeSlot2Script.Invoke("ResetSlot", 0.01f);
+    }
+    else if (upgrade1Progress == 2)
+    {
+      upgrade2 = true;
+      ugpradeSlot1Script.Invoke("FillSlot", 0.01f);
+      ugpradeSlot2Script.Invoke("FillSlot", 0.01f);
+    }
 
-      if (upgrade2Progress == 0)
-      {
-        upgrade3 = false;
-        upgrade4 = false;
-        ugpradeSlot3Script.Invoke("ResetSlot", 0.01f);
-        ugpradeSlot4Script.Invoke("ResetSlot", 0.01f);
-      }
-      else if (upgrade2Progress == 1)
-      {
-        upgrade3 = true;
-        ugpradeSlot3Script.Invoke("FillSlot", 0.01f);
-        ugpradeSlot4Script.Invoke("ResetSlot", 0.01f);
-      }
-      else if (upgrade2Progress == 2)
-      {
-        upgrade4 = true;
-        ugpradeSlot3Script.Invoke("FillSlot", 0.01f);
-        ugpradeSlot4Script.Invoke("FillSlot", 0.01f);
-      }
+    if (upgrade2Progress == 0)
+    {
+      upgrade3 = false;
+      upgrade4 = false;
+      ugpradeSlot3Script.Invoke("ResetSlot", 0.01f);
+      ugpradeSlot4Script.Invoke("ResetSlot", 0.01f);
+    }
+    else if (upgrade2Progress == 1)
+    {
+      upgrade3 = true;
+      ugpradeSlot3Script.Invoke("FillSlot", 0.01f);
+      ugpradeSlot4Script.Invoke("ResetSlot", 0.01f);
+    }
+    else if (upgrade2Progress == 2)
+    {
+      upgrade4 = true;
+      ugpradeSlot3Script.Invoke("FillSlot", 0.01f);
+      ugpradeSlot4Script.Invoke("FillSlot", 0.01f);
     }
 
     CheckIfUpgradesAvailable();
@@ -370,43 +317,11 @@ public class UI_Window_Part : MonoBehaviour
 
   }
 
-  public void SwitchTabs()
-  {
-    if (currentTab == 0)
-    {
-      OpenUpgrades();
-    }
-    else if (currentTab == 1)
-    {
-      OpenInfo();
-    }
-  }
-
   public void OpenInfo()
   {
-    currentTab = 0;
-    spriteRend.sprite = sprite_info;
-
-    infoTabScript.Invoke("OpenTab", 0.01f);
-    upgradeTabScript.Invoke("CloseTab", 0.01f);
-
-    upgradeSlots.SetActive(false);
-    upgradeNums.SetActive(true);
     RefreshUpgradeSlotNum();
-  }
-
-  public void OpenUpgrades()
-  {
-    currentTab = 1;
-    spriteRend.sprite = sprite_upgrade;
-
-    infoTabScript.Invoke("CloseTab", 0.01f);
-    upgradeTabScript.Invoke("OpenTab", 0.01f);
-
-    upgradeSlots.SetActive(true);
-    upgradeNums.SetActive(false);
-    CheckUpgradeSlotsToShow();
     RefreshUpgrades();
+    Invoke("CheckUpgradeSlotsToShow", 0.1f);
   }
 
   public void CloseAllWindows()

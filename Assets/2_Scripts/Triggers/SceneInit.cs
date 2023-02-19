@@ -165,7 +165,8 @@ public class SceneInit : MonoBehaviour
       }
       if (PlayerManager.current.sceneDirection == "Up")
       {
-        PlayerManager.current.spawnPosition = new Vector3(playerSpawnPoint.transform.position.x, playerSpawnPoint.transform.position.y + 40.0f, playerSpawnPoint.transform.position.z);
+        playerSpawnPoint = GameObject.Find("TopClimbSpawn");
+        PlayerManager.current.spawnPosition = new Vector3(playerSpawnPoint.transform.position.x, playerSpawnPoint.transform.position.y, playerSpawnPoint.transform.position.z);
       }
       PlayerManager.current.RebootNewMap();
       GameController.current.sceneChanging = false;

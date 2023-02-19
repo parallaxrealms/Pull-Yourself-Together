@@ -223,6 +223,10 @@ public class PickUpScript : MonoBehaviour
           PlayerManager.current.PickupWorkerHead();
           DestroySelf();
         }
+        if (PlayerManager.current.pickupSelectableActive)
+        {
+          PlayerManager.current.pickupSelectableActive = false;
+        }
       }
       if (Input.GetButtonDown("Q"))
       {
@@ -260,7 +264,7 @@ public class PickUpScript : MonoBehaviour
       GameController.current.prevBotOwner = prevBotOwner;
 
       transform.SetParent(backupObjectsContainer.transform);
-
+      activated = false;
       isActivated = true;
     }
   }

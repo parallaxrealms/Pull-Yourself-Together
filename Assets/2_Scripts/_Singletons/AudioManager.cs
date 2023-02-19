@@ -83,6 +83,8 @@ public class AudioManager : MonoBehaviour
   [SerializeField] private AudioClip cyberMantis_activation; //124
   [SerializeField] private AudioClip cyberMantis_hit; //125
   [SerializeField] private AudioClip cyberMantis_death; //126
+  [SerializeField] private AudioClip cyberMantis_synth; //127
+  [SerializeField] private AudioClip cyberMantis_lunge; //128
 
   public float musicVolume = 1f; // range from 0 to 1
   public float sfxVolume = 1f; // range from 0 to 1
@@ -389,6 +391,14 @@ public class AudioManager : MonoBehaviour
       else if (currentSFXTrack == 126)
       {
         sfxSource.PlayOneShot(cyberMantis_death);
+      }
+      else if (currentSFXTrack == 127)
+      {
+        sfxSource.PlayOneShot(cyberMantis_synth);
+      }
+      else if (currentSFXTrack == 128)
+      {
+        sfxSource.PlayOneShot(cyberMantis_lunge);
       }
     }
   }

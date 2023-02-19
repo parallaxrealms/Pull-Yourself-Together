@@ -130,6 +130,19 @@ public class MenuManager : MonoBehaviour
   // Update is called once per frame
   void Update()
   {
+    if (menuState == 0 || menuState == 1)
+    {
+      if (Input.GetButton("Shift") && Input.GetButton("Q"))
+      {
+        forewordScreen.SetActive(false);
+        mainMenuScreen.SetActive(false);
+        GameController.current.NewGame();
+        if (!GameController.current.introDialogue)
+        {
+          GameController.current.introDialogue = true;
+        }
+      }
+    }
     if (!fadeToBlackStarted)
     {
       if (menuState == 1 || menuState == 3)
@@ -338,7 +351,7 @@ public class MenuManager : MonoBehaviour
       else
       {
         creditsStart = false;
-        creditsTimer = 5f;
+        creditsTimer = 15f;
         GameController.current.StartEndingScene();
         UIPartsScript.CloseAllWindows();
         ClosePartsUI();
@@ -356,14 +369,14 @@ public class MenuManager : MonoBehaviour
         else
         {
           creditsStart = false;
+          creditsTimer = 15f;
         }
       }
       else
       {
         if (Input.anyKey)
         {
-          GameController.current.RestartGame();
-          onCreditsRoll = false;
+          Application.Quit();
         }
       }
     }
@@ -379,7 +392,7 @@ public class MenuManager : MonoBehaviour
     creditRollScript.moving = true;
 
     onCreditsRoll = true;
-    creditsTimer = 8f;
+    creditsTimer = 15f;
     creditsStart = true;
   }
 

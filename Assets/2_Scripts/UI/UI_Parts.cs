@@ -543,6 +543,11 @@ public class UI_Parts : MonoBehaviour
     MenuManager.current.isMouseOver = false;
   }
 
+  public void TakeHitHead()
+  {
+    headPartScript.TakeDurabilityHit();
+  }
+
   public void TriggerAllPartsDrop()
   {
     if (PlayerManager.current.hasBody)
@@ -647,6 +652,7 @@ public class UI_Parts : MonoBehaviour
 
   public void GainWorkerHead(int attatchStyle, bool openWindow)
   {
+    CloseAllWindows();
     if (attatchStyle == 0)
     {
       headPartScript.progress1 = temp_progress1;
@@ -683,6 +689,7 @@ public class UI_Parts : MonoBehaviour
   }
   public void GainWorkerBody(int attatchStyle, bool openWindow)
   {
+    CloseAllWindows();
     if (attatchStyle == 0)
     {
       bodyPartScript.progress1 = temp_progress1;
@@ -719,6 +726,7 @@ public class UI_Parts : MonoBehaviour
   }
   public void GainWorkerDrill(int attatchStyle, bool openWindow)
   {
+    CloseAllWindows();
     if (attatchStyle == 0)
     {
       rightArmScript.progress1 = temp_progress1;
@@ -755,6 +763,7 @@ public class UI_Parts : MonoBehaviour
   }
   public void GainBlaster(int attatchStyle, bool openWindow)
   {
+    CloseAllWindows();
     if (attatchStyle == 0)
     {
       leftArmScript.progress1 = temp_progress1;
@@ -791,6 +800,7 @@ public class UI_Parts : MonoBehaviour
   }
   public void GainMissileLauncher(int attatchStyle, bool openWindow)
   {
+    CloseAllWindows();
     if (attatchStyle == 0)
     {
       leftArmScript.progress1 = temp_progress1;
@@ -827,6 +837,7 @@ public class UI_Parts : MonoBehaviour
   }
   public void GainLaserBeam(int attatchStyle, bool openWindow)
   {
+    CloseAllWindows();
     if (attatchStyle == 0)
     {
       leftArmScript.progress1 = temp_progress1;
@@ -863,6 +874,7 @@ public class UI_Parts : MonoBehaviour
   }
   public void GainWorkerBoots(int attatchStyle, bool openWindow)
   {
+    CloseAllWindows();
     if (attatchStyle == 0)
     {
       legsPartScript.progress1 = temp_progress1;
@@ -899,6 +911,7 @@ public class UI_Parts : MonoBehaviour
   }
   public void GainJumpBoots(int attatchStyle, bool openWindow)
   {
+    CloseAllWindows();
     if (attatchStyle == 0)
     {
       legsPartScript.progress1 = temp_progress1;
